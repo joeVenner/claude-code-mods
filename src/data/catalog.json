@@ -1,0 +1,1815 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-20",
+  "extensions": [
+    {
+      "hooks": [],
+      "tags": [
+        "git",
+        "commit",
+        "pull-request",
+        "slash-commands"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/commit-commands/README.md"
+        },
+        {
+          "label": "Discover and install plugins",
+          "url": "https://code.claude.com/docs/en/discover-plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "commit-commands",
+      "name": "commit-commands",
+      "kind": "plugin",
+      "categories": [
+        "workflow"
+      ],
+      "summary": "Slash commands for git workflows: /commit, /commit-push-pr and /clean_gone, published in the anthropics/claude-plugins-official repository.",
+      "description": [
+        "Adds three slash commands. /commit reviews staged and unstaged changes, looks at recent commit messages to match the repository style, and creates a commit. /commit-push-pr creates a branch when you are on main, commits, pushes, and opens a pull request with gh. /clean_gone removes local branches whose remote branch was deleted, including their worktrees.",
+        "The README notes that /commit-push-pr needs the GitHub CLI (gh) installed and authenticated, and a remote named origin. It also says commit messages include a Claude Code attribution line, so check that against your own commit conventions."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands",
+      "installCommands": [
+        "/plugin install commit-commands@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "workflow",
+        "architecture",
+        "agents",
+        "planning"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/feature-dev/README.md"
+        },
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": true,
+      "license": "Apache-2.0",
+      "slug": "feature-dev",
+      "name": "feature-dev",
+      "kind": "plugin",
+      "categories": [
+        "development",
+        "workflow"
+      ],
+      "summary": "A guided 7-phase feature workflow behind /feature-dev, with code-explorer, code-architect and code-reviewer agents.",
+      "description": [
+        "The /feature-dev command walks through discovery, codebase exploration, clarifying questions, architecture design, implementation, quality review and a summary. The README describes launching two to three code-explorer agents in parallel to study the existing code, then code-architect agents with different focuses to propose designs.",
+        "The plugin ships three agents (code-explorer, code-architect, code-reviewer) and one command. The command asks for your answers before designing, so it is interactive by design."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev",
+      "installCommands": [
+        "/plugin install feature-dev@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "review",
+        "pull-request",
+        "agents",
+        "testing"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/README.md"
+        },
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "pr-review-toolkit",
+      "name": "pr-review-toolkit",
+      "kind": "plugin",
+      "categories": [
+        "quality",
+        "development"
+      ],
+      "summary": "Six review agents for pull requests (comments, tests, error handling, types, code quality, simplification) and a /review-pr command.",
+      "description": [
+        "Bundles six agents: comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer, code-reviewer and code-simplifier. The README suggests using them one at a time for a targeted review or together for a full pass over a pull request.",
+        "The /review-pr command runs the applicable agents and accepts optional review aspects such as comments, tests, errors and types."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit",
+      "installCommands": [
+        "/plugin install pr-review-toolkit@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit"
+      }
+    },
+    {
+      "hooks": [
+        "PreToolUse",
+        "PostToolUse",
+        "Stop",
+        "UserPromptSubmit"
+      ],
+      "tags": [
+        "hooks",
+        "rules",
+        "guardrails",
+        "regex"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/hookify/README.md"
+        },
+        {
+          "label": "Claude Code hooks docs",
+          "url": "https://code.claude.com/docs/en/hooks"
+        }
+      ],
+      "stars": null,
+      "isFeatured": true,
+      "license": "Apache-2.0",
+      "slug": "hookify",
+      "name": "hookify",
+      "kind": "plugin",
+      "categories": [
+        "workflow",
+        "quality"
+      ],
+      "summary": "Create Claude Code hooks from markdown rule files instead of editing hooks.json, or derive rules from your conversation.",
+      "description": [
+        "Hookify lets you describe a behavior to block or warn about, for example /hookify Warn me when I use rm -rf commands, and writes a lightweight markdown rule file with YAML frontmatter and a regex pattern. The README says rules take effect on the next tool use without a restart.",
+        "The plugin registers PreToolUse, PostToolUse, Stop and UserPromptSubmit hooks that read those rule files. It also ships list, configure and help commands and a conversation-analyzer agent."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/hookify",
+      "installCommands": [
+        "/plugin install hookify@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/hookify"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "plugins",
+        "authoring",
+        "skills",
+        "agents",
+        "hooks"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/plugin-dev/README.md"
+        },
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "plugin-dev",
+      "name": "plugin-dev",
+      "kind": "plugin",
+      "categories": [
+        "development"
+      ],
+      "summary": "Toolkit for building Claude Code plugins: seven skills, three agents and an end-to-end /plugin-dev:create-plugin workflow.",
+      "description": [
+        "Seven skills cover hook development, MCP integration, plugin structure, plugin settings, command development, agent development and skill development. The README describes an 8-phase /plugin-dev:create-plugin command that goes from discovery and component planning through validation, testing and documentation.",
+        "Three agents ship with it: agent-creator, plugin-validator and skill-reviewer. plugin-validator checks the manifest, component files and naming conventions."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/plugin-dev",
+      "installCommands": [
+        "/plugin install plugin-dev@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/plugin-dev"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "review",
+        "pull-request",
+        "claude-md",
+        "agents"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-review/README.md"
+        },
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "code-review",
+      "name": "code-review",
+      "kind": "plugin",
+      "categories": [
+        "quality"
+      ],
+      "summary": "Automated pull request review with /code-review: four parallel agents, confidence scoring and an 80 point threshold.",
+      "description": [
+        "The /code-review command skips closed, draft, trivial and already-reviewed pull requests, gathers CLAUDE.md guideline files, then launches four agents in parallel. Two audit CLAUDE.md compliance, one scans the changes for bugs, and one uses git blame and history for context.",
+        "Each issue is scored from 0 to 100 and issues below 80 are dropped. The README says the review comment is posted only when high-confidence issues remain."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review",
+      "installCommands": [
+        "/plugin install code-review@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review"
+      }
+    },
+    {
+      "hooks": [
+        "SessionStart",
+        "UserPromptSubmit",
+        "PostToolUse",
+        "Stop",
+        "SubagentStop"
+      ],
+      "tags": [
+        "security",
+        "review",
+        "hooks",
+        "secrets",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/security-guidance/README.md"
+        },
+        {
+          "label": "hooks.json",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/security-guidance/hooks/hooks.json"
+        },
+        {
+          "label": "Claude Code hooks docs",
+          "url": "https://code.claude.com/docs/en/hooks"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "security-guidance",
+      "name": "security-guidance",
+      "kind": "plugin",
+      "categories": [
+        "security"
+      ],
+      "summary": "Three layers of security review for Claude-generated code: regex warnings on edits, an LLM diff review on Stop, and an agentic commit review.",
+      "description": [
+        "The README describes pattern warnings on Edit and Write for about 25 known-dangerous patterns, an LLM review of the diff when Claude finishes a turn, and an SDK-driven reviewer on git commit that reads related files to trace data flow. Finding classes include injection, XSS, SSRF, hardcoded secrets, IDOR, auth bypass and unsafe deserialization.",
+        "Layers two and three send your diff to a model call (the README names Opus 4.7 as the default), so they use your API path and cost tokens. It needs Python 3.8 or newer on PATH, and each layer can be switched off with environment variables such as ENABLE_STOP_REVIEW and ENABLE_COMMIT_REVIEW.",
+        "This entry only records that the source exists. This directory has not scanned or audited the plugin."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/security-guidance",
+      "installCommands": [
+        "/plugin install security-guidance@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/security-guidance"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "usage",
+        "tokens",
+        "report",
+        "cache"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/session-report/skills/session-report/SKILL.md"
+        },
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "session-report",
+      "name": "session-report",
+      "kind": "plugin",
+      "categories": [
+        "observability",
+        "optimization"
+      ],
+      "summary": "Generates an explorable HTML report of Claude Code usage from local session transcripts: tokens, cache, subagents, skills, costly prompts.",
+      "description": [
+        "The bundled skill runs a Node script (analyze-sessions.mjs) over transcripts in ~/.claude/projects, defaulting to the last 7 days, and fills an HTML template with the resulting data plus a few short findings and suggestions.",
+        "The output is a single HTML file written to your current working directory. Data is read from local files by the script; the narrative sections are written by Claude in your session."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/session-report",
+      "installCommands": [
+        "/plugin install session-report@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/session-report"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "skill",
+        "fastmcp",
+        "typescript",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/skills/blob/main/skills/mcp-builder/SKILL.md"
+        },
+        {
+          "label": "Claude Code skills docs",
+          "url": "https://code.claude.com/docs/en/skills"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "mcp-builder-skill",
+      "name": "mcp-builder",
+      "kind": "skill",
+      "categories": [
+        "development",
+        "integration"
+      ],
+      "summary": "A skill that guides building MCP servers in Python (FastMCP) or Node and TypeScript, from research through evaluations.",
+      "description": [
+        "The SKILL.md lays out four phases: research and planning, implementation, review and testing, and creating evaluations. It points to reference files for the MCP protocol, SDK documentation and language-specific guides.",
+        "It is part of the example-skills bundle in the anthropics/skills marketplace, installed as a whole rather than skill by skill."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/skills/tree/main/skills/mcp-builder",
+      "installCommands": [
+        "/plugin marketplace add anthropics/skills",
+        "/plugin install example-skills@anthropic-agent-skills"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/skills/tree/main/skills/mcp-builder"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "playwright",
+        "testing",
+        "browser",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/skills/blob/main/skills/webapp-testing/SKILL.md"
+        },
+        {
+          "label": "Claude Code skills docs",
+          "url": "https://code.claude.com/docs/en/skills"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "webapp-testing-skill",
+      "name": "webapp-testing",
+      "kind": "skill",
+      "categories": [
+        "quality",
+        "development"
+      ],
+      "summary": "A skill for testing local web apps with Playwright Python scripts, including a helper that starts and stops dev servers.",
+      "description": [
+        "The SKILL.md tells Claude to write native Python Playwright scripts, with a decision tree for static HTML versus dynamic apps. A bundled scripts/with_server.py manages one or more servers so a script can run against them.",
+        "It targets verifying frontend behavior, debugging UI, capturing screenshots and reading browser logs. It ships in the example-skills bundle of the anthropics/skills marketplace."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/skills/tree/main/skills/webapp-testing",
+      "installCommands": [
+        "/plugin marketplace add anthropics/skills",
+        "/plugin install example-skills@anthropic-agent-skills"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/skills/tree/main/skills/webapp-testing"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "skills",
+        "evals",
+        "authoring",
+        "benchmark"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md"
+        },
+        {
+          "label": "Claude Code skills docs",
+          "url": "https://code.claude.com/docs/en/skills"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "skill-creator-skill",
+      "name": "skill-creator",
+      "kind": "skill",
+      "categories": [
+        "development"
+      ],
+      "summary": "A skill for creating new skills, improving existing ones, running evals, and tuning a skill description for better triggering.",
+      "description": [
+        "The SKILL.md covers capturing intent, writing the SKILL.md, and progressive disclosure, then a loop of running test cases with and without the skill, grading, benchmarking and reading feedback. It also describes blind comparison between versions.",
+        "The folder includes Python scripts for validation, packaging, running evals and generating reports. The license file in the skill folder is Apache-2.0."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/skills/tree/main/skills/skill-creator",
+      "installCommands": [
+        "/plugin marketplace add anthropics/skills",
+        "/plugin install example-skills@anthropic-agent-skills"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/skills/tree/main/skills/skill-creator"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "design",
+        "ui",
+        "typography",
+        "frontend"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md"
+        },
+        {
+          "label": "Claude Code skills docs",
+          "url": "https://code.claude.com/docs/en/skills"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "frontend-design-skill",
+      "name": "frontend-design",
+      "kind": "skill",
+      "categories": [
+        "development"
+      ],
+      "summary": "A skill that steers Claude toward distinctive, intentional UI: aesthetic direction, typography, and avoiding templated defaults.",
+      "description": [
+        "The frontmatter describes guidance for visual design when building new UI or reshaping an existing one, covering aesthetic direction and typography.",
+        "It is part of the example-skills bundle in the anthropics/skills marketplace. A separate frontend-design plugin also exists in claude-plugins-official."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/skills/tree/main/skills/frontend-design",
+      "installCommands": [
+        "/plugin marketplace add anthropics/skills",
+        "/plugin install example-skills@anthropic-agent-skills"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "pdf",
+        "documents",
+        "ocr",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "SKILL.md",
+          "url": "https://github.com/anthropics/skills/blob/main/skills/pdf/SKILL.md"
+        },
+        {
+          "label": "Claude Code skills docs",
+          "url": "https://code.claude.com/docs/en/skills"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Proprietary, source-available (see LICENSE.txt)",
+      "slug": "pdf-skill",
+      "name": "pdf",
+      "kind": "skill",
+      "categories": [
+        "workflow"
+      ],
+      "summary": "A skill for reading, merging, splitting, watermarking, creating and OCRing PDFs, published as source-available reference.",
+      "description": [
+        "The SKILL.md covers extracting text and tables, combining and splitting PDFs, rotating pages, adding watermarks, filling forms, encryption, image extraction and OCR of scanned files, with pypdf examples in the quick start.",
+        "The repository README calls the document skills source-available rather than open source, and the skill's LICENSE.txt is an all-rights-reserved Anthropic notice. Read it before reusing the material."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/skills/tree/main/skills/pdf",
+      "installCommands": [
+        "/plugin marketplace add anthropics/skills",
+        "/plugin install document-skills@anthropic-agent-skills"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/skills/tree/main/skills/pdf"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "subagent",
+        "architecture",
+        "planning"
+      ],
+      "links": [
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "code-architect",
+      "name": "code-architect",
+      "kind": "agent",
+      "categories": [
+        "development"
+      ],
+      "summary": "Read-only subagent from feature-dev that designs a feature blueprint from your existing code patterns and conventions.",
+      "description": [
+        "The agent definition asks for codebase pattern analysis, a decisive architecture design, and a blueprint listing files to create or modify, component responsibilities, data flow and build sequence.",
+        "Its tool list is read-oriented (Glob, Grep, LS, Read, NotebookRead, WebFetch, TodoWrite, WebSearch, KillShell, BashOutput) and it declares the sonnet model. It installs as part of the feature-dev plugin."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/feature-dev/agents/code-architect.md",
+      "installCommands": [
+        "/plugin install feature-dev@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/feature-dev/agents/code-architect.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "subagent",
+        "codebase",
+        "tracing"
+      ],
+      "links": [
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "code-explorer",
+      "name": "code-explorer",
+      "kind": "agent",
+      "categories": [
+        "development"
+      ],
+      "summary": "Read-only subagent from feature-dev that traces how an existing feature works, from entry points through layers to data storage.",
+      "description": [
+        "The agent definition describes discovering entry points, tracing call chains, mapping architecture layers and documenting dependencies so new development fits existing patterns.",
+        "It declares a read-oriented tool list and the sonnet model. It installs as part of the feature-dev plugin, where the /feature-dev command launches several explorers in parallel."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/feature-dev/agents/code-explorer.md",
+      "installCommands": [
+        "/plugin install feature-dev@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/feature-dev/agents/code-explorer.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "subagent",
+        "error-handling",
+        "review"
+      ],
+      "links": [
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "silent-failure-hunter",
+      "name": "silent-failure-hunter",
+      "kind": "agent",
+      "categories": [
+        "quality"
+      ],
+      "summary": "Subagent from pr-review-toolkit that audits catch blocks, fallbacks and error handling for silent failures.",
+      "description": [
+        "The agent definition sets rules such as: errors need logging and actionable user feedback, fallbacks must be explicit and justified, catch blocks should be specific, and mock implementations belong only in tests.",
+        "It inherits the session model and installs as part of the pr-review-toolkit plugin."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/agents/silent-failure-hunter.md",
+      "installCommands": [
+        "/plugin install pr-review-toolkit@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/agents/silent-failure-hunter.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "subagent",
+        "types",
+        "review"
+      ],
+      "links": [
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "type-design-analyzer",
+      "name": "type-design-analyzer",
+      "kind": "agent",
+      "categories": [
+        "quality"
+      ],
+      "summary": "Subagent from pr-review-toolkit that reviews new or changed types for encapsulation, invariants, usefulness and enforcement.",
+      "description": [
+        "The agent definition says to use it when introducing a type, during pull request creation for all added types, and when refactoring existing types. It gives qualitative feedback plus ratings on four axes.",
+        "It inherits the session model and installs as part of the pr-review-toolkit plugin."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/agents/type-design-analyzer.md",
+      "installCommands": [
+        "/plugin install pr-review-toolkit@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/agents/type-design-analyzer.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "subagent",
+        "refactoring",
+        "clarity"
+      ],
+      "links": [
+        {
+          "label": "Claude Code subagents docs",
+          "url": "https://code.claude.com/docs/en/sub-agents"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "code-simplifier",
+      "name": "code-simplifier",
+      "kind": "agent",
+      "categories": [
+        "quality"
+      ],
+      "summary": "Subagent that simplifies recently modified code for clarity and consistency while preserving exact behavior.",
+      "description": [
+        "The agent definition prioritizes readable, explicit code over compact code, preserves functionality, applies project-specific conventions, and focuses on recently modified code unless told otherwise.",
+        "It declares the opus model and ships as its own plugin, code-simplifier, in claude-plugins-official."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md",
+      "installCommands": [
+        "/plugin install code-simplifier@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md"
+      }
+    },
+    {
+      "hooks": [
+        "Stop"
+      ],
+      "tags": [
+        "hooks",
+        "loop",
+        "iteration",
+        "bash"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/ralph-loop/README.md"
+        },
+        {
+          "label": "hooks.json",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/ralph-loop/hooks/hooks.json"
+        },
+        {
+          "label": "Claude Code hooks docs",
+          "url": "https://code.claude.com/docs/en/hooks"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "ralph-loop-stop-hook",
+      "name": "ralph-loop Stop hook",
+      "kind": "hook",
+      "categories": [
+        "workflow"
+      ],
+      "summary": "A Stop hook script that blocks Claude from exiting and feeds the same prompt back until a completion promise or an iteration cap is reached.",
+      "description": [
+        "stop-hook.sh reads a state file at .claude/ralph-loop.local.md, and if a loop is active it blocks the stop and re-feeds the prompt. It ends the loop when the max iterations value is reached or when the last assistant message contains the expected promise tag. It only reacts to the session that started the loop.",
+        "The script relies on jq and perl. The README says the default iteration limit is unlimited and recommends always passing --max-iterations, since a loop on an impossible task will otherwise keep spending tokens."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/ralph-loop/hooks/stop-hook.sh",
+      "installCommands": [
+        "/plugin install ralph-loop@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/ralph-loop/hooks/stop-hook.sh"
+      }
+    },
+    {
+      "hooks": [
+        "SessionStart"
+      ],
+      "tags": [
+        "hooks",
+        "output-style",
+        "learning"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/explanatory-output-style/README.md"
+        },
+        {
+          "label": "Claude Code hooks docs",
+          "url": "https://code.claude.com/docs/en/hooks"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "explanatory-style-session-hook",
+      "name": "explanatory-output-style SessionStart hook",
+      "kind": "hook",
+      "categories": [
+        "development"
+      ],
+      "summary": "A SessionStart hook that injects instructions asking Claude for short educational insights about implementation choices.",
+      "description": [
+        "The plugin recreates the deprecated Explanatory output style as a SessionStart hook that runs hooks-handlers/session-start.sh. The README says the added instructions ask for brief explanations before and after writing code, formatted as an insight block.",
+        "The README warns not to install it unless you accept the extra token cost of the added instructions and output."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/explanatory-output-style/hooks/hooks.json",
+      "installCommands": [
+        "/plugin install explanatory-output-style@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/explanatory-output-style/hooks/hooks.json"
+      }
+    },
+    {
+      "hooks": [
+        "SessionStart"
+      ],
+      "tags": [
+        "hooks",
+        "output-style",
+        "learning"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/learning-output-style/README.md"
+        },
+        {
+          "label": "Claude Code hooks docs",
+          "url": "https://code.claude.com/docs/en/hooks"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "learning-style-session-hook",
+      "name": "learning-output-style SessionStart hook",
+      "kind": "hook",
+      "categories": [
+        "development"
+      ],
+      "summary": "A SessionStart hook that switches Claude into a learning mode that asks you to write small, meaningful pieces of code.",
+      "description": [
+        "The plugin combines an unshipped Learning output style with the explanatory insights, delivered as a SessionStart hook. The README says Claude will look for places where you can write 5 to 10 lines of business logic or design choices, and prepare the context for them.",
+        "The README warns that it adds token cost and makes the session interactive, so install it only if you want that."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/learning-output-style/hooks/hooks.json",
+      "installCommands": [
+        "/plugin install learning-output-style@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/learning-output-style/hooks/hooks.json"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "git",
+        "branches",
+        "worktrees",
+        "cleanup"
+      ],
+      "links": [
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "clean-gone-command",
+      "name": "/clean_gone",
+      "kind": "command",
+      "categories": [
+        "workflow"
+      ],
+      "summary": "A slash command from commit-commands that deletes local git branches whose remote branch is gone, removing their worktrees first.",
+      "description": [
+        "The command file runs git branch -v to find branches marked [gone], git worktree list to find worktrees tied to them, then removes those worktrees and deletes the branches.",
+        "It runs destructive local git operations, so read the command file before using it on a repository with unmerged local work."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/commit-commands/commands/clean_gone.md",
+      "installCommands": [
+        "/plugin install commit-commands@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/commit-commands/commands/clean_gone.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "review",
+        "pull-request",
+        "agents"
+      ],
+      "links": [
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        },
+        {
+          "label": "Parent plugin",
+          "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "review-pr-command",
+      "name": "/review-pr",
+      "kind": "command",
+      "categories": [
+        "quality"
+      ],
+      "summary": "A slash command from pr-review-toolkit that runs specialized review agents over your changes, optionally limited to chosen aspects.",
+      "description": [
+        "The command checks git status to find changed files, reads optional review aspects (comments, tests, errors, types and others) from its arguments, and runs the applicable agents. With no arguments it runs all applicable reviews.",
+        "It allows the Bash, Glob, Grep, Read and Task tools in its frontmatter."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/commands/review-pr.md",
+      "installCommands": [
+        "/plugin install pr-review-toolkit@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/pr-review-toolkit/commands/review-pr.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "agent-sdk",
+        "scaffolding",
+        "typescript",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/agent-sdk-dev/README.md"
+        },
+        {
+          "label": "Claude Code plugins docs",
+          "url": "https://code.claude.com/docs/en/plugins"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "new-sdk-app-command",
+      "name": "/new-sdk-app",
+      "kind": "command",
+      "categories": [
+        "development"
+      ],
+      "summary": "A slash command from agent-sdk-dev that scaffolds a new Claude Agent SDK app in TypeScript or Python.",
+      "description": [
+        "The command asks about language, project name, agent type, starting point and tooling, installs the latest SDK, creates project files and environment files, and then verifies the setup. It takes an optional project name argument.",
+        "It tells Claude to read the official Agent SDK documentation first, so it needs network access for those page fetches."
+      ],
+      "publisher": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics",
+        "kind": "anthropic"
+      },
+      "repositoryUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/agent-sdk-dev/commands/new-sdk-app.md",
+      "installCommands": [
+        "/plugin install agent-sdk-dev@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/anthropics/claude-plugins-official/blob/main/plugins/agent-sdk-dev/commands/new-sdk-app.md"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "files",
+        "npm",
+        "roots"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/modelcontextprotocol/servers/blob/main/src/filesystem/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": null,
+      "isFeatured": true,
+      "license": "See repository LICENSE (MIT to Apache-2.0 transition)",
+      "slug": "filesystem-mcp-server",
+      "name": "Filesystem MCP server",
+      "kind": "mcp-server",
+      "categories": [
+        "integration",
+        "security"
+      ],
+      "summary": "Reference MCP server for file operations with directory allowlists set by arguments or MCP Roots.",
+      "description": [
+        "Provides read and write, directory create, list and delete, move, search, and file metadata tools. Access is limited to directories you pass on the command line or that the client supplies through Roots.",
+        "The repository README calls the servers there reference implementations for education, not production-ready solutions, and tells you to assess your own security needs. The npm package is @modelcontextprotocol/server-filesystem."
+      ],
+      "publisher": {
+        "name": "Model Context Protocol project",
+        "url": "https://github.com/modelcontextprotocol",
+        "kind": "mcp-project"
+      },
+      "repositoryUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "installCommands": [
+        "claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path/to/allowed/dir"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "git",
+        "python",
+        "uvx"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/modelcontextprotocol/servers/blob/main/src/git/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "MIT",
+      "slug": "git-mcp-server",
+      "name": "Git MCP server",
+      "kind": "mcp-server",
+      "categories": [
+        "integration",
+        "development"
+      ],
+      "summary": "Reference MCP server with tools to read, search and manipulate Git repositories, run with uvx mcp-server-git.",
+      "description": [
+        "Exposes tools such as git_status, git_diff_unstaged, git_diff_staged and git_diff over a repository path you pass in, among others. It is a Python package, run with uvx or installed with pip.",
+        "The README says mcp-server-git is in early development and its tools may change. It also states the servers in the repository are reference implementations, not production-ready."
+      ],
+      "publisher": {
+        "name": "Model Context Protocol project",
+        "url": "https://github.com/modelcontextprotocol",
+        "kind": "mcp-project"
+      },
+      "repositoryUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "installCommands": [
+        "claude mcp add git -- uvx mcp-server-git"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/git"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "web",
+        "markdown",
+        "python"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/modelcontextprotocol/servers/blob/main/src/fetch/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "MIT",
+      "slug": "fetch-mcp-server",
+      "name": "Fetch MCP server",
+      "kind": "mcp-server",
+      "categories": [
+        "integration"
+      ],
+      "summary": "Reference MCP server that fetches a URL and returns its content as markdown, with chunked reading via start_index.",
+      "description": [
+        "One fetch tool takes a url, an optional max_length (default 5000), an optional start_index and a raw flag. Long pages are truncated and can be read in chunks by moving start_index.",
+        "The README carries a caution that the server can reach local and internal IP addresses, which may be a security risk. It is a Python package run with uvx mcp-server-fetch."
+      ],
+      "publisher": {
+        "name": "Model Context Protocol project",
+        "url": "https://github.com/modelcontextprotocol",
+        "kind": "mcp-project"
+      },
+      "repositoryUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "installCommands": [
+        "claude mcp add fetch -- uvx mcp-server-fetch"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "memory",
+        "knowledge-graph",
+        "npm"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/modelcontextprotocol/servers/blob/main/src/memory/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "See repository LICENSE (MIT to Apache-2.0 transition)",
+      "slug": "memory-mcp-server",
+      "name": "Memory MCP server",
+      "kind": "mcp-server",
+      "categories": [
+        "integration",
+        "workflow"
+      ],
+      "summary": "Reference MCP server for persistent memory as a local knowledge graph of entities, relations and observations.",
+      "description": [
+        "Stores entities with a type and a list of observations, plus directed relations between them, and offers tools such as create_entities and create_relations. The README says this lets Claude remember information across chats.",
+        "Data is kept in a local JSONL file; the MEMORY_FILE_PATH variable sets its location. The npm package is @modelcontextprotocol/server-memory."
+      ],
+      "publisher": {
+        "name": "Model Context Protocol project",
+        "url": "https://github.com/modelcontextprotocol",
+        "kind": "mcp-project"
+      },
+      "repositoryUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "installCommands": [
+        "claude mcp add memory -- npx -y @modelcontextprotocol/server-memory"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "reasoning",
+        "planning",
+        "npm"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/modelcontextprotocol/servers/blob/main/src/sequentialthinking/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": null,
+      "isFeatured": false,
+      "license": "See repository LICENSE (MIT to Apache-2.0 transition)",
+      "slug": "sequential-thinking-mcp-server",
+      "name": "Sequential Thinking MCP server",
+      "kind": "mcp-server",
+      "categories": [
+        "workflow",
+        "development"
+      ],
+      "summary": "Reference MCP server with one tool for step-by-step problem solving that supports revising thoughts and branching.",
+      "description": [
+        "The sequential_thinking tool takes the current thought, whether another is needed, the thought number and an estimated total, plus optional fields for revisions and branches. The README lists breaking down problems, revising thoughts as understanding grows, and adjusting the total number of thoughts as uses.",
+        "The npm package is @modelcontextprotocol/server-sequential-thinking."
+      ],
+      "publisher": {
+        "name": "Model Context Protocol project",
+        "url": "https://github.com/modelcontextprotocol",
+        "kind": "mcp-project"
+      },
+      "repositoryUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "installCommands": [
+        "claude mcp add sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "browser",
+        "playwright",
+        "testing"
+      ],
+      "links": [
+        {
+          "label": "README",
+          "url": "https://github.com/microsoft/playwright-mcp/blob/main/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": {
+        "count": 37387,
+        "capturedAt": "2026-09-20"
+      },
+      "isFeatured": false,
+      "license": "Apache-2.0",
+      "slug": "playwright-mcp",
+      "name": "Playwright MCP",
+      "kind": "mcp-server",
+      "categories": [
+        "integration",
+        "quality"
+      ],
+      "summary": "Microsoft's MCP server for browser automation through Playwright accessibility snapshots instead of screenshots.",
+      "description": [
+        "The README says it lets a model interact with pages through structured accessibility snapshots, so no vision model is needed. It requires Node.js 18 or newer.",
+        "The README suggests that coding agents may prefer the Playwright CLI with skills for token efficiency, and keeps the MCP server for persistent-state and exploratory workflows. The claude-plugins-official marketplace also lists a playwright plugin that runs this server through npx."
+      ],
+      "publisher": {
+        "name": "Microsoft",
+        "url": "https://github.com/microsoft",
+        "kind": "community"
+      },
+      "repositoryUrl": "https://github.com/microsoft/playwright-mcp",
+      "installCommands": [
+        "claude mcp add playwright npx @playwright/mcp@latest"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/microsoft/playwright-mcp"
+      }
+    },
+    {
+      "hooks": [],
+      "tags": [
+        "mcp",
+        "documentation",
+        "remote",
+        "http"
+      ],
+      "links": [
+        {
+          "label": "Plugin README",
+          "url": "https://github.com/anthropics/claude-plugins-official/blob/main/external_plugins/context7/README.md"
+        },
+        {
+          "label": "Claude Code MCP docs",
+          "url": "https://code.claude.com/docs/en/mcp"
+        }
+      ],
+      "stars": {
+        "count": 62240,
+        "capturedAt": "2026-09-20"
+      },
+      "isFeatured": false,
+      "license": "MIT",
+      "slug": "context7-mcp",
+      "name": "Context7 MCP",
+      "kind": "mcp-server",
+      "categories": [
+        "integration",
+        "development"
+      ],
+      "summary": "Upstash's hosted MCP server that pulls current, version-specific library documentation into the model context.",
+      "description": [
+        "The plugin README in claude-plugins-official describes two tools: resolve-library-id, which maps a library name to an identifier and versions, and query-docs, which fetches documentation ranked by relevance to your question.",
+        "It connects to a hosted remote server at mcp.context7.com over HTTP, so your queries leave your machine. It works anonymously with shared rate limits, or with a CONTEXT7_API_KEY environment variable for your own plan. The marketplace tags it community-managed."
+      ],
+      "publisher": {
+        "name": "Upstash",
+        "url": "https://github.com/upstash",
+        "kind": "community"
+      },
+      "repositoryUrl": "https://github.com/upstash/context7",
+      "installCommands": [
+        "/plugin install context7@claude-plugins-official"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-09-20",
+        "sourceUrl": "https://github.com/upstash/context7"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-guardrails",
+      "name": "Security Guardrails and Secret Scrubber",
+      "categories": [
+        "security"
+      ],
+      "hooks": [
+        "command:pre_exec",
+        "tool:pre_call"
+      ],
+      "summary": "Security Guardrails and Secret Scrubber: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The spec says it would block destructive shell patterns such as recursive deletes and pipe-to-shell installs, and redact strings that look like cloud, Git host or chat tokens from command arguments.",
+        "The spec names these lifecycle events for it: command:pre_exec, tool:pre_call. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 2.1"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-git-sentinel",
+      "name": "Git Sentinel and Branch Hygiene",
+      "categories": [
+        "workflow"
+      ],
+      "hooks": [
+        "session:init",
+        "command:pre_exec",
+        "turn:complete"
+      ],
+      "summary": "Git Sentinel and Branch Hygiene: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The spec says it would keep Claude from editing or pushing to protected branches such as main and require feature branches and structured commit summaries.",
+        "The spec names these lifecycle events for it: session:init, command:pre_exec, turn:complete. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 2.2"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-context-compressor",
+      "name": "Smart Context Compressor and Token Pruner",
+      "categories": [
+        "optimization"
+      ],
+      "hooks": [
+        "context:inject",
+        "context:compact",
+        "context:prune"
+      ],
+      "summary": "Smart Context Compressor and Token Pruner: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The spec says it would deduplicate repeated tool calls and shorten large historical outputs when context is compacted or pruned. The report gives a token savings figure with no measurement behind it.",
+        "The spec names these lifecycle events for it: context:inject, context:compact, context:prune. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 2.3"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-ui-telemetry",
+      "name": "Terminal HUD and Realtime Cost Sparkline",
+      "categories": [
+        "observability"
+      ],
+      "hooks": [
+        "session:start",
+        "turn:post_prompt",
+        "turn:complete"
+      ],
+      "summary": "Terminal HUD and Realtime Cost Sparkline: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The spec says it would show a status line above the prompt with a token sparkline and cumulative session cost.",
+        "The spec names these lifecycle events for it: session:start, turn:post_prompt, turn:complete. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 2.4"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-mcp-bridge",
+      "name": "Dynamic MCP Server-to-Hook Bridge",
+      "categories": [
+        "integration"
+      ],
+      "hooks": [
+        "session:init",
+        "tool:filtering",
+        "tool:pre_call"
+      ],
+      "summary": "Dynamic MCP Server-to-Hook Bridge: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The report lists it under Integration with the lifecycle events below and gives no further design detail.",
+        "The spec names these lifecycle events for it: session:init, tool:filtering, tool:pre_call. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 1 (registry table)"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-docker-sandbox",
+      "name": "Ephemeral Docker Container Isolation",
+      "categories": [
+        "sandboxing"
+      ],
+      "hooks": [
+        "command:pre_exec",
+        "session:exit"
+      ],
+      "summary": "Ephemeral Docker Container Isolation: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The report lists it under Sandboxing with the lifecycle events below and gives no further design detail.",
+        "The spec names these lifecycle events for it: command:pre_exec, session:exit. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 1 (registry table)"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-agentic-eval",
+      "name": "LLM-as-a-Judge Pre-Commit Evaluator",
+      "categories": [
+        "quality"
+      ],
+      "hooks": [
+        "turn:complete",
+        "command:pre_exec"
+      ],
+      "summary": "LLM-as-a-Judge Pre-Commit Evaluator: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The report lists it under Quality Assurance with the lifecycle events below and gives no further design detail.",
+        "The spec names these lifecycle events for it: turn:complete, command:pre_exec. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 1 (registry table)"
+      }
+    },
+    {
+      "kind": "mod",
+      "publisher": {
+        "name": "Marketplace spec, Report 03",
+        "url": null,
+        "kind": "spec"
+      },
+      "repositoryUrl": null,
+      "license": null,
+      "installCommands": [],
+      "links": [],
+      "stars": null,
+      "isFeatured": false,
+      "slug": "claude-mod-voice-alerts",
+      "name": "Terminal Audio and TTS Notifications",
+      "categories": [
+        "accessibility"
+      ],
+      "hooks": [
+        "turn:complete",
+        "tool:pre_call"
+      ],
+      "summary": "Terminal Audio and TTS Notifications: proposed in the marketplace spec, no public implementation, not installable.",
+      "description": [
+        "This is a proposed design from the marketplace spec (Report 03), not a shipping product. The repository URL the report gives for it returns HTTP 404 as of 2026-09-20, and no implementation was found.",
+        "The report lists it under Accessibility with the lifecycle events below and gives no further design detail.",
+        "The spec names these lifecycle events for it: turn:complete, tool:pre_call. Those names come from the spec and are not confirmed Claude Code hook names. The report also says it passed Tier A validation, but no scanning pipeline has been implemented."
+      ],
+      "tags": [
+        "concept",
+        "proposed",
+        "spec"
+      ],
+      "verification": {
+        "status": "concept",
+        "specReference": "Report 03, section 1 (registry table)"
+      }
+    }
+  ]
+}
