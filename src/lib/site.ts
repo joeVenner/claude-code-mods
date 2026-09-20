@@ -1,0 +1,73 @@
+export const SITE_NAME = "Claude Code Mods";
+
+/** Plain and concrete on purpose; also used as the wordmark's accessible description. */
+export const SITE_TAGLINE = "Community directory of Claude Code plugins, skills, agents, and MCP servers.";
+
+export const SITE_DESCRIPTION =
+  "Browse Claude Code plugins, skills, agents, hooks, MCP servers, and proposed mod concepts. Each entry shows whether its source was checked.";
+
+export const DISCLAIMER = "Unofficial community directory. Not affiliated with or endorsed by Anthropic.";
+
+/** Shown wherever the "Source verified" badge could be misread as a security claim. */
+export const VERIFICATION_NOTE =
+  "Source verified means the source URL responded. It is not a security review.";
+
+const DEFAULT_SITE_URL = "http://localhost:3000";
+
+/**
+ * Normalises a configured site URL to an origin-style string without a trailing slash.
+ * Falls back to the local default for missing or malformed values so a bad env var
+ * cannot break `metadataBase` at build time.
+ */
+export function resolveSiteUrl(rawUrl: string | undefined): string {
+  if (!rawUrl) return DEFAULT_SITE_URL;
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return DEFAULT_SITE_URL;
+    return parsed.origin;
+  } catch {
+    return DEFAULT_SITE_URL;
+  }
+}
+
+export const SITE_URL: string = resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
+
+export interface NavLink {
+  readonly label: string;
+  /** Internal path with trailing slash (the site exports with `trailingSlash: true`). */
+  readonly href: string;
+  /** Extra path prefixes that should also mark this link as the current section. */
+  readonly matchPrefixes?: readonly string[];
+}
+
+export const NAV_LINKS: readonly NavLink[] = [
+  { label: "Browse", href: "/browse/", matchPrefixes: ["/extensions/"] },
+  { label: "Security", href: "/security/" },
+  { label: "Publish", href: "/publish/" },
+  { label: "About", href: "/about/" },
+];
+
+/** True when `pathname` belongs to the section a nav link represents. */
+export function isNavLinkActive(pathname: string, link: NavLink): boolean {
+  const normalizedPathname = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  return [link.href, ...(link.matchPrefixes ?? [])].some((prefix) => normalizedPathname.startsWith(prefix));
+}
+
+/**
+ * Stacking scale. Only systemic layers get a z-index; everything else stays in flow.
+ * Order: header < menu < overlay < skipLink (the skip link must beat everything when focused).
+ */
+export const Z_INDEX = {
+  header: 40,
+  menu: 50,
+  overlay: 60,
+  skipLink: 100,
+} as const;
+
+/** Literal class names so Tailwind's scanner sees them; keep in sync with `Z_INDEX`. */
+export const Z_CLASS = {
+  header: "z-40",
+  menu: "z-50",
+  overlay: "z-60",
+  skipLink: "z-100",
+} as const;
