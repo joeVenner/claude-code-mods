@@ -36,6 +36,13 @@ export const PAGE_SEO = {
       "Search and filter Claude Code mods, plugins, skills, agents, hooks, commands and MCP servers by kind, category and how you get them.",
     breadcrumbLabel: "Browse",
   },
+  hooks: {
+    path: "/hooks/",
+    title: "Hook events across Claude Code mods",
+    description:
+      "Every hook event listed by an entry in the directory and which mods, plugins and hooks use it, split into function hooks for mods and classic hooks.",
+    breadcrumbLabel: "Hooks",
+  },
   ideas: {
     path: "/ideas/",
     title: "Proposed Claude Code mod ideas",
@@ -73,4 +80,4 @@ export const PAGE_SEO = {
 export type StaticPageKey = keyof typeof PAGE_SEO;
 
 /** Pages in the order sitemaps and llms files list them. */
-export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = ["home", "browse", "ideas", "security", "publish", "about"];
+export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = ["home", "browse", "hooks", "ideas", "security", "publish", "about"];

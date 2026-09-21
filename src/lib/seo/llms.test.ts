@@ -107,7 +107,7 @@ describe("buildLlmsTxt", () => {
 
   it("lists the site docs with absolute URLs and keeps ideas out of the directory sections", () => {
     const docs = text.slice(text.indexOf("## Site docs"), text.indexOf(`## ${LLMS_IDEAS_HEADING}`));
-    for (const path of ["/security/", "/publish/", "/about/"]) expect(docs).toContain(`](${SITE_URL}${path})`);
+    for (const path of ["/hooks/", "/security/", "/publish/", "/about/"]) expect(docs).toContain(`](${SITE_URL}${path})`);
     const directory = text.slice(0, text.indexOf("## Site docs"));
     for (const idea of catalogInput.ideas) expect(directory).not.toContain(idea.name);
   });

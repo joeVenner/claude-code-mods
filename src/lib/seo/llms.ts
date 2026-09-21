@@ -102,7 +102,7 @@ function indexLine(extension: Extension, siteUrl: string): string {
 }
 
 function docLines(siteUrl: string): readonly string[] {
-  return [PAGE_SEO.security, PAGE_SEO.publish, PAGE_SEO.about].map(
+  return [PAGE_SEO.hooks, PAGE_SEO.security, PAGE_SEO.publish, PAGE_SEO.about].map(
     (page) => `- [${page.breadcrumbLabel}](${absoluteUrl(page.path, siteUrl)}): ${page.description}`,
   );
 }
