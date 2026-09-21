@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { COMMUNITY_REPOSITORY_URL, DISCLAIMER, NAV_LINKS, SITE_DESCRIPTION, SITE_TAGLINE, isNavLinkActive, resolveSiteUrl } from "./site";
+import {
+  COMMUNITY_REPOSITORY_URL,
+  DISCLAIMER,
+  NAV_LINKS,
+  PRODUCTION_SITE_URL,
+  SITE_DESCRIPTION,
+  SITE_TAGLINE,
+  isNavLinkActive,
+  resolveSiteUrl,
+} from "./site";
 
 describe("NAV_LINKS", () => {
   it("lists five short destinations so the header fits on one line", () => {
@@ -66,5 +75,16 @@ describe("resolveSiteUrl", () => {
 
   it("reduces a valid URL to its origin", () => {
     expect(resolveSiteUrl("https://example.org/some/path/")).toBe("https://example.org");
+  });
+
+  it("falls back to the production domain in production, never to localhost", () => {
+    expect(resolveSiteUrl(undefined, true)).toBe(PRODUCTION_SITE_URL);
+    expect(resolveSiteUrl("not a url", true)).toBe(PRODUCTION_SITE_URL);
+    expect(resolveSiteUrl("javascript:alert(1)", true)).toBe(PRODUCTION_SITE_URL);
+    expect(PRODUCTION_SITE_URL).toBe("https://claudecodemods.com");
+  });
+
+  it("lets an explicit URL override the production fallback", () => {
+    expect(resolveSiteUrl("https://preview.example.org/x", true)).toBe("https://preview.example.org");
   });
 });

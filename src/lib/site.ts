@@ -15,21 +15,28 @@ export const VERIFICATION_NOTE =
 /** Public repository that accepts community submissions by pull request. */
 export const COMMUNITY_REPOSITORY_URL = "https://github.com/joeVenner/claude-code-mods";
 
-const DEFAULT_SITE_URL = "http://localhost:3000";
+const LOCAL_SITE_URL = "http://localhost:3000";
+/** Where the site is deployed. Production builds fall back to it so canonical URLs never say localhost. */
+export const PRODUCTION_SITE_URL = "https://claudecodemods.com";
 
 /**
  * Normalises a configured site URL to an origin-style string without a trailing slash.
- * Falls back to the local default for missing or malformed values so a bad env var
- * cannot break `metadataBase` at build time.
+ * Missing or malformed values fall back to the production domain in production builds and to
+ * localhost otherwise, so a bad env var can neither break `metadataBase` nor leak localhost
+ * into the sitemap and canonical tags of a deployed site.
  */
-export function resolveSiteUrl(rawUrl: string | undefined): string {
-  if (!rawUrl) return DEFAULT_SITE_URL;
+export function resolveSiteUrl(
+  rawUrl: string | undefined,
+  isProduction: boolean = process.env.NODE_ENV === "production",
+): string {
+  const fallback = isProduction ? PRODUCTION_SITE_URL : LOCAL_SITE_URL;
+  if (!rawUrl) return fallback;
   try {
     const parsed = new URL(rawUrl);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return DEFAULT_SITE_URL;
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return fallback;
     return parsed.origin;
   } catch {
-    return DEFAULT_SITE_URL;
+    return fallback;
   }
 }
 
