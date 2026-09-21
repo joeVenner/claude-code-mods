@@ -101,7 +101,7 @@ The share images are checked by eye: after `npm run build`, open the files named
 
 The site is a static export deployed on Vercel.
 
-1. Import the repository in Vercel. Build command `npm run build`, output directory `out`.
+1. Import the repository in Vercel. `vercel.json` already sets the install command, the build command and the output directory `out`, so the framework preset in the dashboard does not matter.
 2. Set `NEXT_PUBLIC_SITE_URL=https://claudecodemods.com` in the project's environment variables.
 3. Enable Web Analytics in the Vercel dashboard for the project, then redeploy. The `@vercel/analytics` component is already in the layout and records nothing until it is enabled.
 4. Security headers (Content-Security-Policy, HSTS and others) come from `vercel.json`.

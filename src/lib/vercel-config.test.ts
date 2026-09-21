@@ -9,6 +9,9 @@ interface HeaderRule {
 }
 
 const config = JSON.parse(readFileSync(path.join(process.cwd(), "vercel.json"), "utf8")) as {
+  readonly buildCommand?: string;
+  readonly installCommand?: string;
+  readonly outputDirectory?: string;
   readonly headers: readonly HeaderRule[];
 };
 
@@ -34,7 +37,23 @@ function contentTypeFor(urlPath: string): string | undefined {
     .find((value): value is string => value !== undefined);
 }
 
-describe("vercel.json", () => {
+describe("vercel.json build settings", () => {
+  // The first Vercel deploy built fine and then failed with "No Output Directory named public found",
+  // because a project created with the generic "Other" preset looks in ./public while `next build` with
+  // output: "export" writes to ./out. The repo has to say where the site is, whatever the dashboard says.
+  it("points Vercel at the directory a Next.js static export writes to", () => {
+    const nextConfig = readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
+    expect(nextConfig).toMatch(/output:\s*"export"/);
+    expect(config.outputDirectory).toBe("out");
+  });
+
+  it("builds with the same commands as CI", () => {
+    expect(config.buildCommand).toBe("npm run build");
+    expect(config.installCommand).toBe("npm ci --ignore-scripts");
+  });
+});
+
+describe("vercel.json headers", () => {
   const globalRule = config.headers.find((rule) => rule.source === "/(.*)");
 
   it("uses only source patterns that path-to-regexp accepts, so Vercel will deploy it", () => {
