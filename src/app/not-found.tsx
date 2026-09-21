@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { buildNotFoundMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNotFoundMetadata();
 
 export default function NotFound(): ReactNode {
   return (

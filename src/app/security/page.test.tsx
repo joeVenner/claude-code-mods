@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
@@ -92,7 +93,7 @@ describe("security page", () => {
   });
 
   it("exports page metadata with a canonical path", () => {
-    expect(metadata.alternates?.canonical).toBe("/security/");
-    expect(metadata.title).toBe("Security");
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/security/`);
+    expect(metadata.title).toBe("Security: what is and is not checked");
   });
 });

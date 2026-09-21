@@ -19,13 +19,12 @@ import {
   getCatalogGeneratedAt,
   getFeaturedExtensions,
 } from "@/lib/catalog";
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildHomeGraph } from "@/lib/seo/jsonLd";
+import { buildStaticPageMetadata } from "@/lib/seo/metadata";
+import { PAGE_SEO } from "@/lib/seo/pages";
 
-export const metadata: Metadata = {
-  title: { absolute: `${SITE_NAME}: community directory for Claude Code extensions` },
-  description: SITE_DESCRIPTION,
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = buildStaticPageMetadata(PAGE_SEO.home);
 
 /** Landing page. All data is read at build time; only the hero search runs in the browser. */
 export default function HomePage(): ReactNode {
@@ -35,6 +34,7 @@ export default function HomePage(): ReactNode {
 
   return (
     <>
+      <JsonLd data={buildHomeGraph()} />
       <Hero extensions={toListItems(allExtensions)} />
       <KindExplorer counts={countByKind()} builtInModsNote={describeBuiltInMods(allExtensions)} />
       <FeaturedSection extensions={featuredPick.extensions} isEditorialPick={featuredPick.isEditorial} />

@@ -6,7 +6,8 @@ import { getCatalogGeneratedAt } from "@/lib/catalog";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
 import { ThemeScript } from "@/components/shell/ThemeScript";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, Z_CLASS } from "@/lib/site";
+import { buildRootMetadata } from "@/lib/seo/metadata";
+import { Z_CLASS } from "@/lib/site";
 import { cn } from "@/lib/cn";
 import "./globals.css";
 
@@ -22,27 +23,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const DEFAULT_TITLE = `${SITE_NAME}: community directory for Claude Code extensions`;
-
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: DEFAULT_TITLE, template: `%s | ${SITE_NAME}` },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    title: DEFAULT_TITLE,
-    description: SITE_DESCRIPTION,
-    url: "/",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary",
-    title: DEFAULT_TITLE,
-    description: SITE_DESCRIPTION,
-  },
-};
+export const metadata: Metadata = buildRootMetadata();
 
 export const viewport: Viewport = {
   themeColor: [

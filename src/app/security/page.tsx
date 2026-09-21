@@ -8,7 +8,6 @@ import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
 import { Timeline } from "@/components/docs/Timeline";
 import { pickExampleMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
-import { buildPageMetadata } from "@/components/docs/pageMetadata";
 import {
   BEFORE_YOU_INSTALL,
   NO_SCANNER_NOTICE,
@@ -18,13 +17,12 @@ import {
 import { Chip } from "@/components/ui/Chip";
 import { getAllExtensions } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildDocPageGraph } from "@/lib/seo/jsonLd";
+import { buildStaticPageMetadata } from "@/lib/seo/metadata";
+import { PAGE_SEO } from "@/lib/seo/pages";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Security",
-  description:
-    "What is checked today, the proposed security tier model (not implemented), and what to check before you install anything.",
-  path: "/security/",
-});
+export const metadata: Metadata = buildStaticPageMetadata(PAGE_SEO.security);
 
 export default function SecurityPage(): ReactNode {
   const builtInMods = selectAnthropicBuiltInMods(getAllExtensions());
@@ -35,6 +33,7 @@ export default function SecurityPage(): ReactNode {
       title="Security and verification"
       description="What the checks on this site cover, what the proposed tier model would add, and what to check yourself."
     >
+      <JsonLd data={buildDocPageGraph(PAGE_SEO.security)} />
       <DocSection id="what-is-checked" title="What is checked today">
         <DefinitionList
           items={[

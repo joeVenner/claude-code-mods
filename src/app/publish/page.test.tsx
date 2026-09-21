@@ -10,7 +10,7 @@ import {
   SUBMISSION_RULES,
 } from "@/components/docs/publishContent";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
-import { COMMUNITY_REPOSITORY_URL } from "@/lib/site";
+import { COMMUNITY_REPOSITORY_URL, SITE_URL } from "@/lib/site";
 import { extensionSchema } from "@/lib/types";
 import PublishPage, { metadata } from "./page";
 
@@ -172,6 +172,6 @@ describe("publish page", () => {
   });
 
   it("exports metadata with a canonical path", () => {
-    expect(metadata.alternates?.canonical).toBe("/publish/");
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/publish/`);
   });
 });

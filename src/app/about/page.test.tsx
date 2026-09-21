@@ -6,7 +6,7 @@ import path from "node:path";
 import { selectAnthropicBuiltInMods, sharedNotice } from "@/components/docs/builtInMods";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeas } from "@/lib/ideas";
-import { DISCLAIMER, VERIFICATION_NOTE } from "@/lib/site";
+import { DISCLAIMER, SITE_URL, VERIFICATION_NOTE } from "@/lib/site";
 import AboutPage, { metadata } from "./page";
 
 beforeAll(stubIntersectionObserver);
@@ -114,6 +114,6 @@ describe("about page", () => {
   });
 
   it("exports metadata with a canonical path", () => {
-    expect(metadata.alternates?.canonical).toBe("/about/");
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/about/`);
   });
 });

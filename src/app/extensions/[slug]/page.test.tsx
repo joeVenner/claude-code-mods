@@ -1,6 +1,8 @@
+import { SITE_URL } from "@/lib/site";
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/ui/testSupport";
+import { buildExtensionMetadata } from "@/lib/seo/metadata";
 import { getAllExtensions } from "@/lib/catalog";
 import ExtensionPage, { dynamicParams, generateMetadata, generateStaticParams } from "./page";
 
@@ -25,9 +27,13 @@ describe("extension detail route", () => {
   it("builds metadata from the entry title, summary and canonical path", async () => {
     const [entry] = getAllExtensions();
     const metadata = await generateMetadata({ params: paramsFor(entry.slug) });
-    expect(metadata.title).toBe(entry.name);
-    expect(metadata.description).toBe(entry.summary);
-    expect(metadata.alternates?.canonical).toBe(`/extensions/${entry.slug}/`);
+    const expected = buildExtensionMetadata(entry);
+    // Exact values, not fragments: a mod name is short enough for the "<name>, a mod for Claude Code" form.
+    expect(entry.kind).toBe("mod");
+    expect(metadata.title).toBe(`${entry.name}, a mod for Claude Code`);
+    expect(metadata.description).toBe(expected.description);
+    expect(String(metadata.description).startsWith(entry.summary)).toBe(true);
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/extensions/${entry.slug}/`);
   });
 
   it("returns empty metadata for an unknown slug", async () => {

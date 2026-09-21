@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
@@ -71,7 +72,7 @@ describe("ideas page", () => {
   });
 
   it("exports metadata with a canonical path", () => {
-    expect(metadata.alternates?.canonical).toBe("/ideas/");
-    expect(metadata.title).toBe("Proposed ideas");
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/ideas/`);
+    expect(metadata.title).toBe("Proposed Claude Code mod ideas");
   });
 });

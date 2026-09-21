@@ -8,7 +8,6 @@ import { DocSection, Prose } from "@/components/docs/DocSection";
 import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
 import { Timeline } from "@/components/docs/Timeline";
-import { buildPageMetadata } from "@/components/docs/pageMetadata";
 import {
   COMMUNITY_FILE_PATTERN,
   COMMUNITY_LABEL,
@@ -29,13 +28,12 @@ import {
 import { Button } from "@/components/ui/Button";
 import { CopyCommand } from "@/components/ui/CopyCommand";
 import { COMMUNITY_REPOSITORY_URL } from "@/lib/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildDocPageGraph } from "@/lib/seo/jsonLd";
+import { buildStaticPageMetadata } from "@/lib/seo/metadata";
+import { PAGE_SEO } from "@/lib/seo/pages";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "Publish",
-  description:
-    "List a Claude Code extension or mod by pull request: the steps, the rules a submission cannot bypass, the entry format and what a listing means.",
-  path: "/publish/",
-});
+export const metadata: Metadata = buildStaticPageMetadata(PAGE_SEO.publish);
 
 function CodeBlock({ label, children }: { readonly label: string; readonly children: string }): ReactNode {
   return (
@@ -55,6 +53,7 @@ export default function PublishPage(): ReactNode {
       title="Publish an extension"
       description="List your Claude Code extension or mod with a pull request. A listing says the source exists, not that anyone reviewed it."
     >
+      <JsonLd data={buildDocPageGraph(PAGE_SEO.publish)} />
       <DocSection id="how-it-works" title="How listing works">
         <Callout tone="note">
           <p>

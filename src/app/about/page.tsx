@@ -7,19 +7,17 @@ import { DocSection, Prose } from "@/components/docs/DocSection";
 import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
 import { repositoryNameOf, selectAnthropicBuiltInMods, sharedNotice } from "@/components/docs/builtInMods";
-import { buildPageMetadata } from "@/components/docs/pageMetadata";
 import { CopyCommand } from "@/components/ui/CopyCommand";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeas } from "@/lib/ideas";
 import { DISCLAIMER, VERIFICATION_NOTE } from "@/lib/site";
 import type { ExtensionKind } from "@/lib/types";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildDocPageGraph } from "@/lib/seo/jsonLd";
+import { buildStaticPageMetadata } from "@/lib/seo/metadata";
+import { PAGE_SEO } from "@/lib/seo/pages";
 
-export const metadata: Metadata = buildPageMetadata({
-  title: "About",
-  description:
-    "What this unofficial directory is, what a mod is, where the data comes from, what Source verified means and how to re-check the links.",
-  path: "/about/",
-});
+export const metadata: Metadata = buildStaticPageMetadata(PAGE_SEO.about);
 
 type OtherKind = Exclude<ExtensionKind, "mod">;
 
@@ -53,6 +51,7 @@ export default function AboutPage(): ReactNode {
       title="About this directory"
       description="A community-run directory of Claude Code mods and extensions, with a plain record of what was checked."
     >
+      <JsonLd data={buildDocPageGraph(PAGE_SEO.about)} />
       <DocSection id="unofficial" title="Unofficial, and not a security service">
         <Callout tone="note">
           <p>{DISCLAIMER}</p>

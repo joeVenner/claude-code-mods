@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/site";
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { HOME_FIXTURES, buildFeaturedMods } from "@/components/home/__fixtures__/extensions";
@@ -106,7 +107,7 @@ describe("home page", () => {
   });
 
   it("exports metadata with a canonical path and a description", () => {
-    expect(metadata.alternates?.canonical).toBe("/");
+    expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/`);
     expect(metadata.description).toBeTruthy();
   });
 });
