@@ -77,6 +77,8 @@ Everything below is generated at build time from the catalog, so nothing lists a
 | `src/app/icon.tsx`, `apple-icon.tsx`, `favicon.ico`, `manifest.ts`, `icons/` | The brand mark as favicon, touch icon and web app icons (192, 512 and maskable). |
 | `src/app/llms.txt/`, `llms-full.txt/` | Index and full text of the directory for AI search, following [llmstxt.org](https://llmstxt.org). |
 | `src/app/feed.xml/` | Atom feed, newest source check first. |
+| `src/app/catalog.json/` | The whole catalog as one read-only JSON document for tools that would otherwise scrape pages. It is data, not a Claude Code plugin marketplace: it has no install semantics. Community entries are reduced to an allowlisted index record, like in `llms-full.txt`. Built by `src/lib/seo/catalogJson.ts`. |
+| `src/app/hooks/`, `src/lib/hooks-index.ts` | The `/hooks/` page: every hook event any entry lists, and which entries use it, split into function hooks (mods) and classic hooks (everything else). Derived from each entry's `hooks` field, so no event name is written by hand. |
 | `src/app/robots.ts`, `sitemap.ts` | Crawler rules (search and AI crawlers are allowed by name) and every indexable page with its own last modified date. |
 | `src/lib/seo/jsonLd.ts` | JSON-LD graphs and `serializeJsonLd`, the only place catalog text is serialised into a `<script>`. |
 | `src/assets/fonts/` | Geist and Geist Mono for the generated images, under the SIL Open Font License (`OFL.txt` beside them). |
