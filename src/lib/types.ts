@@ -225,6 +225,62 @@ export const ideasFileSchema = z.object({
 });
 export type IdeasFile = z.infer<typeof ideasFileSchema>;
 
+/**
+ * Which part of Claude Code's function hooks declares an event.
+ * - `engine`: the engine's own lifecycle (`session.start`, `tool.call`, `ui.render`).
+ * - `op`: one call on the `$` object (`fs.write`, `http.fetch`).
+ * - `classic`: a classic hook event bridged in as `classic.<Name>` (`classic.PreToolUse`).
+ * Events a plugin declares for a noun of its own are not listed: they depend on which plugins are loaded.
+ */
+export const EVENT_FAMILIES = ["engine", "op", "classic"] as const;
+export type EventFamily = (typeof EVENT_FAMILIES)[number];
+
+export const EVENT_FAMILY_LABELS: Readonly<Record<EventFamily, string>> = {
+  engine: "Engine",
+  op: "Calls on $",
+  classic: "Classic",
+};
+
+/**
+ * One event name, as Anthropic's type declarations spell it, with the line it is declared on.
+ * Nothing else from the declarations is stored: they are published under "All rights reserved"
+ * terms, so this site links to them at a pinned commit and does not reproduce their text.
+ */
+export const eventSchema = z
+  .object({
+    name: z.string().regex(/^[a-z]{1,32}\.[A-Za-z]{1,64}$/, "expected <noun>.<name>, for example tool.call"),
+    family: z.enum(EVENT_FAMILIES),
+    /** One-based line in the declarations file at the pinned commit. */
+    line: z.number().int().positive().max(1_000_000),
+  })
+  .superRefine((event, ctx) => {
+    const isClassicName = event.name.startsWith("classic.");
+    if (isClassicName !== (event.family === "classic")) {
+      ctx.addIssue({ code: "custom", message: 'only classic events are named "classic.<Name>", and every classic event is' });
+    }
+  });
+export type HookEvent = z.infer<typeof eventSchema>;
+
+export const eventsFileSchema = z.object({
+  version: z.literal(1),
+  /** The upstream commit the names were read from, so every event can link to its source line. */
+  source: z.object({
+    repository: z.literal("anthropics/claude-code"),
+    path: z.literal("mods/types/claude-code.d.ts"),
+    sha: z.string().regex(/^[0-9a-f]{40}$/, "expected a full lowercase commit hash"),
+    /** Claude Code version named in the declarations' first comment, or null when it names none. */
+    claudeCodeVersion: z.string().regex(/^\d{1,4}\.\d{1,4}\.\d{1,6}$/).nullable(),
+    syncedAt: isoDate,
+  }),
+  events: z
+    .array(eventSchema)
+    .min(1)
+    // Far above the 125 events today; a larger file is more likely a bad sync than a real API.
+    .max(500)
+    .refine((events) => new Set(events.map((event) => event.name)).size === events.length, "duplicate event name"),
+});
+export type EventsFile = z.infer<typeof eventsFileSchema>;
+
 /** Filters accepted by the browse page and hero search. All fields are optional. */
 export interface SearchFilters {
   readonly query?: string;

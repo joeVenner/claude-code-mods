@@ -132,6 +132,20 @@ describe("the shipped data", () => {
       }
     });
 
+    it("say the source is silent on enabling function hooks, and cite the announcement issue for the flag", () => {
+      for (const mod of anthropicMods) {
+        const setup = mod.guide.find((section) => /set ?up/i.test(section.title));
+        const text = setup?.paragraphs.join(" ") ?? "";
+        expect(text, mod.slug).toContain("The source does not document how to enable function hooks.");
+        expect(text, mod.slug).toContain("CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1");
+        expect(text, mod.slug).toMatch(/not documentation/);
+        expect(
+          mod.links.some((link) => link.url === "https://github.com/anthropics/claude-code/issues/91870"),
+          `${mod.slug} links the announcement issue`,
+        ).toBe(true);
+      }
+    });
+
     it("keep every command on one line and never repeat the early access notice", () => {
       for (const mod of anthropicMods) {
         const guideText = mod.guide.flatMap((section) => section.paragraphs).join(" ");

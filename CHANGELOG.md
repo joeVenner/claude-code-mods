@@ -30,8 +30,12 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - A Deploy section in the README for Vercel.
 - GitHub Actions: `validate.yml` (typecheck, lint, tests and build on every pull request, catalog checks on changed community files, and an advisory path check) and a weekly `reverify.yml` that re-checks every entry so link rot shows up as a failed run.
 - `.github/CODEOWNERS`, a pull request template, an issue template for wrong or dead listings, and `CONTRIBUTING.md`.
+- `src/data/events.json`: the 125 hook events of Claude Code's function hooks (38 engine events, 54 calls on `$` and 33 classic hooks), read from Anthropic's type declarations at a pinned upstream commit. It stores names, family and the declaring line only, because the declarations are published under "All rights reserved" terms; the site links to them instead of copying them. It is validated at load time, and a test checks that every event the Anthropic mods hook exists in it.
+- `npm run sync:events` (`scripts/sync-events.mjs`) regenerates that file. It prints what was added, removed, moved or re-filed and writes nothing unless `--write` is given. It refuses any change in the declarations' layout instead of returning a shorter list, never builds a pattern from upstream text, and caps the download while reading it.
 
 ### Changed
+
+- The guides of the four Anthropic mods now say where the flag for enabling function hooks comes from: `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` is named in a comment on the announcement issue (anthropics/claude-code #91870), not in any documentation, and may change. The issue is linked from each mod page, and the four entries were re-checked on 2026-09-21.
 
 - The site deploys on Vercel, not Cloudflare Pages. `NEXT_PUBLIC_SITE_URL` defaults to `https://claudecodemods.com` in production builds, so canonical URLs and the sitemap never say localhost.
 - Page titles and descriptions are rewritten for search: titles fit 60 characters with the site name, descriptions are 110 to 160 characters, and extension pages read "<name>, a <kind> for Claude Code".
