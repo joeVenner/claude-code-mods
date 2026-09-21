@@ -1,0 +1,8 @@
+{
+  "name": "block-force-push",
+  "version": "0.1.0",
+  "description": "A starter mod: refuses a Bash call that force pushes with git, and passes every other tool call through.",
+  "author": {
+    "name": "Your name"
+  }
+}

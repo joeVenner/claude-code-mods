@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "catalog:verify": "node scripts/verify-catalog.mjs",
     "catalog:structure": "node scripts/verify-catalog.mjs --structure",
-    "sync:events": "node scripts/sync-events.mjs"
+    "sync:events": "node scripts/sync-events.mjs",
+    "test:starter": "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin test templates/mod-starter"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

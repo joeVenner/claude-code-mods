@@ -1,0 +1,4 @@
+{
+  "description": "A tool.call hook that refuses a Bash call which force pushes with git",
+  "modules": ["./register.ts"]
+}
