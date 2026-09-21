@@ -1,7 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { HookEventRow } from "@/lib/hooks-index";
-import { HookEventList } from "./HookEventList";
+import { HookEventList, type HookEventRow } from "./HookEventList";
 
 const ROWS: readonly HookEventRow[] = [
   {

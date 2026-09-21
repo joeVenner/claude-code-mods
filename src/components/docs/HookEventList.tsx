@@ -3,9 +3,22 @@ import { CommunityBadge } from "@/components/catalog/CommunityBadge";
 import { DefinitionList } from "@/components/docs/DefinitionList";
 import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
-import type { HookEventRow } from "@/lib/hooks-index";
 import { extensionPath } from "@/lib/seo/metadata";
-import { KIND_LABELS } from "@/lib/types";
+import { KIND_LABELS, type ExtensionKind, type Publisher } from "@/lib/types";
+
+export interface HookEntryRef {
+  readonly slug: string;
+  readonly name: string;
+  readonly kind: ExtensionKind;
+  readonly publisherKind: Publisher["kind"];
+}
+
+export interface HookEventRow {
+  /** The hook name exactly as the entry's own source writes it. */
+  readonly event: string;
+  /** Entries that list it, in the order to show them. */
+  readonly entries: readonly HookEntryRef[];
+}
 
 export interface HookEventListProps {
   readonly rows: readonly HookEventRow[];
