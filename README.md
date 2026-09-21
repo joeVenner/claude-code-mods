@@ -62,6 +62,14 @@ npm run catalog:structure   # checks that plugin and mod entries have their mani
 
 Add `-- --only <file>` to either command to check just one data file. Pages read the catalog only through `src/lib/catalog.ts`, `src/lib/ideas.ts` and `src/lib/search.ts`. Nothing in the UI hardcodes entry names, counts or star numbers.
 
+Hook event names live in `src/data/events.json`, read through `src/lib/events.ts`. Anthropic publishes the type declarations they come from under "All rights reserved" terms, so the file keeps only event names, their family and the line each is declared on, pinned to an upstream commit. Regenerate it with:
+
+```bash
+npm run sync:events                          # print what would change, write nothing
+npm run sync:events -- --write               # update src/data/events.json, then review the diff
+npm run sync:events -- --sha <commit> --write  # pin a specific upstream commit
+```
+
 CI (`.github/workflows/validate.yml`) runs typecheck, lint, tests and a build on every pull request, runs the two catalog checks on the community files a pull request adds or changes, and asks a submission to touch only `src/data/community/`. That last check is advisory, because a pull request runs its own workflow; the real protection is `.github/CODEOWNERS` plus a branch ruleset that requires code owner review. `.github/workflows/reverify.yml` re-runs both catalog checks on every entry each week, so link rot or a rewritten repository shows up as a failed run.
 
 ## SEO, GEO and previews
