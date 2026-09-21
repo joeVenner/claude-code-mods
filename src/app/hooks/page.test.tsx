@@ -1,13 +1,21 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
 import { getAllExtensions } from "@/lib/catalog";
-import { buildHooksIndex } from "@/lib/hooks-index";
+import { buildEventReference } from "@/lib/event-reference";
+import { getEvents, getEventsSource } from "@/lib/events";
 import { PAGE_SEO } from "@/lib/seo/pages";
 import { SITE_URL } from "@/lib/site";
 import HooksPage, { metadata } from "./page";
 
 beforeAll(stubIntersectionObserver);
+
+const reference = buildEventReference(getEventsSource(), getEvents(), getAllExtensions());
+
+function eventTerms(container: HTMLElement): string[] {
+  return Array.from(container.querySelectorAll("#events dt")).map((term) => term.textContent ?? "");
+}
 
 describe("hooks page", () => {
   it("has exactly one h1, ordered headings and no em or en dashes", () => {
@@ -20,29 +28,46 @@ describe("hooks page", () => {
     });
   });
 
-  it("splits the two hook systems into their own sections", () => {
-    render(<HooksPage />);
-    expect(screen.getByRole("heading", { name: /Function hooks/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Classic hooks/ })).toBeInTheDocument();
-  });
-
-  it("shows every event the catalog lists exactly once per system", () => {
+  it("lists every event from the synced file exactly once, in family groups", () => {
     const { container } = render(<HooksPage />);
-    const { functionHooks, classicHooks } = buildHooksIndex(getAllExtensions());
-    const termTexts = Array.from(container.querySelectorAll("dt")).map((term) => term.textContent);
-    expect(termTexts).toHaveLength(functionHooks.length + classicHooks.length);
-    for (const row of [...functionHooks, ...classicHooks]) expect(termTexts).toContain(row.event);
+    const terms = eventTerms(container);
+    expect(terms).toHaveLength(getEvents().length);
+    expect(new Set(terms).size).toBe(terms.length);
+    for (const event of getEvents()) expect(terms).toContain(event.name);
+    expect(screen.getByRole("heading", { level: 3, name: /^Engine/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: /^Calls on \$/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: /^Classic/ })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(`Showing ${getEvents().length} of ${getEvents().length} events`);
   });
 
-  it("says the page lists names only and does not describe what an event does", () => {
-    render(<HooksPage />);
-    expect(screen.getByText(/does not say what an event does/)).toBeInTheDocument();
+  it("gives every event a row that links its declaring line and lists exactly the entries the reference says use it", () => {
+    const { container } = render(<HooksPage />);
+    for (const row of reference.rows) {
+      const item = container.querySelector(`[id="${row.anchorId}"]`) as HTMLElement;
+      expect(item, row.name).not.toBeNull();
+      expect(within(item).getByRole("link", { name: /line \d+/ })).toHaveAttribute("href", row.sourceUrl);
+      const entryLinks = within(item).queryAllByRole("link", { name: (name) => !/^line \d+/.test(name) });
+      expect(entryLinks, row.name).toHaveLength(row.users.length);
+    }
   });
 
-  it("says the grouping follows entry kind and that event names are not checked against code", () => {
+  it("names the commit, the Claude Code version and the date the event names were read", () => {
+    const { container } = render(<HooksPage />);
+    const source = getEventsSource();
+    expect(container.textContent).toContain(source.sha.slice(0, 7));
+    expect(container.textContent).toContain(source.syncedAt);
+    if (source.claudeCodeVersion !== null) expect(container.textContent).toContain(`Claude Code ${source.claudeCodeVersion}`);
+  });
+
+  it("says the page does not say what an event does, and that use is not checked against code", () => {
     render(<HooksPage />);
-    expect(screen.getByText(/grouped by their kind/)).toBeInTheDocument();
+    expect(screen.getByText(/does not say\s+what an event does/)).toBeInTheDocument();
     expect(screen.getByText(/not checked against its code/)).toBeInTheDocument();
+  });
+
+  it("explains that a classic hook plugin's plain name is the same event as classic.<Name>", () => {
+    render(<HooksPage />);
+    expect(screen.getByText(/lists a classic event by its plain name/)).toBeInTheDocument();
   });
 
   it("does not count or promise run-from-source for the mods, which the catalog does not back", () => {
@@ -55,6 +80,23 @@ describe("hooks page", () => {
     const { container } = render(<HooksPage />);
     expect(container.textContent).toMatch(/early\s+access/);
     expect(container.textContent).not.toMatch(/CLAUDE_CODE_ENABLE_FUNCTION_HOOKS/);
+  });
+
+  it("lists hook names that select no event apart, and says why", () => {
+    const { container } = render(<HooksPage />);
+    expect(reference.otherNames.length).toBeGreaterThan(0);
+    const section = container.querySelector("#other-names") as HTMLElement;
+    const terms = Array.from(section.querySelectorAll("dt")).map((term) => term.textContent);
+    expect(terms).toEqual(reference.otherNames.map((other) => other.name));
+    expect(within(section).getByText(/select none of the events above/)).toBeInTheDocument();
+  });
+
+  it("filters the events from the page", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<HooksPage />);
+    await user.type(screen.getByRole("searchbox", { name: "Filter events" }), "fs.write");
+    expect(eventTerms(container)).toEqual(["fs.write"]);
+    expect(screen.getByRole("status")).toHaveTextContent(`Showing 1 of ${getEvents().length} events`);
   });
 
   it("has its own canonical URL and a unique title", () => {

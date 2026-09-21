@@ -40,27 +40,5 @@ export function getEventsSource(): EventsFile["source"] {
   return getEventsFile().source;
 }
 
-/** The noun an event belongs to: the part of its name before the dot (`fs` for `fs.write`). */
-export function nounOf(event: HookEvent): string {
-  const dotIndex = event.name.indexOf(".");
-  return dotIndex === -1 ? event.name : event.name.slice(0, dotIndex);
-}
-
-/** Where `event` is declared, as a github.com link pinned to the synced commit. */
-export function eventSourceUrl(source: EventsFile["source"], event: HookEvent): string {
-  return `https://github.com/${source.repository}/blob/${source.sha}/${source.path}#L${event.line}`;
-}
-
-/**
- * True when `pattern`, a hook name as a mod's own source writes it, selects at least one known
- * event: an exact name, `*`, `<noun>.*`, or `classic.*`. Patterns naming a noun that a plugin
- * declares for itself (`telemetry.*`) select nothing here, so they return false.
- */
-export function patternMatchesEvent(pattern: string, events: readonly HookEvent[]): boolean {
-  if (pattern === "*") return events.length > 0;
-  if (pattern.endsWith(".*")) {
-    const prefix = pattern.slice(0, -1);
-    return events.some((event) => event.name.startsWith(prefix));
-  }
-  return events.some((event) => event.name === pattern);
-}
+// Pure helpers live in event-names.ts so client components can import them; re-exported for callers of this module.
+export { eventSourceUrl, nounOf, patternMatchesEvent } from "@/lib/event-names";

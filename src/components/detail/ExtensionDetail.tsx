@@ -24,10 +24,14 @@ import { InlineLink } from "./InlineLink";
 import { InstallSection } from "./InstallSection";
 import { VerificationExplainer, VerificationNote } from "./VerificationNote";
 
+const NO_HOOK_LINKS: ReadonlyMap<string, string> = new Map();
+
 export interface ExtensionDetailProps {
   readonly extension: Extension;
   /** Pre-resolved by the page from the catalog so this component stays pure and easy to test. */
   readonly related: readonly Extension[];
+  /** Hook name to the Hooks page row for it, for the hooks that name exactly one event. A hook with no link is shown as text. */
+  readonly hookHrefs?: ReadonlyMap<string, string>;
 }
 
 /** Caveat stored on the entry (for example early access), shown before anything else the reader might act on. */
@@ -98,7 +102,7 @@ function ExtensionMeta({ extension }: { readonly extension: Extension }): ReactN
   );
 }
 
-function HookList({ extension }: { readonly extension: Extension }): ReactNode {
+function HookList({ extension, hookHrefs }: { readonly extension: Extension; readonly hookHrefs: ReadonlyMap<string, string> }): ReactNode {
   if (extension.hooks.length === 0) return null;
   const heading = extension.kind === "mod" ? "Hooks it registers" : "Lifecycle hooks";
   return (
@@ -107,11 +111,21 @@ function HookList({ extension }: { readonly extension: Extension }): ReactNode {
         {heading}
       </h2>
       <ul className="flex flex-wrap gap-1.5">
-        {extension.hooks.map((hook) => (
-          <li key={hook}>
-            <Chip className="font-mono">{hook}</Chip>
-          </li>
-        ))}
+        {extension.hooks.map((hook) => {
+          const href = hookHrefs.get(hook);
+          return (
+            <li key={hook}>
+              {href === undefined ? (
+                <Chip className="font-mono">{hook}</Chip>
+              ) : (
+                <Link href={href} title="Open in the event reference" className="rounded-chip hover:opacity-80">
+                  {/* The underline is the cue that this chip is a link and the others are not, so it does not rest on hover alone. */}
+                  <Chip className="font-mono underline decoration-1 underline-offset-4">{hook}</Chip>
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
@@ -141,7 +155,7 @@ function TagList({ tags }: { readonly tags: readonly string[] }): ReactNode {
  * simpler two-column layout applies. Below lg everything is one column: notice, contents, guide,
  * then the rail. Every fact shown comes from `extension`.
  */
-export function ExtensionDetail({ extension, related }: ExtensionDetailProps): ReactNode {
+export function ExtensionDetail({ extension, related, hookHrefs = NO_HOOK_LINKS }: ExtensionDetailProps): ReactNode {
   const { name, kind, summary, description, categories, tags, verification, availability, notice, details, guide } =
     extension;
   const links = collectExtensionLinks(extension);
@@ -194,7 +208,7 @@ export function ExtensionDetail({ extension, related }: ExtensionDetailProps): R
             <>
               <GuideTocCollapsible anchors={guideAnchors} />
               <GuideSections guide={guide} anchors={guideAnchors} />
-              <HookList extension={extension} />
+              <HookList extension={extension} hookHrefs={hookHrefs} />
             </>
           ) : (
             <div className="flex max-w-[65ch] flex-col gap-4 text-base leading-relaxed text-fg-muted">
@@ -210,7 +224,7 @@ export function ExtensionDetail({ extension, related }: ExtensionDetailProps): R
         <aside aria-label="Install, links and details" className="flex min-w-0 flex-col gap-8">
           <InstallSection extension={extension} />
           <DetailsList details={details} />
-          {hasGuide ? null : <HookList extension={extension} />}
+          {hasGuide ? null : <HookList extension={extension} hookHrefs={hookHrefs} />}
           <TagList tags={tags} />
           <ExtensionLinks links={links} />
           <div className="border-t border-border pt-5">

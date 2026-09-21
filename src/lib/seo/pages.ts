@@ -57,7 +57,7 @@ export const PAGE_SEO = {
     path: "/hooks/",
     title: "Hook events across Claude Code mods",
     description:
-      "Every hook event listed by an entry in the directory and which mods, plugins and hooks use it, split into function hooks for mods and classic hooks.",
+      "Every hook event Claude Code's function hooks name, by family and noun, with its source line and the mods, plugins and hooks that list it.",
     breadcrumbLabel: "Hooks",
   },
   ideas: {
