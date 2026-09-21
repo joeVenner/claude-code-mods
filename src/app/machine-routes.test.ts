@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DASH_PATTERN } from "@/components/docs/testSupport";
 import { getAllExtensions } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
+import { GET as getCatalogJson, dynamic as catalogJsonDynamic } from "./catalog.json/route";
 import { GET as getFeed, dynamic as feedDynamic } from "./feed.xml/route";
 import { GET as getLlmsFull, dynamic as llmsFullDynamic } from "./llms-full.txt/route";
 import { GET as getLlms, dynamic as llmsDynamic } from "./llms.txt/route";
@@ -35,6 +36,19 @@ describe("llms-full.txt route", () => {
       expect(body.split(`- Page: ${SITE_URL}/extensions/${extension.slug}/\n`)).toHaveLength(2);
     }
     expect(DASH_PATTERN.test(body)).toBe(false);
+  });
+});
+
+describe("catalog.json route", () => {
+  it("is static and served as UTF-8 JSON", async () => {
+    expect(catalogJsonDynamic).toBe("force-static");
+    const response = getCatalogJson();
+    expect(response.headers.get("content-type")).toBe("application/json; charset=utf-8");
+    const body = (await response.json()) as { version: number; disclaimer: string; extensions: { slug: string; pageUrl: string }[] };
+    expect(body.version).toBe(1);
+    expect(body.disclaimer).toMatch(/not a security review/);
+    expect(body.extensions.map((entry) => entry.slug)).toEqual(getAllExtensions().map((entry) => entry.slug));
+    for (const entry of body.extensions) expect(entry.pageUrl).toBe(`${SITE_URL}/extensions/${entry.slug}/`);
   });
 });
 

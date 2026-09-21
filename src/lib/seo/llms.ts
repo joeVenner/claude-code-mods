@@ -2,6 +2,7 @@ import { COMMUNITY_REPOSITORY_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import { AVAILABILITY_LABELS, CATEGORY_LABELS, KIND_LABELS, type Extension, type ExtensionKind, type Idea } from "@/lib/types";
 import { toSafeOutputUrl } from "@/lib/url";
 import { ATOM_FEED_PATH, absoluteUrl as rawAbsoluteUrl, extensionPath } from "@/lib/seo/metadata";
+import { CATALOG_JSON_PATH } from "@/lib/seo/catalogJson";
 import { PAGE_SEO } from "@/lib/seo/pages";
 import { toInertLine, toPlainText, toSingleLine, toStrictInertLine } from "@/lib/seo/text";
 
@@ -101,7 +102,7 @@ function indexLine(extension: Extension, siteUrl: string): string {
 }
 
 function docLines(siteUrl: string): readonly string[] {
-  return [PAGE_SEO.security, PAGE_SEO.publish, PAGE_SEO.about].map(
+  return [PAGE_SEO.hooks, PAGE_SEO.security, PAGE_SEO.publish, PAGE_SEO.about].map(
     (page) => `- [${page.breadcrumbLabel}](${absoluteUrl(page.path, siteUrl)}): ${page.description}`,
   );
 }
@@ -116,6 +117,7 @@ function optionalLines(siteUrl: string): readonly string[] {
   return [
     `- [Browse all entries](${absoluteUrl(PAGE_SEO.browse.path, siteUrl)}): Search and filter the whole directory.`,
     `- [Full text of maintainer entries](${absoluteUrl("/llms-full.txt", siteUrl)}): Guides and commands of maintainer and Anthropic entries, and an index line for each community entry.`,
+    `- [Catalog JSON](${absoluteUrl(CATALOG_JSON_PATH, siteUrl)}): The whole catalog as one read-only JSON document. It is data, not a plugin marketplace.`,
     `- [Atom feed](${absoluteUrl(ATOM_FEED_PATH, siteUrl)}): The newest source checks.`,
     `- [Sitemap](${absoluteUrl("/sitemap.xml", siteUrl)}): Every indexable page.`,
     `- [Source repository](${toSafeOutputUrl(COMMUNITY_REPOSITORY_URL)}): Site source and community submissions by pull request.`,
