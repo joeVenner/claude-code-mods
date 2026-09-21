@@ -4,7 +4,7 @@ export const SITE_NAME = "Claude Code Mods";
 export const SITE_TAGLINE = "Community directory of Claude Code mods, plugins, skills, agents, and MCP servers.";
 
 export const SITE_DESCRIPTION =
-  "Browse Claude Code mods, plugins, skills, agents, hooks, and MCP servers. Each entry shows whether its source was checked.";
+  "Browse Claude Code mods, plugins, skills, agents, hooks, and MCP servers. Each entry shows the date its source URL last responded.";
 
 export const DISCLAIMER = "Unofficial community directory. Not affiliated with or endorsed by Anthropic.";
 
@@ -33,7 +33,9 @@ export function resolveSiteUrl(
   if (!rawUrl) return fallback;
   try {
     const parsed = new URL(rawUrl);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return fallback;
+    // Plain http is for local development only: a production build must never publish http canonical URLs.
+    const isAllowedProtocol = parsed.protocol === "https:" || (parsed.protocol === "http:" && !isProduction);
+    if (!isAllowedProtocol) return fallback;
     return parsed.origin;
   } catch {
     return fallback;

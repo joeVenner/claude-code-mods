@@ -189,6 +189,14 @@ describe("communityRuleProblems: text hygiene", () => {
     ["a byte order mark", `${BYTE_ORDER_MARK}start`],
     ["a soft hyphen", `soft${SOFT_HYPHEN}hyphen`],
     ["a NUL", `a${NUL}b`],
+    ["the noncharacter U+FFFE", `a${character(0xfffe)}b`],
+    ["the noncharacter U+FFFF", `a${character(0xffff)}b`],
+    ["a noncharacter from U+FDD0 to U+FDEF", `a${character(0xfdd0)}b`],
+    ["a noncharacter at the end of a plane", `a${character(0x1ffff)}b`],
+    ["a private use character", `a${character(0xe000)}b`],
+    ["a supplementary private use character", `a${character(0xf0000)}b`],
+    ["a lone high surrogate", `a${String.fromCharCode(0xd800)}b`],
+    ["a lone low surrogate", `a${String.fromCharCode(0xdc00)}b`],
   ])("rejects %s in a guide paragraph and names the field", (_label, text) => {
     const guide = communityMod.guide.map((section, index) =>
       index === 0 ? { ...section, paragraphs: [text] } : section,
@@ -200,6 +208,10 @@ describe("communityRuleProblems: text hygiene", () => {
     expectProblem(problemsFor({ tags: ["ok", `bad${ZERO_WIDTH_SPACE}tag`] }), /^tags\.1:/);
     expectProblem(problemsFor({ hooks: [`tool${RIGHT_TO_LEFT_OVERRIDE}.call`] }), /^hooks\.0:/);
     expectProblem(problemsFor({ name: `na${ZERO_WIDTH_SPACE}me` }), /^name:/);
+  });
+
+  it("does not reject emoji, which are assigned characters (unassigned code points are not checked)", () => {
+    expect(problemsFor({ summary: `Ships fast ${character(0x1f680)}` })).toEqual([]);
   });
 
   it("accepts ordinary non-ASCII letters and punctuation in prose", () => {
@@ -254,6 +266,30 @@ describe("communityRuleProblems: length limits", () => {
 
   it.each(cases)("rejects a long %s", (_label, overrides, pattern) => {
     expectProblem(problemsFor(overrides), pattern);
+  });
+
+  it("caps the number of description paragraphs, install commands, details and guide items", () => {
+    const paragraphs = (count: number): string[] => Array.from({ length: count }, (_, index) => `Paragraph ${index}.`);
+    expectProblem(problemsFor({ description: paragraphs(limits.descriptionParagraphs + 1) }), /^description: has 11 items/);
+    expect(problemsFor({ description: paragraphs(limits.descriptionParagraphs) })).toEqual([]);
+    expectProblem(
+      problemsFor({ installCommands: Array.from({ length: limits.installCommands + 1 }, () => "/plugin install a@b") }),
+      /^installCommands: has 6 items/,
+    );
+    expectProblem(
+      problemsFor({
+        details: Array.from({ length: limits.details + 1 }, (_, index) => ({ label: `L${index}`, value: "v", isCommand: false })),
+      }),
+      /^details: has 21 items/,
+    );
+    const [first, ...rest] = communityMod.guide;
+    const guide = [
+      { ...first, paragraphs: paragraphs(limits.guideParagraphsPerSection + 1) },
+      { ...rest[0], commands: Array.from({ length: limits.guideCommandsPerSection + 1 }, () => "cd tidy-hooks") },
+    ];
+    const problems = problemsFor({ guide });
+    expectProblem(problems, /^guide\.0\.paragraphs: has 13 items/);
+    expectProblem(problems, /^guide\.1\.commands: has 11 items/);
   });
 
   it("rejects a long guide paragraph and title and too many guide sections", () => {

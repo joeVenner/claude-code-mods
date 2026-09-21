@@ -84,6 +84,13 @@ describe("resolveSiteUrl", () => {
     expect(PRODUCTION_SITE_URL).toBe("https://claudecodemods.com");
   });
 
+  it("does not accept an http URL in production, but does outside it", () => {
+    expect(resolveSiteUrl("http://preview.example.org", true)).toBe(PRODUCTION_SITE_URL);
+    expect(resolveSiteUrl("http://localhost:3000", true)).toBe(PRODUCTION_SITE_URL);
+    expect(resolveSiteUrl("http://localhost:4000", false)).toBe("http://localhost:4000");
+    expect(resolveSiteUrl("https://preview.example.org", false)).toBe("https://preview.example.org");
+  });
+
   it("lets an explicit URL override the production fallback", () => {
     expect(resolveSiteUrl("https://preview.example.org/x", true)).toBe("https://preview.example.org");
   });

@@ -9,7 +9,11 @@ import type { Extension } from "@/lib/types";
  */
 
 const COMMUNITY_HOST = "github.com";
-const CONTROL_OR_FORMAT_CHARACTER = /[\p{Cc}\p{Cf}]/u;
+// Cc control, Cf format (bidi, zero width), Co private use, Cs lone surrogate and noncharacters (U+FFFE,
+// U+FFFF, U+FDD0 to U+FDEF and the last two code points of every plane). Cn (unassigned) is left
+// out on purpose: which code points are unassigned depends on the Unicode version of the runtime,
+// and rejecting them would turn away emoji that a newer ICU knows about.
+const CONTROL_OR_FORMAT_CHARACTER = /[\p{Cc}\p{Cf}\p{Co}\p{Cs}\p{Noncharacter_Code_Point}]/u;
 const PRINTABLE_ASCII = /^[\x20-\x7e]*$/;
 const MAX_MESSAGE_TEXT_LENGTH = 60;
 
@@ -27,6 +31,12 @@ export const COMMUNITY_LIMITS = {
   publisherNameLength: 80,
   licenseLength: 200,
   paragraphLength: 1200,
+  /** Array caps: they bound how much text one submission can put into llms-full.txt and the pages. */
+  descriptionParagraphs: 10,
+  installCommands: 5,
+  details: 20,
+  guideParagraphsPerSection: 12,
+  guideCommandsPerSection: 10,
   guideTitleLength: 80,
   guideSections: 12,
   tagLength: 40,
@@ -161,7 +171,7 @@ export function commandProblems(extension: Extension): readonly string[] {
 
 // ---------- text hygiene ----------
 
-/** Finds control, bidi and zero-width characters (Unicode categories Cc and Cf) in any string value. */
+/** Finds control, bidi, zero-width, private-use, lone-surrogate and noncharacter code points in any string value. */
 export function invisibleCharacterProblems(value: unknown, fieldPath = ""): readonly string[] {
   if (typeof value === "string") {
     return CONTROL_OR_FORMAT_CHARACTER.test(value)
@@ -195,9 +205,14 @@ function limitProblems(extension: Extension): readonly string[] {
   longest("summary", extension.summary, limits.summaryLength);
   longest("publisher.name", extension.publisher.name, limits.publisherNameLength);
   if (extension.license !== null) longest("license", extension.license, limits.licenseLength);
+  most("description", extension.description.length, limits.descriptionParagraphs);
   extension.description.forEach((text, index) => longest(`description.${index}`, text, limits.paragraphLength));
+  most("installCommands", extension.installCommands.length, limits.installCommands);
+  most("details", extension.details.length, limits.details);
   most("guide", extension.guide.length, limits.guideSections);
   extension.guide.forEach((section, sectionIndex) => {
+    most(`guide.${sectionIndex}.paragraphs`, section.paragraphs.length, limits.guideParagraphsPerSection);
+    most(`guide.${sectionIndex}.commands`, section.commands.length, limits.guideCommandsPerSection);
     longest(`guide.${sectionIndex}.title`, section.title, limits.guideTitleLength);
     section.paragraphs.forEach((text, index) =>
       longest(`guide.${sectionIndex}.paragraphs.${index}`, text, limits.paragraphLength),
