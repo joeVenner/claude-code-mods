@@ -12,7 +12,7 @@ import {
 
 describe("NAV_LINKS", () => {
   it("lists short destinations so the header fits on one line", () => {
-    expect(NAV_LINKS.map((link) => link.label)).toEqual(["Browse", "Hooks", "Ideas", "Security", "Publish", "About"]);
+    expect(NAV_LINKS.map((link) => link.label)).toEqual(["Browse", "Learn", "Hooks", "Ideas", "Security", "Publish", "About"]);
     for (const link of NAV_LINKS) {
       expect(link.label.length).toBeLessThanOrEqual(8);
     }

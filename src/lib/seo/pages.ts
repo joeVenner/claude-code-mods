@@ -14,6 +14,8 @@ export interface PageSeo {
   readonly description: string;
   /** Short name for breadcrumbs. */
   readonly breadcrumbLabel: string;
+  /** The page this one sits under, for a nested page: it becomes the breadcrumb step between Home and this page. */
+  readonly breadcrumbParent?: { readonly label: string; readonly path: string };
   /** True when the title already carries the site name, so the title template must be skipped. */
   readonly hasAbsoluteTitle?: boolean;
   /** Set when the page has its own `opengraph-image` and `twitter-image` files: their route folder and alt text. */
@@ -35,6 +37,21 @@ export const PAGE_SEO = {
     description:
       "Search and filter Claude Code mods, plugins, skills, agents, hooks, commands and MCP servers by kind, category and how you get them.",
     breadcrumbLabel: "Browse",
+  },
+  learn: {
+    path: "/learn/",
+    title: "Learn Claude Mods and function hooks",
+    description:
+      "What a Claude Mod is, how function hooks and the $ object work, and how mods differ from plugins, classic hooks, MCP servers and skills.",
+    breadcrumbLabel: "Learn",
+  },
+  learnGettingStarted: {
+    path: "/learn/getting-started/",
+    title: "Build your first Claude Mod",
+    description:
+      "Turn on function hooks, build a starter mod that refuses force pushes, test it with claude plugin test and run it from a folder.",
+    breadcrumbLabel: "Getting started",
+    breadcrumbParent: { label: "Learn", path: "/learn/" },
   },
   hooks: {
     path: "/hooks/",
@@ -80,4 +97,14 @@ export const PAGE_SEO = {
 export type StaticPageKey = keyof typeof PAGE_SEO;
 
 /** Pages in the order sitemaps and llms files list them. */
-export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = ["home", "browse", "hooks", "ideas", "security", "publish", "about"];
+export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = [
+  "home",
+  "browse",
+  "learn",
+  "learnGettingStarted",
+  "hooks",
+  "ideas",
+  "security",
+  "publish",
+  "about",
+];
