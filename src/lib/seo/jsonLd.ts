@@ -167,7 +167,7 @@ export function buildBrowseGraph(allExtensions: readonly Extension[]): JsonLdGra
   );
 }
 
-/** Any documentation page: a WebPage and its breadcrumb. */
+/** Any documentation page: a WebPage and its breadcrumb, with the parent page as a step for a nested page. */
 export function buildDocPageGraph(page: PageSeo): JsonLdGraph {
   return graph(
     {
@@ -179,7 +179,11 @@ export function buildDocPageGraph(page: PageSeo): JsonLdGraph {
       isPartOf: { "@id": WEBSITE_ID },
       inLanguage: "en",
     },
-    buildBreadcrumbList([HOME_STEP, { name: page.breadcrumbLabel, path: page.path }]),
+    buildBreadcrumbList([
+      HOME_STEP,
+      ...(page.breadcrumbParent === undefined ? [] : [{ name: page.breadcrumbParent.label, path: page.breadcrumbParent.path }]),
+      { name: page.breadcrumbLabel, path: page.path },
+    ]),
   );
 }
 

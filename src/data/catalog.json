@@ -78,7 +78,7 @@
           "paragraphs": [
             "This mod ships inside Claude Code and is seated by the CLI, so there is no install step. It has no configuration options: its plugin.json declares no userConfig.",
             "To read it running from source, run the command below from the root of a clone of the repository. The README gives a caution for this: it is a plugin folder like any other, but its one move that matters, next.to, is refused outside a managed tier, so loading it with --plugin-dir seats a plugin that can only pass.",
-            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote on Sep 9, 2026 that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a comment in an issue, not documentation, and it may change without notice."
+            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote in its Sep 9, 2026 update that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a note in an issue, not documentation, and it may change without notice."
           ],
           "commands": [
             "claude --plugin-dir mods/sec-default"
@@ -249,7 +249,7 @@
             "This mod ships inside Claude Code as a built-in. It has no configuration options: its plugin.json declares no userConfig.",
             "To read it running from source, run the command below from the root of a clone of the repository, then use /diff inside a git repository with a modified file. The README says a session where another /diff is listed leaves the plugin idle.",
             "It needs a git repository to show anything. Outside one, /diff says so and does nothing else. For the pane to open by itself on the first edit, file checkpointing must be on, and the layout and terminal width conditions in the overview must hold.",
-            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote on Sep 9, 2026 that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a comment in an issue, not documentation, and it may change without notice."
+            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote in its Sep 9, 2026 update that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a note in an issue, not documentation, and it may change without notice."
           ],
           "commands": [
             "claude --plugin-dir mods/diff"
@@ -407,7 +407,7 @@
             "The README says plainly that it is not meant to be installed or loaded with --plugin-dir. The folder has a manifest so it reads like every other plugin, not so it can stand alone. For that reason this listing gives no run-from-source command.",
             "It has no configuration options: its plugin.json declares no userConfig. The README documents no switch for this plugin itself. It sends nothing wherever the CLI's own analytics are off, under DISABLE_TELEMETRY, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC or DO_NOT_TRACK, and the overview lists the other cases.",
             "A built-in that calls $.telemetry where this plugin is absent finds no such noun and should treat that as no analytics here.",
-            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote on Sep 9, 2026 that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a comment in an issue, not documentation, and it may change without notice."
+            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote in its Sep 9, 2026 update that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a note in an issue, not documentation, and it may change without notice."
           ],
           "commands": []
         },
@@ -584,7 +584,7 @@
             "To read it running from source, run the command below from the root of a clone of the repository. Run from that folder, the same entry is keyed \"agents-md\" instead of \"agents-md@builtin\".",
             "The option was first keyed projectInstructions, with the values claude, agents-fallback, both and none. A value still stored under that key is honoured for now while instructionFiles reads as its default: none as managed-only, claude as claude-md, agents-fallback as claude-md-or-agents-md, both as claude-md-and-agents-md, and any other value as claude-md. The first session.start of a load says in the transcript how it was read. Once instructionFiles is set to anything but its default, the old key is not read and the transcript says to remove it.",
             "In plugin.json the option is declared as userConfig instructionFiles: type string, title \"Project instructions\", not required, default claude-md-or-agents-md, with the four values as its options.",
-            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote on Sep 9, 2026 that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a comment in an issue, not documentation, and it may change without notice."
+            "The source does not document how to enable function hooks. The author of the announcement issue (anthropics/claude-code #91870) wrote in its Sep 9, 2026 update that anyone who wants to test can start Claude Code with CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1. That is a note in an issue, not documentation, and it may change without notice."
           ],
           "commands": [
             "claude --plugin-dir mods/agents-md"

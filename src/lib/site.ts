@@ -54,6 +54,7 @@ export interface NavLink {
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: "Browse", href: "/browse/", matchPrefixes: ["/extensions/"] },
+  { label: "Learn", href: "/learn/" },
   { label: "Hooks", href: "/hooks/" },
   { label: "Ideas", href: "/ideas/" },
   { label: "Security", href: "/security/" },

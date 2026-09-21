@@ -161,6 +161,25 @@ describe("documentation page graphs", () => {
     expect(nodeOfType(graph, "WebPage").url).toBe(`${SITE_URL}${PAGE_SEO[key].path}`);
     expect(roundTrip(graph)).toEqual(graph);
   });
+
+  it("puts a nested page's parent between Home and the page in its breadcrumb", () => {
+    const graph = buildDocPageGraph(PAGE_SEO.learnGettingStarted);
+    const crumbs = nodeOfType(graph, "BreadcrumbList").itemListElement as readonly { position: number; name: string; item: string }[];
+    expect(crumbs.map((crumb) => crumb.name)).toEqual(["Home", "Learn", "Getting started"]);
+    expect(crumbs.map((crumb) => crumb.position)).toEqual([1, 2, 3]);
+    expect(crumbs.map((crumb) => crumb.item)).toEqual([
+      `${SITE_URL}/`,
+      `${SITE_URL}/learn/`,
+      `${SITE_URL}/learn/getting-started/`,
+    ]);
+  });
+
+  it("names the same path and label as the parent page it points at, so the two cannot drift", () => {
+    const parent = PAGE_SEO.learnGettingStarted.breadcrumbParent;
+    expect(parent.path).toBe(PAGE_SEO.learn.path);
+    expect(parent.label).toBe(PAGE_SEO.learn.breadcrumbLabel);
+    expect(PAGE_SEO.learnGettingStarted.path.startsWith(parent.path)).toBe(true);
+  });
 });
 
 describe("extension graph", () => {
