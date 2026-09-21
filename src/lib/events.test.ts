@@ -46,6 +46,13 @@ describe("the shipped events", () => {
   });
 });
 
+describe("the guard on mod hook names", () => {
+  it("rejects a classic event written bare, which a mod must write as classic.<Name>", () => {
+    expect(patternMatchesEvent("Stop", getEvents())).toBe(false);
+    expect(patternMatchesEvent("classic.Stop", getEvents())).toBe(true);
+  });
+});
+
 describe("nounOf", () => {
   it("is the part of the name before the dot", () => {
     expect(nounOf({ name: "fs.write", family: "op", line: 1 })).toBe("fs");
