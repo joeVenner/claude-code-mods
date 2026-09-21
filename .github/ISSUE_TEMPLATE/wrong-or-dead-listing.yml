@@ -1,0 +1,34 @@
+name: Wrong or dead listing
+description: A listing has a broken link, a wrong detail or a source that no longer exists.
+title: "Listing: <name of the entry>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting it. This directory is unofficial. Please do not include secrets or private information.
+  - type: input
+    id: entry
+    attributes:
+      label: Entry
+      description: The address of the entry page on the site, or its slug.
+    validations:
+      required: true
+  - type: dropdown
+    id: problem
+    attributes:
+      label: What is wrong
+      options:
+        - A link is dead or returns an error
+        - The source no longer exists
+        - A detail does not match the source
+        - The install command does not work
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What you saw, and where the source says something different if that is the problem.
+    validations:
+      required: true

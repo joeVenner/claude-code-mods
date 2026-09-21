@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Add an extension
+    url: https://github.com/joeVenner/claude-code-mods
+    about: Listing is by pull request. Follow CONTRIBUTING.md in the repository and open one instead of an issue.

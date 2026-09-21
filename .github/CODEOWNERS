@@ -1,0 +1,10 @@
+# CODEOWNERS only takes effect when the repository enables "Require review from Code Owners" in a
+# branch ruleset (or branch protection rule) for main. Without that setting these lines only suggest
+# reviewers. Later lines override earlier ones.
+* @joeVenner
+/src/data/ @joeVenner
+/src/lib/ @joeVenner
+/scripts/ @joeVenner
+/.github/ @joeVenner
+/package.json @joeVenner
+/package-lock.json @joeVenner

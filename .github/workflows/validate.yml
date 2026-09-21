@@ -1,0 +1,135 @@
+name: Validate
+
+# This workflow uses pull_request and never pull_request_target. Pull requests come from forks and
+# run the changed code (npm test, the build, the catalog scripts). pull_request gives a fork's run a
+# read-only token and no secrets. pull_request_target would run with the base repository's privileges,
+# which must never be combined with checking out and running a contributor's code.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the run it supersedes. Runs on main are never cancelled.
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # Advisory only. A pull request runs its own copy of this workflow and its own scripts, so a
+  # hostile contributor can edit or delete this guard. The real protection is CODEOWNERS plus a
+  # branch ruleset that requires a code owner's review (see .github/CODEOWNERS). The guard exists to
+  # give honest contributors a clear message: keep a submission to files under src/data/community/.
+  # It is skipped for the owner, members and collaborators, who may change several areas at once.
+  path-guard:
+    name: Keep submissions to the community folder
+    if: github.event_name == 'pull_request' && !contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fail if a submission also changes files elsewhere
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git diff -z --name-only --no-renames "origin/${BASE_REF}...HEAD" > "${RUNNER_TEMP}/changed-files.txt"
+          touches_community=false
+          touches_elsewhere=false
+          while IFS= read -r -d '' changed_path; do
+            case "${changed_path}" in
+              src/data/community/*) touches_community=true ;;
+              *) touches_elsewhere=true ;;
+            esac
+          done < "${RUNNER_TEMP}/changed-files.txt"
+          if [ "${touches_community}" = true ] && [ "${touches_elsewhere}" = true ]; then
+            echo "::error::This pull request changes files under src/data/community/ and files elsewhere. Please split it: one pull request for the submission and another for anything else."
+            exit 1
+          fi
+          echo "Path guard passed."
+
+  submission:
+    name: Check community submissions
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Full history is needed so the diff against the base branch can find the merge base.
+      - name: Check out the code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The base branch name reaches the shell through an environment variable, never through
+      # expression text inside the script, and file names travel NUL separated. --no-renames makes
+      # git report a moved file as a deletion plus an addition, so a rename with edits cannot hide
+      # the new file from the checks below.
+      - name: Find added or changed community files
+        id: collect
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git diff -z --name-only --no-renames --diff-filter=AM "origin/${BASE_REF}...HEAD" -- 'src/data/community/*.json' > "${RUNNER_TEMP}/community-files.txt"
+          if [ -s "${RUNNER_TEMP}/community-files.txt" ]; then
+            echo "has_files=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "has_files=false" >> "${GITHUB_OUTPUT}"
+            echo "No community submissions changed, so there is nothing to check."
+          fi
+
+      - name: Set up Node
+        if: steps.collect.outputs.has_files == 'true'
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.collect.outputs.has_files == 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Check that every URL responds
+        if: steps.collect.outputs.has_files == 'true'
+        run: xargs -0 npm run catalog:verify -- --only < "${RUNNER_TEMP}/community-files.txt"
+
+      - name: Check that the manifest files exist
+        if: ${{ !cancelled() && steps.collect.outputs.has_files == 'true' }}
+        run: xargs -0 npm run catalog:structure -- --only < "${RUNNER_TEMP}/community-files.txt"
