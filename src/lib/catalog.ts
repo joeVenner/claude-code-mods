@@ -1,29 +1,181 @@
-import rawCatalog from "@/data/catalog.json";
+import { lstatSync, readdirSync, type Dirent } from "node:fs";
+import path from "node:path";
 import {
-  CATEGORIES,
+  communityRuleProblems,
+  futureCheckedAtProblem,
+  invisibleCharacterProblems,
+  todayIso,
+} from "@/lib/community-rules";
+import {
+  defaultDataDirectory,
+  describeError,
+  displayPath,
+  formatIssues,
+  readJsonFile,
+} from "@/lib/data-files";
+import {
   EXTENSION_KINDS,
   catalogSchema,
+  extensionSchema,
   type Catalog,
   type Category,
   type Extension,
   type ExtensionKind,
 } from "@/lib/types";
 
-const DEFAULT_RELATED_LIMIT = 3;
+/**
+ * The directory of extensions: `catalog.json` (curated by maintainers) plus one JSON file per
+ * community submission in `community/`. Server code only: this module reads the file system,
+ * so client components must receive its data through props (a test enforces it).
+ */
 
-let cachedCatalog: Catalog | undefined;
-let cachedSortedExtensions: readonly Extension[] | undefined;
+export { communityRuleProblems };
+
+const DEFAULT_RELATED_LIMIT = 3;
+export const CATALOG_FILE_NAME = "catalog.json";
+export const COMMUNITY_DIRECTORY_NAME = "community";
+// Files that may sit in the community folder without being a submission. .DS_Store is created by Finder
+// and is gitignored, so a local build must not fail because a maintainer opened the folder.
+const IGNORED_FILE_NAMES: readonly string[] = [".gitkeep", ".DS_Store"];
+const JSON_EXTENSION = ".json";
+
+interface InspectedFile {
+  readonly problems: readonly string[];
+  /** Present only when the file has no problems. */
+  readonly extension?: Extension;
+}
 
 /**
- * Formats zod issues as `path: message` lines so a bad catalog edit points at the exact entry.
+ * Lists the community folder. Only regular `<slug>.json` files, `.gitkeep` and Finder's `.DS_Store` are allowed: symlinks,
+ * subfolders, other extensions and upper-case `.JSON` are problems, because whatever sits in this
+ * folder ends up in a build that other people's pull requests can change.
  */
-function formatIssues(issues: readonly { path: readonly PropertyKey[]; message: string }[]): string {
-  return issues
-    .map((issue) => {
-      const path = issue.path.length > 0 ? issue.path.map(String).join(".") : "(root)";
-      return `  ${path}: ${issue.message}`;
-    })
-    .join("\n");
+function listCommunityFiles(communityDirectory: string): {
+  readonly files: readonly string[];
+  readonly problems: readonly string[];
+} {
+  const shownDirectory = displayPath(communityDirectory);
+  let directoryEntries: readonly Dirent[];
+  try {
+    const status = lstatSync(communityDirectory);
+    if (status.isSymbolicLink() || !status.isDirectory()) {
+      return { files: [], problems: [`${shownDirectory}: must be a regular folder, not a symlink or a file`] };
+    }
+    directoryEntries = readdirSync(communityDirectory, { withFileTypes: true });
+  } catch (error) {
+    const isMissing = (error as NodeJS.ErrnoException).code === "ENOENT";
+    return {
+      files: [],
+      problems: isMissing ? [] : [`${shownDirectory}: cannot read folder (${describeError(error)})`],
+    };
+  }
+
+  const files: string[] = [];
+  const problems: string[] = [];
+  for (const entry of [...directoryEntries].sort((left, right) => left.name.localeCompare(right.name))) {
+    const isPlainFile = entry.isFile();
+    if (isPlainFile && IGNORED_FILE_NAMES.includes(entry.name)) continue;
+    if (isPlainFile && entry.name.endsWith(JSON_EXTENSION)) {
+      files.push(path.join(communityDirectory, entry.name));
+      continue;
+    }
+    problems.push(
+      `${displayPath(path.join(communityDirectory, entry.name))}: not allowed in the community folder ` +
+        `(only regular <slug>${JSON_EXTENSION} files and ${IGNORED_FILE_NAMES.join(" or ")}; no symlinks, subfolders or other names)`,
+    );
+  }
+  return { files, problems };
+}
+
+/** Reads one file and returns its parsed value, or the message describing why it is invalid. */
+function tryReadJson(filePath: string): { readonly value: unknown } | { readonly problem: string } {
+  try {
+    return { value: readJsonFile(filePath) };
+  } catch (error) {
+    return { problem: describeError(error) };
+  }
+}
+
+function inspectCommunityFile(
+  filePath: string,
+  existingSlugs: readonly string[],
+  fileBySlug: ReadonlyMap<string, string>,
+  today: string,
+): InspectedFile {
+  const read = tryReadJson(filePath);
+  if ("problem" in read) {
+    return { problems: [read.problem] };
+  }
+  const result = extensionSchema.safeParse(read.value);
+  if (!result.success) {
+    const schemaLines = formatIssues(result.error.issues).split("\n").map((line) => line.trim());
+    return { problems: [...schemaLines, ...invisibleCharacterProblems(read.value)] };
+  }
+  const extension = result.data;
+  const problems: string[] = [...communityRuleProblems(extension, path.basename(filePath), { existingSlugs })];
+  const dateProblem = futureCheckedAtProblem(extension, today);
+  if (dateProblem !== null) problems.push(dateProblem);
+  const firstFile = fileBySlug.get(extension.slug);
+  if (firstFile !== undefined) {
+    problems.push(`duplicate slug "${extension.slug}", already defined in ${firstFile}`);
+  }
+  return problems.length > 0 ? { problems } : { problems, extension };
+}
+
+/**
+ * Loads `catalog.json` and every `community/*.json` file from `dataDirectory`, validates them and
+ * merges them. Every problem in every file is collected, even when `catalog.json` itself is invalid,
+ * so one run shows a submitter everything. `today` (YYYY-MM-DD) is injectable for tests.
+ * @throws Error naming each offending file path with its field paths, or the two files that
+ * define the same slug.
+ */
+export function loadCatalog(dataDirectory: string, today: string = todayIso()): Catalog {
+  const problemBlocks: string[] = [];
+  const addBlock = (shownPath: string | null, lines: readonly string[]): void => {
+    const text = shownPath === null ? lines.join("\n  ") : `${shownPath}:\n${lines.map((line) => `    ${line}`).join("\n")}`;
+    problemBlocks.push(text);
+  };
+
+  const catalogPath = path.join(dataDirectory, CATALOG_FILE_NAME);
+  const shownCatalogPath = displayPath(catalogPath);
+  const fileBySlug = new Map<string, string>();
+  let catalog: Catalog | undefined;
+
+  const catalogRead = tryReadJson(catalogPath);
+  if ("problem" in catalogRead) {
+    addBlock(null, [catalogRead.problem]);
+  } else {
+    const catalogResult = catalogSchema.safeParse(catalogRead.value);
+    if (!catalogResult.success) {
+      addBlock(shownCatalogPath, formatIssues(catalogResult.error.issues).split("\n").map((line) => line.trim()));
+    } else {
+      catalog = catalogResult.data;
+      const dateProblems = catalog.extensions.flatMap((extension, index) => {
+        const problem = futureCheckedAtProblem(extension, today);
+        return problem === null ? [] : [`extensions.${index}.${problem}`];
+      });
+      if (dateProblems.length > 0) addBlock(shownCatalogPath, dateProblems);
+      for (const extension of catalog.extensions) fileBySlug.set(extension.slug, shownCatalogPath);
+    }
+  }
+
+  const communityExtensions: Extension[] = [];
+  const listing = listCommunityFiles(path.join(dataDirectory, COMMUNITY_DIRECTORY_NAME));
+  for (const problem of listing.problems) addBlock(null, [problem]);
+  for (const filePath of listing.files) {
+    const inspected = inspectCommunityFile(filePath, [...fileBySlug.keys()], fileBySlug, today);
+    if (inspected.extension === undefined) {
+      addBlock(displayPath(filePath), inspected.problems);
+      continue;
+    }
+    fileBySlug.set(inspected.extension.slug, displayPath(filePath));
+    communityExtensions.push(inspected.extension);
+  }
+
+  if (problemBlocks.length > 0 || catalog === undefined) {
+    throw new Error(`Invalid catalog data:\n${problemBlocks.map((block) => `  ${block}`).join("\n")}`);
+  }
+  return { ...catalog, extensions: [...catalog.extensions, ...communityExtensions] };
 }
 
 /** Featured entries first, then name ascending. Stable so pages render deterministically. */
@@ -34,26 +186,20 @@ function compareExtensions(left: Extension, right: Extension): number {
   return left.name.localeCompare(right.name);
 }
 
+let cachedCatalog: Catalog | undefined;
+let cachedSortedExtensions: readonly Extension[] | undefined;
+
 /**
- * Validates `catalog.json` once and caches the result.
- * @throws Error listing every zod issue with its path when the catalog is invalid.
+ * The merged, validated catalog, loaded once from `src/data` and cached.
+ * @throws Error naming the offending file when any data file is invalid.
  */
 export function getCatalog(): Catalog {
-  if (cachedCatalog !== undefined) {
-    return cachedCatalog;
-  }
-  const result = catalogSchema.safeParse(rawCatalog);
-  if (!result.success) {
-    throw new Error(`Invalid catalog.json:\n${formatIssues(result.error.issues)}`);
-  }
-  cachedCatalog = result.data;
+  cachedCatalog ??= loadCatalog(defaultDataDirectory());
   return cachedCatalog;
 }
 
 export function getAllExtensions(): readonly Extension[] {
-  if (cachedSortedExtensions === undefined) {
-    cachedSortedExtensions = [...getCatalog().extensions].sort(compareExtensions);
-  }
+  cachedSortedExtensions ??= [...getCatalog().extensions].sort(compareExtensions);
   return cachedSortedExtensions;
 }
 
@@ -94,17 +240,6 @@ export function countByKind(): Readonly<Record<ExtensionKind, number>> {
   const counts = Object.fromEntries(EXTENSION_KINDS.map((kind) => [kind, 0])) as Record<ExtensionKind, number>;
   for (const extension of getAllExtensions()) {
     counts[extension.kind] += 1;
-  }
-  return counts;
-}
-
-/** An entry with several categories counts once in each of them. */
-export function countByCategory(): Readonly<Record<Category, number>> {
-  const counts = Object.fromEntries(CATEGORIES.map((category) => [category, 0])) as Record<Category, number>;
-  for (const extension of getAllExtensions()) {
-    for (const category of extension.categories) {
-      counts[category] += 1;
-    }
   }
   return counts;
 }

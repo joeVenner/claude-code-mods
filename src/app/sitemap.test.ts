@@ -17,6 +17,15 @@ describe("sitemap", () => {
     }
   });
 
+  it("includes the ideas page once, and no per-idea urls", () => {
+    expect(urls.filter((url) => url === `${SITE_URL}/ideas/`)).toHaveLength(1);
+    expect(urls.some((url) => url.includes("/ideas/#"))).toBe(false);
+  });
+
+  it("lists the ideas page as a nav destination so it is indexed automatically", () => {
+    expect(NAV_LINKS.map((link) => link.href)).toContain("/ideas/");
+  });
+
   it("includes every extension slug exactly once", () => {
     for (const extension of getAllExtensions()) {
       expect(urls.filter((url) => url === `${SITE_URL}/extensions/${extension.slug}/`)).toHaveLength(1);

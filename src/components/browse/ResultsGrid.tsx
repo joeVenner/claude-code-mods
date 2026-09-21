@@ -3,11 +3,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { ExtensionCard } from "@/components/catalog/ExtensionCard";
-import type { Extension } from "@/lib/types";
+import type { ExtensionListItem } from "@/components/catalog/ExtensionListItem";
 import { RESULTS_GRID_CLASSES } from "./layout";
 
 export interface ResultsGridProps {
-  readonly items: readonly Extension[];
+  readonly items: readonly ExtensionListItem[];
 }
 
 const ENTER_OFFSET_PX = 8;

@@ -9,6 +9,8 @@ export interface CopyCommandProps {
   readonly command: string;
   /** Short caption above the command, for example "Add the marketplace". */
   readonly label?: string;
+  /** Accessible name suffix for the copy button when the caption is shown elsewhere, so a stack of rows stays distinguishable. */
+  readonly copyLabel?: string;
   readonly className?: string;
 }
 
@@ -28,7 +30,7 @@ const STATUS_MESSAGES: Readonly<Record<CopyStatus, string>> = {
  * context) or rejected (permissions), so failure is a first-class visible state and the command
  * text is selected for a manual copy.
  */
-export function CopyCommand({ command, label, className }: CopyCommandProps): ReactNode {
+export function CopyCommand({ command, label, copyLabel, className }: CopyCommandProps): ReactNode {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const commandRef = useRef<HTMLElement>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,6 +66,7 @@ export function CopyCommand({ command, label, className }: CopyCommandProps): Re
     }
   }
 
+  const buttonLabelSuffix = label ?? copyLabel;
   const isFailed = status === "failed";
   const isCopied = status === "copied";
 
@@ -87,7 +90,7 @@ export function CopyCommand({ command, label, className }: CopyCommandProps): Re
         <button
           type="button"
           onClick={handleCopy}
-          aria-label={label ? `Copy command: ${label}` : "Copy command"}
+          aria-label={buttonLabelSuffix ? `Copy command: ${buttonLabelSuffix}` : "Copy command"}
           className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap border-l border-border px-4 text-sm font-medium text-fg-muted transition-[transform,background-color,color] duration-150 hover:bg-surface-2 hover:text-fg active:scale-[0.98] md:min-h-10"
         >
           {isCopied ? <Check size={16} weight="regular" aria-hidden="true" /> : <Copy size={16} weight="regular" aria-hidden="true" />}

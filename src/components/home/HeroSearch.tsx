@@ -9,14 +9,14 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchField } from "@/components/ui/SearchField";
 import { cn } from "@/lib/cn";
-import { searchExtensions } from "@/lib/search";
+import { searchListItems } from "@/components/catalog/ExtensionListItem";
+import type { ExtensionListItem } from "@/components/catalog/ExtensionListItem";
 import { EXTENSION_KINDS, KIND_LABELS } from "@/lib/types";
-import type { Extension } from "@/lib/types";
 import { HERO_RESULT_LIMIT, buildBrowseHref, describeResultCount } from "./home-data";
 import type { KindFilter } from "./home-data";
 
 export interface HeroSearchProps {
-  readonly extensions: readonly Extension[];
+  readonly extensions: readonly ExtensionListItem[];
 }
 
 const KIND_FILTER_OPTIONS: readonly KindFilter[] = ["all", ...EXTENSION_KINDS];
@@ -31,7 +31,7 @@ function kindFilterLabel(kind: KindFilter): string {
 
 /**
  * Working catalog search for the hero. It filters the real catalog in the browser with the same
- * `searchExtensions` the browse page uses, so what you see here is what "See all" opens.
+ * search the browse page uses, so what you see here is what "See all" opens.
  * With no query it lists the first entries in catalog order (featured first).
  */
 export function HeroSearch({ extensions }: HeroSearchProps): ReactNode {
@@ -43,7 +43,7 @@ export function HeroSearch({ extensions }: HeroSearchProps): ReactNode {
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const results = useMemo(
-    () => searchExtensions(extensions, { query, kind: kind === "all" ? undefined : kind }),
+    () => searchListItems(extensions, { query, kind: kind === "all" ? undefined : kind }),
     [extensions, query, kind],
   );
   const visibleResults = results.slice(0, HERO_RESULT_LIMIT);

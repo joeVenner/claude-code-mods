@@ -3,13 +3,15 @@ import type { ReactNode } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { cn } from "@/lib/cn";
 import { CATEGORY_LABELS, KIND_LABELS } from "@/lib/types";
-import type { Extension } from "@/lib/types";
+import { AvailabilityChip } from "./AvailabilityChip";
+import { CommunityBadge } from "./CommunityBadge";
+import type { ExtensionListItem } from "./ExtensionListItem";
 import { KindIcon } from "./KindIcon";
 import { StarCount } from "./StarCount";
 import { StatusBadge } from "./StatusBadge";
 
 export interface ExtensionCardProps {
-  readonly extension: Extension;
+  readonly extension: ExtensionListItem;
   readonly className?: string;
 }
 
@@ -28,7 +30,7 @@ export function extensionHref(slug: string): string {
  * name. The focus ring is drawn on the card via `:has()` because the anchor itself is inline.
  */
 export function ExtensionCard({ extension, className }: ExtensionCardProps): ReactNode {
-  const { slug, name, kind, summary, categories, verification, stars } = extension;
+  const { slug, name, kind, summary, categories, verification, stars, availability, publisher } = extension;
 
   return (
     <article
@@ -39,12 +41,16 @@ export function ExtensionCard({ extension, className }: ExtensionCardProps): Rea
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <p className="flex items-center gap-2 font-mono text-xs text-fg-muted">
           <KindIcon kind={kind} size={16} />
           {KIND_LABELS[kind]}
         </p>
-        <StatusBadge verification={verification} className={ABOVE_LINK_OVERLAY} />
+        <div className="flex flex-wrap items-center gap-1.5">
+          {availability === "built-in" ? <AvailabilityChip availability={availability} /> : null}
+          <CommunityBadge publisher={publisher} className={ABOVE_LINK_OVERLAY} />
+          <StatusBadge verification={verification} className={ABOVE_LINK_OVERLAY} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

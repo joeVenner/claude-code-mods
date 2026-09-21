@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { conceptExtension, verifiedExtension } from "./__fixtures__/extensions";
+import { builtInModExtension, sourceOnlyExtension, verifiedExtension } from "./__fixtures__/extensions";
 import { ExtensionCard } from "./ExtensionCard";
 import { ExtensionRow } from "./ExtensionRow";
 
@@ -39,12 +39,55 @@ describe.each([
     expect(screen.getByText("1 star")).toBeInTheDocument();
   });
 
-  it("shows no stars for concepts and labels them as concepts", () => {
-    render(<Component extension={conceptExtension} />);
+  it("shows no stars when none were captured and never mentions concepts", () => {
+    const { container } = render(<Component extension={sourceOnlyExtension} />);
     expect(screen.queryByText(/star/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Concept")).toBeInTheDocument();
-    expect(screen.getByText("Mod (concept)")).toBeInTheDocument();
-    expect(screen.queryByText("Source verified")).not.toBeInTheDocument();
+    expect(container.textContent ?? "").not.toMatch(/concept/i);
+    expect(screen.getByText("Source verified")).toBeInTheDocument();
+  });
+
+  it("shows a Built in chip for built-in entries only", () => {
+    const { unmount } = render(<Component extension={builtInModExtension} />);
+    expect(screen.getByText("Built in")).toBeInTheDocument();
+    expect(screen.getByText("Mod")).toBeInTheDocument();
+    expect(screen.queryByText(/star/i)).not.toBeInTheDocument();
+    unmount();
+
+    render(<Component extension={verifiedExtension} />);
+    expect(screen.queryByText("Built in")).not.toBeInTheDocument();
+    expect(screen.queryByText("Installable")).not.toBeInTheDocument();
+  });
+});
+
+describe.each([
+  ["ExtensionCard", ExtensionCard],
+  ["ExtensionRow", ExtensionRow],
+] as const)("%s publisher signal", (_name, Component) => {
+  it("shows a Community listing chip for community publishers", () => {
+    expect(verifiedExtension.publisher.kind).toBe("community");
+    render(<Component extension={verifiedExtension} />);
+    expect(screen.getByText("Community listing")).toBeInTheDocument();
+    expect(screen.getByText("Source verified")).toBeInTheDocument();
+  });
+
+  it("shows no community chip for Anthropic or MCP project publishers", () => {
+    expect(builtInModExtension.publisher.kind).toBe("anthropic");
+    const { unmount } = render(<Component extension={builtInModExtension} />);
+    expect(screen.queryByText("Community listing")).not.toBeInTheDocument();
+    unmount();
+    render(
+      <Component extension={{ ...verifiedExtension, publisher: { name: "Project", url: null, kind: "mcp-project" } }} />,
+    );
+    expect(screen.queryByText("Community listing")).not.toBeInTheDocument();
+  });
+
+  it("does not rely on the publisher name to say who published it", () => {
+    render(
+      <Component
+        extension={{ ...verifiedExtension, publisher: { name: "Anthropic", url: null, kind: "community" } }}
+      />,
+    );
+    expect(screen.getByText("Community listing")).toBeInTheDocument();
   });
 });
 

@@ -32,6 +32,16 @@ describe("Timeline", () => {
     expect(screen.getAllByRole("list")).toHaveLength(2);
   });
 
+  it("renders commands as copyable rows only for items that have them", () => {
+    const items: readonly TimelineItem[] = [
+      { title: "Install", description: "Get the packages.", commands: ["npm ci"] },
+      { title: "Read", description: "No commands here." },
+    ];
+    render(<Timeline items={items} label="With commands" />);
+    expect(screen.getByText("npm ci")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /copy/i })).toHaveLength(1);
+  });
+
   it("does not number items with step labels", () => {
     const { container } = render(<Timeline items={ITEMS} label="Example process" />);
     expect(container.textContent).not.toMatch(/\b(step|phase|stage)\s*\d/i);

@@ -11,10 +11,11 @@ const EM_OR_EN_DASH = /[–—]/;
 describe("home page with the bundled catalog", () => {
   beforeAll(stubIntersectionObserver);
 
-  it("renders one h1, one link per kind, and no em or en dashes", () => {
+  it("renders one h1, one link per kind, and no em or en dashes or concept wording", () => {
     const { container } = render(<HomePage />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(container.textContent).not.toMatch(EM_OR_EN_DASH);
+    expect(container.textContent).not.toMatch(/concept/i);
 
     const kindLinks = screen
       .getAllByRole("link")

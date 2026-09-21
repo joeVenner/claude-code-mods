@@ -1,16 +1,19 @@
 export const SITE_NAME = "Claude Code Mods";
 
 /** Plain and concrete on purpose; also used as the wordmark's accessible description. */
-export const SITE_TAGLINE = "Community directory of Claude Code plugins, skills, agents, and MCP servers.";
+export const SITE_TAGLINE = "Community directory of Claude Code mods, plugins, skills, agents, and MCP servers.";
 
 export const SITE_DESCRIPTION =
-  "Browse Claude Code plugins, skills, agents, hooks, MCP servers, and proposed mod concepts. Each entry shows whether its source was checked.";
+  "Browse Claude Code mods, plugins, skills, agents, hooks, and MCP servers. Each entry shows whether its source was checked.";
 
 export const DISCLAIMER = "Unofficial community directory. Not affiliated with or endorsed by Anthropic.";
 
 /** Shown wherever the "Source verified" badge could be misread as a security claim. */
 export const VERIFICATION_NOTE =
   "Source verified means the source URL responded. It is not a security review.";
+
+/** Public repository that accepts community submissions by pull request. */
+export const COMMUNITY_REPOSITORY_URL = "https://github.com/joeVenner/claude-code-mods";
 
 const DEFAULT_SITE_URL = "http://localhost:3000";
 
@@ -42,6 +45,7 @@ export interface NavLink {
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: "Browse", href: "/browse/", matchPrefixes: ["/extensions/"] },
+  { label: "Ideas", href: "/ideas/" },
   { label: "Security", href: "/security/" },
   { label: "Publish", href: "/publish/" },
   { label: "About", href: "/about/" },

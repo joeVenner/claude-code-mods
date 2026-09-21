@@ -18,11 +18,12 @@ import {
   docsBridge,
   gitGuard,
   lintRunner,
+  paneMod,
+  policyMod,
   reviewAgent,
-  sandboxConcept,
-  trimConcept,
+  sourceSkill,
 } from "./__fixtures__/browseItems";
-import { CATEGORIES, EXTENSION_KINDS } from "@/lib/types";
+import { AVAILABILITIES, CATEGORIES, EXTENSION_KINDS } from "@/lib/types";
 
 function stateWith(overrides: Partial<BrowseState>): BrowseState {
   return { ...DEFAULT_BROWSE_STATE, ...overrides };
@@ -39,22 +40,39 @@ describe("parseFilters", () => {
 
   it("reads every supported key", () => {
     const state = parseFilters(
-      new URLSearchParams("q=lint&kind=plugin&category=quality&status=verified&sort=stars"),
+      new URLSearchParams("q=lint&kind=plugin&category=quality&availability=installable&sort=stars"),
     );
     expect(state).toEqual({
       query: "lint",
       kind: "plugin",
       category: "quality",
-      status: "verified",
+      availability: "installable",
       sort: "stars",
     });
   });
 
   it("ignores unknown enum values instead of throwing", () => {
     const state = parseFilters(
-      new URLSearchParams("kind=widget&category=nope&status=maybe&sort=random"),
+      new URLSearchParams("kind=widget&category=nope&availability=maybe&sort=random"),
     );
     expect(state).toEqual(DEFAULT_BROWSE_STATE);
+  });
+
+  it("ignores the legacy status parameter without throwing", () => {
+    for (const legacy of ["status=verified", "status=concept", "status=installable"]) {
+      expect(parseFilters(new URLSearchParams(legacy))).toEqual(DEFAULT_BROWSE_STATE);
+    }
+    const mixed = parseFilters(new URLSearchParams("status=concept&kind=mod&availability=built-in"));
+    expect(mixed.kind).toBe("mod");
+    expect(mixed.availability).toBe("built-in");
+  });
+
+  it("reads each availability value and rejects other casings", () => {
+    for (const availability of AVAILABILITIES) {
+      expect(parseFilters(new URLSearchParams({ availability })).availability).toBe(availability);
+    }
+    expect(parseFilters(new URLSearchParams("availability=Built-in")).availability).toBeNull();
+    expect(parseFilters(new URLSearchParams("availability=built_in")).availability).toBeNull();
   });
 
   it("treats enum values as case sensitive", () => {
@@ -104,12 +122,12 @@ describe("serializeFilters", () => {
   it("uses a stable key order regardless of how the state was built", () => {
     const state = stateWith({
       sort: "stars",
-      status: "concept",
+      availability: "built-in",
       category: "quality",
       kind: "mod",
       query: "lint",
     });
-    expect(serializeFilters(state)).toBe("q=lint&kind=mod&category=quality&status=concept&sort=stars");
+    expect(serializeFilters(state)).toBe("q=lint&kind=mod&category=quality&availability=built-in&sort=stars");
   });
 
   it("encodes special characters and trims the query", () => {
@@ -124,15 +142,26 @@ describe("serializeFilters", () => {
     const states: readonly BrowseState[] = [
       DEFAULT_BROWSE_STATE,
       stateWith({ query: "git hooks", kind: "hook" }),
-      stateWith({ category: "security", status: "verified", sort: "name" }),
-      stateWith({ query: "a&b=c#d", kind: "mcp-server", category: "integration", status: "concept", sort: "stars" }),
+      stateWith({ category: "security", availability: "installable", sort: "name" }),
+      stateWith({ query: "a&b=c#d", kind: "mcp-server", category: "integration", availability: "source-only", sort: "stars" }),
     ];
     for (const state of states) {
       expect(parseFilters(new URLSearchParams(serializeFilters(state)))).toEqual(state);
     }
   });
 
-  it("round-trips every kind and category", () => {
+  it("never writes the legacy status key", () => {
+    for (const availability of AVAILABILITIES) {
+      expect(serializeFilters(stateWith({ availability }))).toBe(`availability=${availability}`);
+    }
+  });
+
+  it("round-trips every kind, category and availability", () => {
+    for (const availability of AVAILABILITIES) {
+      expect(parseFilters(new URLSearchParams(serializeFilters(stateWith({ availability }))))).toEqual(
+        stateWith({ availability }),
+      );
+    }
     for (const kind of EXTENSION_KINDS) {
       expect(parseFilters(new URLSearchParams(serializeFilters(stateWith({ kind }))))).toEqual(stateWith({ kind }));
     }
@@ -158,11 +187,11 @@ describe("hasActiveFilters and countActiveFilters", () => {
     expect(countActiveFilters(DEFAULT_BROWSE_STATE)).toBe(0);
   });
 
-  it("is true for a query, kind, category, or status", () => {
+  it("is true for a query, kind, category, or availability", () => {
     expect(hasActiveFilters(stateWith({ query: "x" }))).toBe(true);
     expect(hasActiveFilters(stateWith({ kind: "hook" }))).toBe(true);
     expect(hasActiveFilters(stateWith({ category: "quality" }))).toBe(true);
-    expect(hasActiveFilters(stateWith({ status: "concept" }))).toBe(true);
+    expect(hasActiveFilters(stateWith({ availability: "built-in" }))).toBe(true);
   });
 
   it("ignores whitespace-only queries", () => {
@@ -174,13 +203,13 @@ describe("hasActiveFilters and countActiveFilters", () => {
   });
 
   it("counts facets but not the query", () => {
-    expect(countActiveFilters(stateWith({ query: "x", kind: "hook", status: "verified" }))).toBe(2);
+    expect(countActiveFilters(stateWith({ query: "x", kind: "hook", availability: "installable" }))).toBe(2);
   });
 });
 
 describe("clearFilters", () => {
   it("resets query and facets but keeps the sort", () => {
-    const cleared = clearFilters(stateWith({ query: "x", kind: "hook", category: "quality", status: "verified", sort: "name" }));
+    const cleared = clearFilters(stateWith({ query: "x", kind: "hook", category: "quality", availability: "installable", sort: "name" }));
     expect(cleared).toEqual(stateWith({ sort: "name" }));
   });
 });
@@ -190,18 +219,28 @@ describe("applyBrowseState", () => {
     expect(slugs(applyBrowseState(browseFixtures, DEFAULT_BROWSE_STATE))).toEqual(slugs(browseFixtures));
   });
 
-  it("filters by kind, category and status together", () => {
+  it("filters by kind, category and availability together", () => {
     expect(slugs(applyBrowseState(browseFixtures, stateWith({ kind: "mod" })))).toEqual([
-      sandboxConcept.slug,
-      trimConcept.slug,
+      paneMod.slug,
+      policyMod.slug,
     ]);
-    expect(slugs(applyBrowseState(browseFixtures, stateWith({ category: "quality", status: "verified" })))).toEqual([
-      lintRunner.slug,
-      reviewAgent.slug,
+    expect(
+      slugs(applyBrowseState(browseFixtures, stateWith({ category: "quality", availability: "installable" }))),
+    ).toEqual([lintRunner.slug, reviewAgent.slug]);
+    expect(
+      slugs(applyBrowseState(browseFixtures, stateWith({ availability: "built-in", category: "security" }))),
+    ).toEqual([policyMod.slug]);
+  });
+
+  it("filters by each availability", () => {
+    expect(slugs(applyBrowseState(browseFixtures, stateWith({ availability: "source-only" })))).toEqual([
+      sourceSkill.slug,
     ]);
-    expect(slugs(applyBrowseState(browseFixtures, stateWith({ status: "concept", category: "security" })))).toEqual([
-      sandboxConcept.slug,
+    expect(slugs(applyBrowseState(browseFixtures, stateWith({ availability: "built-in" })))).toEqual([
+      paneMod.slug,
+      policyMod.slug,
     ]);
+    expect(applyBrowseState(browseFixtures, stateWith({ availability: "installable" }))).toHaveLength(4);
   });
 
   it("searches with the data layer and ranks name hits above summary hits", () => {
@@ -220,18 +259,18 @@ describe("applyBrowseState", () => {
 
   it("sorts by stars descending with missing counts last", () => {
     const results = applyBrowseState(browseFixtures, stateWith({ sort: "stars" }));
-    expect(results.map((item) => item.stars?.count ?? null)).toEqual([250, 100, 100, 7, null, null]);
+    expect(results.map((item) => item.stars?.count ?? null)).toEqual([250, 100, 100, 7, null, null, null]);
   });
 
   it("keeps input order for equal star counts and for entries without stars", () => {
     const results = slugs(applyBrowseState(browseFixtures, stateWith({ sort: "stars" })));
     expect(results.indexOf(lintRunner.slug)).toBeLessThan(results.indexOf(docsBridge.slug));
-    expect(results.indexOf(sandboxConcept.slug)).toBeLessThan(results.indexOf(trimConcept.slug));
+    expect(results.indexOf(paneMod.slug)).toBeLessThan(results.indexOf(policyMod.slug));
     expect(results.indexOf(gitGuard.slug)).toBe(0);
   });
 
   it("applies the sort after the filter", () => {
-    const results = applyBrowseState(browseFixtures, stateWith({ status: "verified", sort: "stars" }));
+    const results = applyBrowseState(browseFixtures, stateWith({ availability: "installable", sort: "stars" }));
     expect(slugs(results)).toEqual([gitGuard.slug, lintRunner.slug, docsBridge.slug, reviewAgent.slug]);
   });
 
@@ -252,11 +291,12 @@ describe("countByFacet and countWithoutFacet", () => {
     const counts = countByFacet(browseFixtures, DEFAULT_BROWSE_STATE, "kind", EXTENSION_KINDS);
     expect(counts.plugin).toBe(1);
     expect(counts.mod).toBe(2);
-    expect(counts.skill).toBe(0);
+    expect(counts.skill).toBe(1);
+    expect(counts.command).toBe(0);
   });
 
   it("holds the other filters and the query fixed", () => {
-    const counts = countByFacet(browseFixtures, stateWith({ status: "verified" }), "kind", EXTENSION_KINDS);
+    const counts = countByFacet(browseFixtures, stateWith({ availability: "installable" }), "kind", EXTENSION_KINDS);
     expect(counts.mod).toBe(0);
     expect(counts.plugin).toBe(1);
 
@@ -279,13 +319,22 @@ describe("countByFacet and countWithoutFacet", () => {
     expect(counts.quality).toBe(0);
   });
 
-  it("counts statuses", () => {
-    const counts = countByFacet(browseFixtures, DEFAULT_BROWSE_STATE, "status", ["verified", "concept"] as const);
-    expect(counts).toEqual({ verified: 4, concept: 2 });
+  it("counts each availability", () => {
+    const counts = countByFacet(browseFixtures, DEFAULT_BROWSE_STATE, "availability", AVAILABILITIES);
+    expect(counts).toEqual({ installable: 4, "built-in": 2, "source-only": 1 });
+  });
+
+  it("counts availability against the current kind and query", () => {
+    expect(countByFacet(browseFixtures, stateWith({ kind: "mod" }), "availability", AVAILABILITIES)).toEqual({
+      installable: 0,
+      "built-in": 2,
+      "source-only": 0,
+    });
+    expect(countByFacet(browseFixtures, stateWith({ query: "lint" }), "availability", AVAILABILITIES).installable).toBe(2);
   });
 
   it("counts the unset facet for the All option", () => {
     expect(countWithoutFacet(browseFixtures, stateWith({ kind: "hook" }), "kind")).toBe(browseFixtures.length);
-    expect(countWithoutFacet(browseFixtures, stateWith({ kind: "hook", status: "concept" }), "kind")).toBe(2);
+    expect(countWithoutFacet(browseFixtures, stateWith({ kind: "hook", availability: "built-in" }), "kind")).toBe(2);
   });
 });

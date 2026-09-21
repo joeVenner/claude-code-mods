@@ -10,18 +10,14 @@ export interface ExtensionLink {
 
 /**
  * Repository first, then the entry's own links, then the verified source when it differs.
- * Deduplicated by URL so the same page is never offered twice. Concepts have no repository,
- * so only their explicit `links` (if any) appear.
+ * Deduplicated by URL so the same page is never offered twice.
  */
 export function collectExtensionLinks(extension: Extension): readonly ExtensionLink[] {
-  const candidates: ExtensionLink[] = [];
-  if (extension.repositoryUrl !== null) {
-    candidates.push({ label: "Source repository", url: extension.repositoryUrl });
-  }
-  candidates.push(...extension.links);
-  if (extension.verification.status === "verified") {
-    candidates.push({ label: "Verified source", url: extension.verification.sourceUrl });
-  }
+  const candidates: readonly ExtensionLink[] = [
+    { label: "Source repository", url: extension.repositoryUrl },
+    ...extension.links,
+    { label: "Verified source", url: extension.verification.sourceUrl },
+  ];
 
   const seenUrls = new Set<string>();
   return candidates.filter((link) => {

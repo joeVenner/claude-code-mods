@@ -26,9 +26,18 @@ describe("browse page", () => {
     }
   });
 
+  it("passes the client explorer only list fields, never guide or description text", () => {
+    const serialized = JSON.stringify(BrowsePage());
+    expect(serialized).toContain(browseFixtures[0].slug);
+    expect(serialized).not.toContain("Fixture setup.");
+    expect(serialized).not.toContain("Fixture description.");
+    expect(serialized).not.toContain('"guide"');
+  });
+
   it("exports metadata with a canonical path and no dashes in visible strings", () => {
     expect(metadata.title).toBe("Browse extensions");
     expect(metadata.alternates?.canonical).toBe("/browse/");
     expect(String(metadata.description)).not.toMatch(/[\u2013\u2014]/);
+    expect(String(metadata.description)).not.toMatch(/concept/i);
   });
 });

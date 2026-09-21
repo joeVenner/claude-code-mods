@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown, Info, SlidersHorizontal } from "@phosphor-icons/react/ssr";
+import { CaretDown, SlidersHorizontal } from "@phosphor-icons/react/ssr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useReducer, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchField } from "@/components/ui/SearchField";
 import { cn } from "@/lib/cn";
-import type { Extension } from "@/lib/types";
+import type { ExtensionListItem } from "@/components/catalog/ExtensionListItem";
 import { FilterPanel } from "./FilterPanel";
 import { ResultsGrid } from "./ResultsGrid";
 import {
@@ -28,11 +28,9 @@ import { createQueryState, queryReducer } from "./queryState";
 
 export const QUERY_DEBOUNCE_MS = 200;
 
-export const CONCEPT_NOTE = "Concept entries are proposed designs with no public code.";
-
 export interface BrowseExplorerProps {
   /** The full catalog, passed from the server page so nothing is fetched on the client. */
-  readonly extensions: readonly Extension[];
+  readonly extensions: readonly ExtensionListItem[];
 }
 
 interface SortOption {
@@ -55,7 +53,7 @@ function formatResultCount(count: number): string {
 
 /**
  * Search, filter and sort the catalog. The URL holds every setting (`q`, `kind`, `category`,
- * `status`, `sort`); facet changes write it immediately and the text query writes it after a
+ * `availability`, `sort`); facet changes write it immediately and the text query writes it after a
  * short pause. The input itself is local state so typing is never delayed.
  */
 export function BrowseExplorer({ extensions }: BrowseExplorerProps): ReactNode {
@@ -148,8 +146,6 @@ export function BrowseExplorer({ extensions }: BrowseExplorerProps): ReactNode {
   const activeFilterCount = countActiveFilters(appliedState);
   const isSearching = appliedState.query.length > 0;
   const resultCountLabel = formatResultCount(results.length);
-  const hasConcepts = results.some((extension) => extension.verification.status === "concept");
-  const shouldShowConceptNote = hasConcepts && appliedState.status !== "concept";
 
   return (
     <div className={BROWSE_LAYOUT_CLASSES}>
@@ -196,7 +192,7 @@ export function BrowseExplorer({ extensions }: BrowseExplorerProps): ReactNode {
             hasActiveFilters={hasFilters}
             onKindChange={(kind) => handleFacetChange({ kind })}
             onCategoryChange={(category) => handleFacetChange({ category })}
-            onStatusChange={(status) => handleFacetChange({ status })}
+            onAvailabilityChange={(availability) => handleFacetChange({ availability })}
             onClear={handleClear}
           />
         </div>
@@ -229,13 +225,6 @@ export function BrowseExplorer({ extensions }: BrowseExplorerProps): ReactNode {
             </select>
           </div>
         </div>
-
-        {shouldShowConceptNote ? (
-          <p className="flex items-start gap-2 text-sm text-fg-muted">
-            <Info size={16} weight="regular" aria-hidden="true" className="mt-0.5 shrink-0" />
-            {CONCEPT_NOTE}
-          </p>
-        ) : null}
 
         {results.length > 0 ? (
           <ResultsGrid items={results} />

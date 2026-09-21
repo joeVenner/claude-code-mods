@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
-import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
+import { DASH_PATTERN, stubIntersectionObserver } from "@/components/ui/testSupport";
 import { getAllExtensions } from "@/lib/catalog";
 import ExtensionPage, { dynamicParams, generateMetadata, generateStaticParams } from "./page";
 
@@ -39,17 +39,45 @@ describe("extension detail route", () => {
   });
 
   it.each(getAllExtensions().map((extension) => [extension.slug, extension.name] as const))(
-    "renders %s with one h1, no dashes and no invented stars for concepts",
+    "renders %s with one h1, no dashes and no concept wording",
     async (slug, name) => {
-      const entry = getAllExtensions().find((extension) => extension.slug === slug);
       const { container } = render(await ExtensionPage({ params: paramsFor(slug) }));
       expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(name);
       expect(container.textContent).not.toMatch(DASH_PATTERN);
-      if (entry?.verification.status === "concept") {
-        expect(screen.queryByRole("button", { name: /copy command/i })).not.toBeInTheDocument();
-        expect(screen.getByText(/Not installable/)).toBeInTheDocument();
-      }
+      expect(container.textContent).not.toMatch(/concept/i);
     },
   );
+
+  describe("mod pages", () => {
+    const mods = getAllExtensions().filter((extension) => extension.kind === "mod");
+
+    it("exist in the catalog", () => {
+      expect(mods.length).toBeGreaterThan(0);
+    });
+
+    it.each(mods.map((mod) => [mod.slug] as const))(
+      "%s has a guide with set up and download sections, unique anchors and no install rows",
+      async (slug) => {
+        const mod = getAllExtensions().find((extension) => extension.slug === slug);
+        expect(mod?.guide.length ?? 0).toBeGreaterThan(0);
+        const { container } = render(await ExtensionPage({ params: paramsFor(slug) }));
+
+        const h2Titles = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent ?? "");
+        expect(h2Titles.some((title) => /set up/i.test(title))).toBe(true);
+        expect(h2Titles.some((title) => /download/i.test(title))).toBe(true);
+
+        const ids = Array.from(container.querySelectorAll("[id]")).map((element) => element.id);
+        expect(new Set(ids).size).toBe(ids.length);
+
+        const toc = screen.getByRole("navigation", { name: "On this page" });
+        for (const link of within(toc).getAllByRole("link")) {
+          expect(document.getElementById((link.getAttribute("href") ?? "").replace(/^#/, ""))).not.toBeNull();
+        }
+        expect(container.textContent).not.toMatch(DASH_PATTERN);
+        expect(screen.getByRole("heading", { level: 2, name: "Install" })).toBeInTheDocument();
+        expect(screen.getByText(/^Built in\. This ships inside Claude Code/)).toBeInTheDocument();
+      },
+    );
+  });
 });

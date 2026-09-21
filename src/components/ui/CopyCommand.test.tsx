@@ -28,6 +28,11 @@ describe("CopyCommand", () => {
     expect(screen.getByText("$")).toHaveAttribute("aria-hidden", "true");
   });
 
+  it("names the copy button after copyLabel when no visible label is given", () => {
+    render(<CopyCommand command={COMMAND} copyLabel="Set up, 2 of 3" />);
+    expect(screen.getByRole("button", { name: "Copy command: Set up, 2 of 3" })).toBeInTheDocument();
+  });
+
   it("copies the command and announces success", async () => {
     const user = userEvent.setup();
     const writeText = vi.fn().mockResolvedValue(undefined);

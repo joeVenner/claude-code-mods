@@ -12,6 +12,8 @@ import { KIND_DESCRIPTIONS } from "./kind-descriptions";
 
 export interface KindExplorerProps {
   readonly counts: Readonly<Record<ExtensionKind, number>>;
+  /** Derived from the catalog by `describeBuiltInMods`. Null or absent when no built-in mod exists. */
+  readonly builtInModsNote?: string | null;
 }
 
 interface KindCellStyle {
@@ -25,32 +27,38 @@ interface KindCellStyle {
 }
 
 /**
- * Bento layout on a 12-column grid at lg: plugin spans two rows on the left, skill and agent
- * sit beside it, MCP fills row two, and hook, command and mod split the last row 3/4/5.
- * Spans per row add up to 12, so no cell is left empty. From md to lg there are two columns and
- * plugin spans both, which leaves six cells in three full rows.
+ * Bento layout on a 12-column grid at lg. Mod is the largest cell: six columns and two rows on
+ * the left. Plugin takes the top right, skill and agent split the row under it, and MCP, hook
+ * and command fill the last row 5/3/4. Spans per row add up to 12, so no cell is left empty.
+ * From md to lg there are two columns and mod spans both, which leaves six cells in three rows.
  */
 const KIND_CELL_STYLES: Readonly<Record<ExtensionKind, KindCellStyle>> = {
-  plugin: {
+  mod: {
     placement: "md:col-span-2 lg:col-span-6 lg:row-span-2",
+    surface: "border-accent/40 bg-accent-soft",
+    texture:
+      "bg-[linear-gradient(to_right,var(--accent)_1px,transparent_1px),linear-gradient(to_bottom,var(--accent)_1px,transparent_1px)] bg-[length:28px_28px] opacity-15 [mask-image:radial-gradient(ellipse_at_bottom_right,black,transparent_70%)]",
+    isLarge: true,
+  },
+  plugin: {
+    placement: "lg:col-span-6",
     surface: "border-border bg-surface",
     texture:
       "bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[length:28px_28px] [mask-image:radial-gradient(ellipse_at_bottom_right,black,transparent_70%)]",
-    isLarge: true,
   },
   skill: {
-    placement: "lg:col-span-3",
-    surface: "border-border bg-accent-soft",
-    texture: null,
-  },
-  agent: {
     placement: "lg:col-span-3",
     surface: "border-border bg-surface-2",
     texture: null,
   },
-  "mcp-server": {
-    placement: "lg:col-span-6",
+  agent: {
+    placement: "lg:col-span-3",
     surface: "border-border bg-surface",
+    texture: null,
+  },
+  "mcp-server": {
+    placement: "lg:col-span-5",
+    surface: "border-border bg-surface-2",
     texture:
       "bg-[radial-gradient(var(--border-strong)_1px,transparent_1px)] bg-[length:16px_16px] [mask-image:linear-gradient(to_left,black,transparent_60%)]",
   },
@@ -65,28 +73,22 @@ const KIND_CELL_STYLES: Readonly<Record<ExtensionKind, KindCellStyle>> = {
     texture:
       "bg-[repeating-linear-gradient(to_bottom,var(--border)_0,var(--border)_1px,transparent_1px,transparent_8px)] [mask-image:linear-gradient(to_top,black,transparent_55%)]",
   },
-  mod: {
-    placement: "lg:col-span-5",
-    surface: "border-dashed border-border-strong bg-transparent",
-    texture: null,
-  },
 };
 
-/** Visual reading order, row by row. Must be a permutation of EXTENSION_KINDS (covered by a test). */
+/** Visual reading order, row by row, mod first. Must be a permutation of EXTENSION_KINDS (covered by a test). */
 export const KIND_CELL_ORDER: readonly ExtensionKind[] = [
+  "mod",
   "plugin",
   "skill",
   "agent",
   "mcp-server",
   "hook",
   "command",
-  "mod",
 ];
 
 const REVEAL_STEP_SECONDS = 0.05;
 
-function formatCountLabel(kind: ExtensionKind, count: number): string {
-  if (kind === "mod") return `${count} ${count === 1 ? "concept" : "concepts"}`;
+function formatCountLabel(count: number): string {
   return `${count} ${count === 1 ? "listing" : "listings"}`;
 }
 
@@ -95,7 +97,7 @@ export function kindBrowseHref(kind: ExtensionKind): string {
 }
 
 /** One tile per extension kind. Counts come from the catalog, never from this file. */
-export function KindExplorer({ counts }: KindExplorerProps): ReactNode {
+export function KindExplorer({ counts, builtInModsNote = null }: KindExplorerProps): ReactNode {
   return (
     <section aria-label="Extension kinds" className="border-t border-border">
       <Container className="flex flex-col gap-10 py-16 md:py-20">
@@ -113,9 +115,9 @@ export function KindExplorer({ counts }: KindExplorerProps): ReactNode {
                   <Link
                     href={kindBrowseHref(kind)}
                     className={cn(
-                      "group relative flex h-full min-h-40 flex-col justify-between gap-8 overflow-hidden rounded-panel border p-5",
+                      "group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-panel border p-5",
                       "transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-fg-muted active:translate-y-0 active:scale-[0.99] motion-reduce:hover:translate-y-0",
-                      isLarge && "lg:p-7",
+                      isLarge ? "min-h-56 lg:p-8" : "min-h-40",
                       style.surface,
                     )}
                   >
@@ -126,13 +128,13 @@ export function KindExplorer({ counts }: KindExplorerProps): ReactNode {
                       <span className="inline-flex size-9 items-center justify-center rounded-control border border-border-strong bg-bg text-accent-text">
                         <KindIcon kind={kind} size={20} />
                       </span>
-                      <span className="font-mono text-sm text-fg-muted">{formatCountLabel(kind, counts[kind])}</span>
+                      <span className="font-mono text-sm text-fg-muted">{formatCountLabel(counts[kind])}</span>
                     </span>
                     <span className="relative flex flex-col gap-2">
                       <span
                         className={cn(
                           "flex items-center gap-2 font-semibold tracking-tight text-fg",
-                          isLarge ? "text-2xl" : "text-lg",
+                          isLarge ? "text-3xl" : "text-lg",
                         )}
                       >
                         {KIND_LABELS[kind]}
@@ -145,11 +147,14 @@ export function KindExplorer({ counts }: KindExplorerProps): ReactNode {
                       </span>
                       <span
                         className={cn(
-                          "max-w-[52ch] leading-relaxed text-fg-muted",
-                          isLarge ? "text-base" : "text-sm",
+                          "max-w-[52ch] leading-relaxed",
+                          isLarge ? "text-base text-fg" : "text-sm text-fg-muted",
                         )}
                       >
                         {KIND_DESCRIPTIONS[kind]}
+                        {kind === "mod" && builtInModsNote !== null ? (
+                          <span className="mt-2 block text-fg-muted">{builtInModsNote}</span>
+                        ) : null}
                       </span>
                     </span>
                   </Link>

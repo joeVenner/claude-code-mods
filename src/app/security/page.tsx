@@ -7,6 +7,7 @@ import { DocSection, Prose } from "@/components/docs/DocSection";
 import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
 import { Timeline } from "@/components/docs/Timeline";
+import { pickExampleMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
 import { buildPageMetadata } from "@/components/docs/pageMetadata";
 import {
   BEFORE_YOU_INSTALL,
@@ -15,37 +16,84 @@ import {
   SECURITY_TIERS,
 } from "@/components/docs/securityContent";
 import { Chip } from "@/components/ui/Chip";
+import { getAllExtensions } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Security",
   description:
-    "What Source verified means today, the proposed security tier model (not implemented), and what to check before you install anything.",
+    "What is checked today, the proposed security tier model (not implemented), and what to check before you install anything.",
   path: "/security/",
 });
 
 export default function SecurityPage(): ReactNode {
+  const builtInMods = selectAnthropicBuiltInMods(getAllExtensions());
+  const exampleMod = pickExampleMod(builtInMods);
+
   return (
     <DocPage
       title="Security and verification"
-      description="What the Source verified badge covers, what the proposed tier model would add, and what to check yourself."
+      description="What the checks on this site cover, what the proposed tier model would add, and what to check yourself."
     >
-      <DocSection id="source-verified" title="What Source verified means today">
-        <Prose>
-          <p>
-            A Source verified badge means one thing: the source URL on that entry responded with HTTP 200 on the date
-            the entry shows. The check is <InlineCode>npm run catalog:verify</InlineCode>, which requests every URL in
-            the catalog and reports any that do not respond.
-          </p>
-          <p>
-            It does not read, scan or run any code. It says nothing about permissions, hooks, network calls, who
-            maintains the project, or whether the description still matches the source after the check date.
-          </p>
-        </Prose>
+      <DocSection id="what-is-checked" title="What is checked today">
+        <DefinitionList
+          items={[
+            {
+              id: "source-verified",
+              term: "Source verified",
+              description: (
+                <>
+                  <p>
+                    The source URL on an entry responded with HTTP 200 on the date the entry shows. The check is{" "}
+                    <InlineCode>npm run catalog:verify</InlineCode>, which requests every URL in the catalog and reports
+                    any that do not respond.
+                  </p>
+                  <p>
+                    It does not read, scan or run any code. It says nothing about permissions, hooks, network calls, who
+                    maintains the project, or whether the description still matches the source after the check date.
+                  </p>
+                </>
+              ),
+            },
+            {
+              id: "structure-check",
+              term: "Structure check on community submissions",
+              description: (
+                <>
+                  <p>
+                    When someone submits an entry by pull request, an automated check in CI confirms that the manifest
+                    files exist and parse: <InlineCode>.claude-plugin/plugin.json</InlineCode> for a plugin or a mod, and
+                    for a mod also <InlineCode>hooks/hooks.json</InlineCode> with a modules array. The command is{" "}
+                    <InlineCode>npm run catalog:structure</InlineCode>.
+                  </p>
+                  <p>It checks that files exist. It is not a review of what they contain.</p>
+                </>
+              ),
+            },
+          ]}
+        />
         <Callout tone="warning">
           <p>Source verified is not a security review. It does not mean the code is safe or endorsed by anyone.</p>
         </Callout>
       </DocSection>
+
+      {exampleMod ? (
+        <DocSection id="built-in-mods" title="Mods that ship inside Claude Code">
+          <Prose>
+            <p>
+              The directory lists {builtInMods.length} {builtInMods.length === 1 ? "mod" : "mods"} published by Anthropic
+              that ship inside Claude Code. As one example,{" "}
+              <TextLink href={`/extensions/${exampleMod.slug}/`}>{exampleMod.name}</TextLink> is listed with this
+              summary:
+            </p>
+            <p className="border-l-2 border-border-strong pl-4 text-fg">{exampleMod.summary}</p>
+            <p>
+              This directory says no more about what it does than that text. Read the mod&apos;s own README for the
+              details.
+            </p>
+          </Prose>
+        </DocSection>
+      ) : null}
 
       <DocSection id="tier-model" title="Proposed security tiers">
         <Callout tone="warning">
@@ -108,7 +156,7 @@ export default function SecurityPage(): ReactNode {
         </ul>
         <Prose>
           <p>
-            For how this site treats concepts and what it does and does not check, see{" "}
+            For where the data comes from and what it does and does not check, see{" "}
             <TextLink href="/about/">About</TextLink>.
           </p>
         </Prose>

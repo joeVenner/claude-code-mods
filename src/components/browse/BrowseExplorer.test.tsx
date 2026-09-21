@@ -2,8 +2,8 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { RenderResult } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BrowseExplorer, CONCEPT_NOTE, QUERY_DEBOUNCE_MS } from "./BrowseExplorer";
-import { browseFixtures, docsBridge, lintRunner, sandboxConcept, trimConcept } from "./__fixtures__/browseItems";
+import { BrowseExplorer, QUERY_DEBOUNCE_MS } from "./BrowseExplorer";
+import { browseFixtures, docsBridge, lintRunner, paneMod, policyMod, sourceSkill } from "./__fixtures__/browseItems";
 
 /**
  * A minimal stand-in for the App Router: `replace` updates the search string and notifies
@@ -87,7 +87,7 @@ describe("BrowseExplorer initial state", () => {
   });
 
   it("ignores invalid URL values", () => {
-    renderExplorer("kind=widget&status=maybe&sort=random&category=nope");
+    renderExplorer("kind=widget&availability=maybe&status=concept&sort=random&category=nope");
     expect(resultNames()).toHaveLength(browseFixtures.length);
     expect(screen.getByRole("radio", { name: /^All kinds/ })).toBeChecked();
     expect(screen.getByLabelText("Sort by")).toHaveValue("featured");
@@ -200,7 +200,7 @@ describe("BrowseExplorer facets", () => {
     renderExplorer();
     await user.click(screen.getByRole("radio", { name: /^Mod/ }));
     expect(routerStore.replace).toHaveBeenCalledWith("/browse/?kind=mod", { scroll: false });
-    expect(resultNames()).toEqual([sandboxConcept.name, trimConcept.name]);
+    expect(resultNames()).toEqual([paneMod.name, policyMod.name]);
     expect(screen.getByRole("radio", { name: /^Mod/ })).toBeChecked();
   });
 
@@ -213,25 +213,55 @@ describe("BrowseExplorer facets", () => {
   });
 
   it("computes kind counts from the other active filters", () => {
-    renderExplorer("status=concept");
-    expect(screen.getByRole("radio", { name: "Mod (concept) 2" })).toBeEnabled();
+    renderExplorer("availability=built-in");
+    expect(screen.getByRole("radio", { name: "Mod 2" })).toBeEnabled();
     expect(screen.getByRole("radio", { name: "Plugin 0" })).toBeDisabled();
     expect(screen.getByRole("radio", { name: "All kinds 2" })).toBeChecked();
   });
 
   it("keeps a selected zero-count option enabled so it can be undone", () => {
-    renderExplorer("kind=plugin&status=concept");
+    renderExplorer("kind=plugin&availability=built-in");
     expect(screen.getByRole("radio", { name: "Plugin 0" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Plugin 0" })).toBeEnabled();
   });
 
-  it("selects a category and a status", async () => {
+  it("selects a category and an availability", async () => {
     const user = userEvent.setup();
     renderExplorer();
     await user.click(screen.getByRole("radio", { name: /^Security/ }));
-    await user.click(screen.getByRole("radio", { name: /^Concept/ }));
-    expect(lastReplaceUrl()).toBe("/browse/?category=security&status=concept");
-    expect(resultNames()).toEqual([sandboxConcept.name]);
+    await user.click(screen.getByRole("radio", { name: /^Built in/ }));
+    expect(lastReplaceUrl()).toBe("/browse/?category=security&availability=built-in");
+    expect(resultNames()).toEqual([policyMod.name]);
+  });
+
+  it("offers an availability group with a count for each label", () => {
+    renderExplorer();
+    const group = screen.getByRole("group", { name: "Availability" });
+    expect(within(group).getByRole("radio", { name: "Any availability 7" })).toBeChecked();
+    expect(within(group).getByRole("radio", { name: "Installable 4" })).toBeEnabled();
+    expect(within(group).getByRole("radio", { name: "Built in 2" })).toBeEnabled();
+    expect(within(group).getByRole("radio", { name: "Source only 1" })).toBeEnabled();
+  });
+
+  it("reads the availability facet from the URL and narrows the results", () => {
+    renderExplorer("availability=source-only");
+    expect(screen.getByRole("radio", { name: /^Source only/ })).toBeChecked();
+    expect(resultNames()).toEqual([sourceSkill.name]);
+  });
+
+  it("clears the availability facet with the Any option", async () => {
+    const user = userEvent.setup();
+    renderExplorer("availability=built-in");
+    await user.click(screen.getByRole("radio", { name: /^Any availability/ }));
+    expect(lastReplaceUrl()).toBe("/browse/");
+    expect(resultNames()).toHaveLength(browseFixtures.length);
+  });
+
+  it("ignores a legacy status link", () => {
+    renderExplorer("status=concept");
+    expect(resultNames()).toHaveLength(browseFixtures.length);
+    expect(screen.getByRole("radio", { name: /^Any availability/ })).toBeChecked();
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 
   it("changes the sort through the labelled select", async () => {
@@ -239,7 +269,7 @@ describe("BrowseExplorer facets", () => {
     renderExplorer();
     await user.selectOptions(screen.getByLabelText("Sort by"), "stars");
     expect(lastReplaceUrl()).toBe("/browse/?sort=stars");
-    expect(resultNames()[resultNames().length - 1]).toBe(trimConcept.name);
+    expect(resultNames()[resultNames().length - 1]).toBe(sourceSkill.name);
   });
 
   it("labels the default sort Best match while searching", () => {
@@ -292,24 +322,10 @@ describe("BrowseExplorer live region", () => {
   });
 });
 
-describe("BrowseExplorer concept note", () => {
-  it("shows when concepts are in the results", () => {
-    renderExplorer();
-    expect(screen.getByText(CONCEPT_NOTE)).toBeInTheDocument();
-  });
-
-  it("is hidden when the status filter is already concept", () => {
-    renderExplorer("status=concept");
-    expect(screen.queryByText(CONCEPT_NOTE)).not.toBeInTheDocument();
-  });
-
-  it("is hidden when no concepts are in the results", () => {
-    renderExplorer("status=verified");
-    expect(screen.queryByText(CONCEPT_NOTE)).not.toBeInTheDocument();
-  });
-
-  it("contains no dash characters", () => {
-    expect(CONCEPT_NOTE).not.toMatch(/[\u2013\u2014]/);
+describe("BrowseExplorer copy", () => {
+  it("never mentions concepts", () => {
+    const { container } = renderExplorer();
+    expect(container.textContent ?? "").not.toMatch(/concept/i);
   });
 });
 
@@ -391,7 +407,7 @@ describe("BrowseExplorer mobile filters disclosure", () => {
   });
 
   it("shows the number of active facet filters in the button name", () => {
-    renderExplorer("kind=hook&status=verified&q=git");
+    renderExplorer("kind=hook&availability=installable&q=git");
     expect(screen.getByRole("button", { name: "Filters, 2 active" })).toBeInTheDocument();
   });
 });

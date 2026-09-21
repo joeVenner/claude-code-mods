@@ -1,32 +1,20 @@
 import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
-import { CATEGORIES, CATEGORY_LABELS, EXTENSION_KINDS, KIND_LABELS } from "@/lib/types";
-import type { Extension } from "@/lib/types";
+import { AVAILABILITIES, AVAILABILITY_LABELS, CATEGORIES, CATEGORY_LABELS, EXTENSION_KINDS, KIND_LABELS } from "@/lib/types";
+import type { ExtensionListItem } from "@/components/catalog/ExtensionListItem";
 import { ChoiceOption } from "./ChoiceOption";
-import {
-  BROWSE_STATUSES,
-  countByFacet,
-  countWithoutFacet,
-  isBrowseStatus,
-  isCategory,
-  isExtensionKind,
-} from "./filters";
+import { countByFacet, countWithoutFacet, isAvailability, isCategory, isExtensionKind } from "./filters";
 import type { BrowseState } from "./filters";
 
-export const STATUS_LABELS = {
-  verified: "Source verified",
-  concept: "Concept",
-} as const;
-
 export interface FilterPanelProps {
-  readonly items: readonly Extension[];
+  readonly items: readonly ExtensionListItem[];
   /** State the results currently reflect. Counts are computed from it. */
   readonly state: BrowseState;
   readonly hasActiveFilters: boolean;
   readonly onKindChange: (kind: BrowseState["kind"]) => void;
   readonly onCategoryChange: (category: BrowseState["category"]) => void;
-  readonly onStatusChange: (status: BrowseState["status"]) => void;
+  readonly onAvailabilityChange: (availability: BrowseState["availability"]) => void;
   readonly onClear: () => void;
 }
 
@@ -34,7 +22,7 @@ const LEGEND_CLASSES = "mb-2 text-sm font-medium text-fg";
 const ALL_VALUE = "";
 
 /**
- * Kind, category and status facets. Every count is computed with the other filters and the query
+ * Kind, category and availability facets. Every count is computed with the other filters and the query
  * held fixed, so each option shows what choosing it would return.
  */
 export function FilterPanel({
@@ -43,15 +31,18 @@ export function FilterPanel({
   hasActiveFilters,
   onKindChange,
   onCategoryChange,
-  onStatusChange,
+  onAvailabilityChange,
   onClear,
 }: FilterPanelProps): ReactNode {
   const kindCounts = useMemo(() => countByFacet(items, state, "kind", EXTENSION_KINDS), [items, state]);
   const categoryCounts = useMemo(() => countByFacet(items, state, "category", CATEGORIES), [items, state]);
-  const statusCounts = useMemo(() => countByFacet(items, state, "status", BROWSE_STATUSES), [items, state]);
+  const availabilityCounts = useMemo(
+    () => countByFacet(items, state, "availability", AVAILABILITIES),
+    [items, state],
+  );
   const anyKindCount = useMemo(() => countWithoutFacet(items, state, "kind"), [items, state]);
   const anyCategoryCount = useMemo(() => countWithoutFacet(items, state, "category"), [items, state]);
-  const anyStatusCount = useMemo(() => countWithoutFacet(items, state, "status"), [items, state]);
+  const anyAvailabilityCount = useMemo(() => countWithoutFacet(items, state, "availability"), [items, state]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -121,27 +112,27 @@ export function FilterPanel({
       </fieldset>
 
       <fieldset>
-        <legend className={LEGEND_CLASSES}>Status</legend>
+        <legend className={LEGEND_CLASSES}>Availability</legend>
         <div className="flex flex-wrap gap-1.5">
           <ChoiceOption
-            name="status"
+            name="availability"
             value={ALL_VALUE}
-            label="Any status"
-            count={anyStatusCount}
-            isChecked={state.status === null}
+            label="Any availability"
+            count={anyAvailabilityCount}
+            isChecked={state.availability === null}
             layout="chip"
-            onSelect={() => onStatusChange(null)}
+            onSelect={() => onAvailabilityChange(null)}
           />
-          {BROWSE_STATUSES.map((status) => (
+          {AVAILABILITIES.map((availability) => (
             <ChoiceOption
-              key={status}
-              name="status"
-              value={status}
-              label={STATUS_LABELS[status]}
-              count={statusCounts[status]}
-              isChecked={state.status === status}
+              key={availability}
+              name="availability"
+              value={availability}
+              label={AVAILABILITY_LABELS[availability]}
+              count={availabilityCounts[availability]}
+              isChecked={state.availability === availability}
               layout="chip"
-              onSelect={(value) => onStatusChange(isBrowseStatus(value) ? value : null)}
+              onSelect={(value) => onAvailabilityChange(isAvailability(value) ? value : null)}
             />
           ))}
         </div>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CopyCommand } from "@/components/ui/CopyCommand";
 import { cn } from "@/lib/cn";
 
 export interface TimelineItem {
@@ -6,6 +7,8 @@ export interface TimelineItem {
   readonly description: string;
   /** Concrete checks or actions performed at this point, rendered as a plain list. */
   readonly details?: readonly string[];
+  /** Commands to run at this point, each rendered as a copyable row. */
+  readonly commands?: readonly string[];
 }
 
 export interface TimelineProps {
@@ -40,6 +43,13 @@ export function Timeline({ items, label, headingLevel: Heading = "h3", className
                 </li>
               ))}
             </ul>
+          ) : null}
+          {item.commands && item.commands.length > 0 ? (
+            <div className="mt-4 flex max-w-[65ch] flex-col gap-2">
+              {item.commands.map((command) => (
+                <CopyCommand key={command} command={command} />
+              ))}
+            </div>
           ) : null}
         </li>
       ))}

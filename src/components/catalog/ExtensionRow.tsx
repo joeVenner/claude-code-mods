@@ -3,14 +3,16 @@ import type { ReactNode } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { cn } from "@/lib/cn";
 import { CATEGORY_LABELS, KIND_LABELS } from "@/lib/types";
-import type { Extension } from "@/lib/types";
 import { extensionHref } from "./ExtensionCard";
+import { AvailabilityChip } from "./AvailabilityChip";
+import { CommunityBadge } from "./CommunityBadge";
+import type { ExtensionListItem } from "./ExtensionListItem";
 import { KindIcon } from "./KindIcon";
 import { StarCount } from "./StarCount";
 import { StatusBadge } from "./StatusBadge";
 
 export interface ExtensionRowProps {
-  readonly extension: Extension;
+  readonly extension: ExtensionListItem;
   /** Marks the row for the entry currently in focus (for example a selected search result). */
   readonly isActive?: boolean;
   readonly className?: string;
@@ -23,7 +25,7 @@ const ABOVE_LINK_OVERLAY = "relative z-10";
 
 /** Compact result-list row. Wrap rows in a `ul`/`li` and separate them with `divide-y`. */
 export function ExtensionRow({ extension, isActive = false, className }: ExtensionRowProps): ReactNode {
-  const { slug, name, kind, summary, categories, verification, stars } = extension;
+  const { slug, name, kind, summary, categories, verification, stars, availability, publisher } = extension;
 
   return (
     <article
@@ -61,6 +63,8 @@ export function ExtensionRow({ extension, isActive = false, className }: Extensi
             </li>
           ))}
         </ul>
+        {availability === "built-in" ? <AvailabilityChip availability={availability} /> : null}
+        <CommunityBadge publisher={publisher} className={ABOVE_LINK_OVERLAY} />
         <StatusBadge verification={verification} className={ABOVE_LINK_OVERLAY} />
         <StarCount stars={stars} className={cn("whitespace-nowrap font-mono text-xs text-fg-muted", ABOVE_LINK_OVERLAY)} />
       </div>

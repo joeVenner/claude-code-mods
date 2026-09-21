@@ -1,11 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
-import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
-import { conceptExtension, verifiedExtension } from "@/components/catalog/__fixtures__/extensions";
+import {
+  builtInModExtension,
+  sourceOnlyExtension,
+  verifiedExtension,
+} from "@/components/catalog/__fixtures__/extensions";
+import { DASH_PATTERN, stubIntersectionObserver } from "@/components/ui/testSupport";
 import type { Extension } from "@/lib/types";
 import { ExtensionDetail } from "./ExtensionDetail";
 import { collectExtensionLinks } from "./ExtensionLinks";
-import { CONCEPT_NOT_INSTALLABLE, NO_INSTALL_COMMAND } from "./InstallSection";
+import { BUILT_IN_EXPLANATION, NO_INSTALL_COMMAND } from "./InstallSection";
 
 beforeAll(stubIntersectionObserver);
 
@@ -85,7 +89,6 @@ describe("ExtensionDetail: verified entry without install commands", () => {
     render(<ExtensionDetail extension={withOverrides(verifiedExtension, { installCommands: [] })} related={[]} />);
     expect(screen.getByText(NO_INSTALL_COMMAND)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /copy command/i })).not.toBeInTheDocument();
-    expect(screen.queryByText(CONCEPT_NOT_INSTALLABLE)).not.toBeInTheDocument();
   });
 
   it("omits the hooks section when there are no hooks", () => {
@@ -102,44 +105,170 @@ describe("ExtensionDetail: verified entry without install commands", () => {
   });
 });
 
-describe("ExtensionDetail: concept entry", () => {
-  it("shows a top notice, the not-installable callout and the spec reference", () => {
-    render(<ExtensionDetail extension={conceptExtension} related={[]} />);
-    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(screen.getByText(/This is a concept, not a shipping extension/)).toBeInTheDocument();
-    expect(screen.getByText(CONCEPT_NOT_INSTALLABLE)).toBeInTheDocument();
-    expect(screen.getByText(/Spec reference: Fixture spec section/)).toBeInTheDocument();
-    expect(screen.getByText("Concept")).toBeInTheDocument();
-    expect(screen.queryByText("Source verified")).not.toBeInTheDocument();
+describe("ExtensionDetail: installable entry chips", () => {
+  it("shows the availability chip beside the verification badge", () => {
+    render(<ExtensionDetail extension={verifiedExtension} related={[]} />);
+    expect(screen.getByText("Installable")).toBeInTheDocument();
+    expect(screen.getByText("Source verified")).toBeInTheDocument();
+    expect(screen.queryByText("Notice")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "On this page" })).not.toBeInTheDocument();
   });
 
-  it("renders no stars, no copy rows and no repository link", () => {
-    render(<ExtensionDetail extension={conceptExtension} related={[]} />);
-    expect(screen.queryByText(/stars?\b/i)).not.toBeInTheDocument();
+  it("keeps the description paragraphs when there is no guide", () => {
+    render(<ExtensionDetail extension={verifiedExtension} related={[]} />);
+    expect(screen.getByText("Fixture description paragraph.")).toBeInTheDocument();
+  });
+});
+
+describe("ExtensionDetail: publisher signal", () => {
+  const note = "Community listing. Not published by Anthropic; a maintainer read the entry, not the code.";
+
+  it("labels a community entry with a chip next to the badge and a plain line under the publisher", () => {
+    expect(verifiedExtension.publisher.kind).toBe("community");
+    render(<ExtensionDetail extension={verifiedExtension} related={[]} />);
+    expect(screen.getByText("Community listing", { selector: "span" })).toBeInTheDocument();
+    expect(screen.getByText("Source verified")).toBeInTheDocument();
+    const publisher = screen.getByText("Publisher").closest("div") as HTMLElement;
+    expect(within(publisher).getByText(note)).toBeInTheDocument();
+  });
+
+  it("does not let an Anthropic looking name stand in for the label", () => {
+    const lookalike = withOverrides(verifiedExtension, {
+      publisher: { name: "Anthropic", url: null, kind: "community" },
+    });
+    render(<ExtensionDetail extension={lookalike} related={[]} />);
+    expect(screen.getByText(note)).toBeInTheDocument();
+  });
+
+  it("shows no community wording for an Anthropic entry", () => {
+    expect(builtInModExtension.publisher.kind).toBe("anthropic");
+    const { container } = render(<ExtensionDetail extension={builtInModExtension} related={[]} />);
+    expect(container.textContent ?? "").not.toMatch(/community listing/i);
+    expect(screen.getByText("Fixture Vendor")).toBeInTheDocument();
+  });
+});
+
+describe("ExtensionDetail: source-only entry", () => {
+  it("states there is no install command and shows no copy rows", () => {
+    render(<ExtensionDetail extension={sourceOnlyExtension} related={[]} />);
+    expect(screen.getByText("Source only")).toBeInTheDocument();
+    expect(screen.getByText(NO_INSTALL_COMMAND)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /copy command/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Source repository/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /Verified source/ })).not.toBeInTheDocument();
-    expect(screen.queryByText(/Source verified on/)).not.toBeInTheDocument();
+    expect(screen.queryByText("License")).not.toBeInTheDocument();
+    expect(screen.queryByText(/\bstars?\b/i)).not.toBeInTheDocument();
+  });
+});
+
+describe("ExtensionDetail: mod with a guide", () => {
+  const mod = builtInModExtension;
+
+  it("renders one h1, the availability chip and the notice as a labelled warning callout", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByText("Built in", { selector: "span" })).toBeInTheDocument();
+    const callout = screen.getAllByRole("note").find((note) => note.getAttribute("data-tone") === "warning");
+    expect(callout).toBeDefined();
+    if (callout === undefined) return;
+    expect(callout).toHaveTextContent("Notice");
+    expect(callout).toHaveTextContent(mod.notice ?? "missing");
+    expect(callout.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("never shows stars even if malformed data slips a count onto a concept", () => {
-    const malformed = withOverrides(conceptExtension, { stars: { count: 99, capturedAt: "2026-05-01" } });
-    render(<ExtensionDetail extension={malformed} related={[]} />);
-    expect(screen.queryByText(/99/)).not.toBeInTheDocument();
+  it("renders no notice callout when the entry has none", () => {
+    render(<ExtensionDetail extension={{ ...mod, notice: null }} related={[]} />);
+    expect(screen.queryByText("Notice")).not.toBeInTheDocument();
   });
 
-  it("flags the unconfirmed mods runtime only for the mod kind", () => {
-    const { unmount } = render(<ExtensionDetail extension={conceptExtension} related={[]} />);
-    expect(screen.getByText(/mod runtime this concept assumes is unconfirmed/)).toBeInTheDocument();
-    unmount();
-    render(<ExtensionDetail extension={withOverrides(conceptExtension, { kind: "hook" })} related={[]} />);
-    expect(screen.queryByText(/mod runtime this concept assumes/)).not.toBeInTheDocument();
+  it("explains built-in availability and renders no install rows or install commands", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const install = screen.getByRole("heading", { level: 2, name: "Install" }).closest("section");
+    expect(install).not.toBeNull();
+    expect(within(install as HTMLElement).getByText(BUILT_IN_EXPLANATION)).toBeInTheDocument();
+    expect(within(install as HTMLElement).queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByText(NO_INSTALL_COMMAND)).not.toBeInTheDocument();
   });
 
-  it("marks concept hook names as unconfirmed spec names", () => {
-    render(<ExtensionDetail extension={withOverrides(conceptExtension, { hooks: ["turn:complete"] })} related={[]} />);
-    expect(screen.getByText("turn:complete")).toBeInTheDocument();
-    expect(screen.getByText(/not confirmed Claude Code hook names/)).toBeInTheDocument();
+  it("renders details as a definition list with copy rows for command values only", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const section = screen.getByRole("heading", { level: 2, name: "Details" }).closest("section") as HTMLElement;
+    expect(within(section).getByText("Seated")).toBeInTheDocument();
+    expect(within(section).getByText("Built in")).toBeInTheDocument();
+    expect(within(section).getByText("claude --plugin-dir mods/fixture-pane-mod")).toBeInTheDocument();
+    expect(
+      within(section).getByRole("button", { name: "Copy command: Run from source" }),
+    ).toBeInTheDocument();
+    expect(within(section).getAllByRole("button")).toHaveLength(2);
+    expect(section.querySelector("dl")).not.toBeNull();
+  });
+
+  it("lists hooks under the mod heading, keeping wildcard events as text", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const section = screen.getByRole("heading", { level: 2, name: "Hooks it registers" }).closest("section");
+    expect(screen.queryByRole("heading", { name: "Lifecycle hooks" })).not.toBeInTheDocument();
+    expect(within(section as HTMLElement).getByText("classic.*")).toBeInTheDocument();
+    expect(within(section as HTMLElement).getByText("session.start")).toBeInTheDocument();
+  });
+
+  it("shows the stored license exactly and no stars", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    expect(screen.getByText(mod.license ?? "missing")).toBeInTheDocument();
+    expect(screen.queryByText(/\bstars?\b/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/open source/i)).not.toBeInTheDocument();
+  });
+
+  it("renders every guide section as an h2 in order, with paragraphs", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const headings = mod.guide.map((section) => screen.getByRole("heading", { level: 2, name: section.title }));
+    const positions = headings.map((heading) => Array.from<Element>(document.querySelectorAll("h2")).indexOf(heading));
+    expect([...positions].sort((left, right) => left - right)).toEqual(positions);
+    expect(screen.getByText("Fixture overview paragraph one.")).toBeInTheDocument();
+    expect(screen.getByText("Fixture setup paragraph.")).toBeInTheDocument();
+  });
+
+  it("gives every section a unique id that matches a link in the table of contents", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const nav = screen.getByRole("navigation", { name: "On this page" });
+    const tocLinks = within(nav).getAllByRole("link");
+    expect(tocLinks.map((link) => link.textContent)).toEqual(mod.guide.map((section) => section.title));
+    const hrefs = tocLinks.map((link) => link.getAttribute("href") ?? "");
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+    for (const [index, section] of mod.guide.entries()) {
+      const id = hrefs[index].replace(/^#/, "");
+      const heading = document.getElementById(id);
+      expect(heading?.tagName).toBe("H2");
+      expect(heading).toHaveTextContent(section.title);
+    }
+  });
+
+  it("offers a collapsed table of contents for small screens without a second landmark", () => {
+    const { container } = render(<ExtensionDetail extension={mod} related={[]} />);
+    const details = container.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details).not.toHaveAttribute("open");
+    expect(details?.querySelectorAll("a")).toHaveLength(mod.guide.length);
+    expect(screen.getAllByRole("navigation", { name: "On this page" })).toHaveLength(1);
+  });
+
+  it("renders guide commands as consecutive copy rows in stored order with distinct names", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const setUp = screen.getByRole("heading", { level: 2, name: "Set up" }).closest("section") as HTMLElement;
+    const rows = within(setUp).getAllByRole("button");
+    expect(rows.map((row) => row.getAttribute("aria-label"))).toEqual([
+      "Copy command: Set up, step 1 of 2",
+      "Copy command: Set up, step 2 of 2",
+    ]);
+    const commands = Array.from(setUp.querySelectorAll("code")).map((code) => code.textContent);
+    expect(commands).toEqual(mod.guide[1].commands);
+    const download = screen.getByRole("heading", { level: 2, name: "Download the source" }).closest("section");
+    expect(within(download as HTMLElement).getByRole("button", { name: "Copy command: Download the source" })).toBeInTheDocument();
+  });
+
+  it("omits the table of contents landmark when the guide is empty", () => {
+    const { container } = render(<ExtensionDetail extension={{ ...mod, guide: [] }} related={[]} />);
+    expect(screen.queryByRole("navigation", { name: "On this page" })).not.toBeInTheDocument();
+    expect(container.querySelector("details")).toBeNull();
+    // Without a guide the description takes over as body text.
+    expect(screen.getByText("Fixture mod paragraph one.")).toBeInTheDocument();
   });
 });
 
@@ -150,16 +279,17 @@ describe("ExtensionDetail: related extensions", () => {
   });
 
   it("renders cards under an h2 when related entries exist", () => {
-    render(<ExtensionDetail extension={verifiedExtension} related={[conceptExtension]} />);
+    render(<ExtensionDetail extension={verifiedExtension} related={[sourceOnlyExtension]} />);
     expect(screen.getByRole("heading", { level: 2, name: "Related extensions" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Fixture Context Trimmer" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Fixture Source Only" })).toBeInTheDocument();
   });
 });
 
 describe("ExtensionDetail: copy hygiene", () => {
   it.each([
     ["verified", verifiedExtension],
-    ["concept", conceptExtension],
+    ["built-in mod", builtInModExtension],
+    ["source-only", sourceOnlyExtension],
   ])("has no em or en dashes in rendered text (%s)", (_label, extension) => {
     const { container } = render(<ExtensionDetail extension={extension} related={[]} />);
     expect(container.textContent).not.toMatch(DASH_PATTERN);
@@ -188,7 +318,8 @@ describe("collectExtensionLinks", () => {
     ]);
   });
 
-  it("returns no links for a concept without explicit links", () => {
-    expect(collectExtensionLinks(conceptExtension)).toEqual([]);
+  it("lists the repository and the entry's own links for a mod", () => {
+    const links = collectExtensionLinks(builtInModExtension);
+    expect(links[0]).toEqual({ label: "Source repository", url: builtInModExtension.repositoryUrl });
   });
 });

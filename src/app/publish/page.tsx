@@ -7,51 +7,117 @@ import { DocPage } from "@/components/docs/DocPage";
 import { DocSection, Prose } from "@/components/docs/DocSection";
 import { InlineCode } from "@/components/docs/InlineCode";
 import { TextLink } from "@/components/docs/TextLink";
+import { Timeline } from "@/components/docs/Timeline";
 import { buildPageMetadata } from "@/components/docs/pageMetadata";
 import {
+  COMMUNITY_FILE_PATTERN,
+  COMMUNITY_LABEL,
   ENTRY_FIELD_DOCS,
   ENTRY_FIELD_GROUPS,
   EXAMPLE_ENTRY,
   EXAMPLE_ENTRY_JSON,
+  EXAMPLE_GUIDE_JSON,
+  LICENSE_OPEN_ITEM,
+  MODS_LOADING_COMMANDS,
+  MODS_README_URL,
+  MODS_TYPES_URL,
   PLUGIN_DOCS_LINKS,
-  PROPOSED_PUBLISH_API,
+  PUBLISH_STEPS,
+  RULES_FRAMING,
+  SUBMISSION_RULES,
 } from "@/components/docs/publishContent";
 import { Button } from "@/components/ui/Button";
+import { CopyCommand } from "@/components/ui/CopyCommand";
+import { COMMUNITY_REPOSITORY_URL } from "@/lib/site";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Publish",
   description:
-    "How listing works on this directory: submissions are not open, what a catalog entry contains, and where to learn how real plugins are packaged.",
+    "List a Claude Code extension or mod by pull request: the steps, the rules a submission cannot bypass, the entry format and what a listing means.",
   path: "/publish/",
 });
+
+function CodeBlock({ label, children }: { readonly label: string; readonly children: string }): ReactNode {
+  return (
+    <pre
+      tabIndex={0}
+      aria-label={label}
+      className="max-w-full overflow-x-auto rounded-panel border border-border bg-surface p-4 font-mono text-sm leading-relaxed text-fg"
+    >
+      <code>{children}</code>
+    </pre>
+  );
+}
 
 export default function PublishPage(): ReactNode {
   return (
     <DocPage
-      title="How listing works"
-      description="Submissions are not open. This page shows what a catalog entry contains and where real plugin packaging is documented."
+      title="Publish an extension"
+      description="List your Claude Code extension or mod with a pull request. A listing says the source exists, not that anyone reviewed it."
     >
-      <DocSection id="status" title="Submissions are closed">
-        <Callout tone="warning">
+      <DocSection id="how-it-works" title="How listing works">
+        <Callout tone="note">
           <p>
             There is no submission form, account system or backend behind this site. Nothing you type here is sent
-            anywhere, because there is nothing to type into.
+            anywhere.
           </p>
         </Callout>
         <Prose>
           <p>
-            Entries are added by editing one data file, <InlineCode>src/data/catalog.json</InlineCode>, in the
-            repository this site is built from. Each entry must pass a schema check when the site builds, and its links
-            are checked with <InlineCode>npm run catalog:verify</InlineCode>.
+            You add one JSON file to the public repository at{" "}
+            <TextLink href={COMMUNITY_REPOSITORY_URL}>joeVenner/claude-code-mods</TextLink> and open a pull request.
+            Automated checks run on it, a maintainer reads it, and the site is rebuilt after it merges.
+          </p>
+          <p>
+            This page describes the process the repository is set up for. If the repository&apos;s own{" "}
+            <InlineCode>CONTRIBUTING.md</InlineCode> differs from this page, follow that file.
           </p>
         </Prose>
       </DocSection>
 
-      <DocSection id="entry-fields" title="What a catalog entry contains">
+      <DocSection id="steps" title="From fork to listing">
+        <Timeline items={PUBLISH_STEPS} label="Steps to list an extension" />
+      </DocSection>
+
+      <DocSection id="what-a-listing-means" title="What a listing means">
         <Prose>
           <p>
-            These fields are generated from the schema the site validates against, so the list below is the whole
-            contract. Concepts follow stricter rules: no repository link, no install commands and no stars.
+            A merged pull request means the extension is listed and its source existed when the checks ran. It does not
+            mean anyone reviewed, scanned or tested the code, and it is not an endorsement by the maintainers or by
+            Anthropic.
+          </p>
+          <p>
+            The two catalog checks are narrow on purpose. The link check asks whether each URL responds. The structure
+            check asks whether the manifest files exist and parse. Neither reads what the code does. To decide whether
+            something is safe to install, use the checks on the <TextLink href="/security/">Security page</TextLink>.
+          </p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="rules" title="Rules every submission must meet">
+        <Prose>
+          {RULES_FRAMING.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+          <p>
+            The schema, the catalog loader and the checks in CI test the rules below, so most problems show up before a
+            maintainer looks. Entries from the community appear with a visible &quot;{COMMUNITY_LABEL}&quot; label.
+          </p>
+        </Prose>
+        <ul className="flex max-w-[65ch] flex-col divide-y divide-border border-y border-border">
+          {SUBMISSION_RULES.map((rule) => (
+            <li key={rule.id} className="py-3 text-base leading-relaxed text-fg">
+              {rule.rule}
+            </li>
+          ))}
+        </ul>
+      </DocSection>
+
+      <DocSection id="entry-fields" title="What an entry contains">
+        <Prose>
+          <p>
+            One file holds one entry, and it lives at <InlineCode>{COMMUNITY_FILE_PATTERN}</InlineCode>. The fields
+            below come from the schema the site validates against, so this list is the whole contract.
           </p>
         </Prose>
         <div className="flex flex-col gap-10">
@@ -66,6 +132,12 @@ export default function PublishPage(): ReactNode {
                     <>
                       <p>{ENTRY_FIELD_DOCS[field].description}</p>
                       <p className="break-words font-mono text-xs text-fg-muted">{ENTRY_FIELD_DOCS[field].type}</p>
+                      {ENTRY_FIELD_DOCS[field].submissionRule ? (
+                        <p className="text-fg">
+                          <span className="font-medium">In a submission: </span>
+                          {ENTRY_FIELD_DOCS[field].submissionRule}
+                        </p>
+                      ) : null}
                     </>
                   ),
                 }))}
@@ -78,24 +150,64 @@ export default function PublishPage(): ReactNode {
       <DocSection id="example-entry" title="An example entry">
         <figure className="flex min-w-0 flex-col gap-3">
           <figcaption className="max-w-[65ch] text-sm leading-relaxed text-fg-muted">
-            Example, not a real listing. The slug <InlineCode>{EXAMPLE_ENTRY.slug}</InlineCode> and every URL in it are
-            placeholders and would fail the link check.
+            Example, not a real listing. The slug <InlineCode>{EXAMPLE_ENTRY.slug}</InlineCode>, the publisher and every
+            URL in it are invented, and the link check would report them as not found.
           </figcaption>
-          <pre
-            tabIndex={0}
-            aria-label="Example catalog entry as JSON"
-            className="max-w-full overflow-x-auto rounded-panel border border-border bg-surface p-4 font-mono text-sm leading-relaxed text-fg"
-          >
-            <code>{EXAMPLE_ENTRY_JSON}</code>
-          </pre>
+          <CodeBlock label="Example catalog entry as JSON">{EXAMPLE_ENTRY_JSON}</CodeBlock>
+        </figure>
+        <Prose>
+          <p>
+            A guide is a list of titled sections, each with paragraphs and optional commands. For a mod it is required,
+            with at least an overview, a setup section and a download section. The sections below are invented and
+            belong to no real mod.
+          </p>
+        </Prose>
+        <figure className="flex min-w-0 flex-col gap-3">
+          <figcaption className="max-w-[65ch] text-sm leading-relaxed text-fg-muted">
+            Example guide, not from a real mod.
+          </figcaption>
+          <CodeBlock label="Example guide as JSON">{EXAMPLE_GUIDE_JSON}</CodeBlock>
         </figure>
       </DocSection>
 
-      <DocSection id="packaging" title="How real plugins are packaged">
+      <DocSection id="mods" title="If your entry is a mod">
         <Prose>
           <p>
-            This site does not package or host anything. How Claude Code plugins and plugin marketplaces are built and
-            distributed is documented by Claude Code itself, and that documentation is the source to follow.
+            A mod is a Claude Code plugin whose behaviour lives in a hooks module. Anthropic&apos;s own mods are
+            described in <TextLink href={MODS_README_URL}>the mods README</TextLink>, and the typings the engine offers
+            them are in <TextLink href={MODS_TYPES_URL}>the mods types folder</TextLink>. Use only event names you find
+            there.
+          </p>
+          <p>
+            You load a mod from a local folder, and test it, with these commands. Function hooks must be enabled for a
+            hooks module to load. In an entry, only the first form is allowed as a command, so describe testing in
+            prose.
+          </p>
+        </Prose>
+        <div className="flex max-w-[65ch] flex-col gap-2">
+          {MODS_LOADING_COMMANDS.map((command) => (
+            <CopyCommand key={command} command={command} />
+          ))}
+        </div>
+        <Callout tone="warning">
+          <p>
+            Early access. The API mods are written against may change between Claude Code releases without notice, and
+            mods are not listed in a plugin marketplace. Say so in the entry&apos;s <InlineCode>notice</InlineCode>.
+          </p>
+        </Callout>
+      </DocSection>
+
+      <DocSection id="license" title="Open item: license for submitted data">
+        <Prose>
+          <p>{LICENSE_OPEN_ITEM}</p>
+        </Prose>
+      </DocSection>
+
+      <DocSection id="packaging" title="How plugins are packaged">
+        <Prose>
+          <p>
+            This site does not package or host anything. Claude Code documents how plugins and plugin marketplaces are
+            built and distributed, and that documentation is the source to follow.
           </p>
         </Prose>
         <ul className="flex flex-wrap gap-3">
@@ -111,26 +223,6 @@ export default function PublishPage(): ReactNode {
             </li>
           ))}
         </ul>
-      </DocSection>
-
-      <DocSection id="proposed-api" title="Proposed publish API, not available">
-        <Callout tone="warning">
-          <p>Proposed, not available. This API exists only in the marketplace spec. No server implements it.</p>
-        </Callout>
-        <Prose>
-          <p>
-            The spec describes a registry that accepts signed packages and queues them for the scan pipeline described
-            on the <TextLink href="/security/#tier-model">Security page</TextLink>. If it were built, publishing would
-            look like this.
-          </p>
-        </Prose>
-        <DefinitionList
-          items={PROPOSED_PUBLISH_API.map((row) => ({
-            id: row.id,
-            term: row.term,
-            description: <p className="break-words font-mono text-sm text-fg">{row.value}</p>,
-          }))}
-        />
       </DocSection>
     </DocPage>
   );

@@ -1,8 +1,9 @@
 import type { ExtensionKind } from "@/lib/types";
 
 /**
- * Neutral one-line definitions shown on the kind explorer. `mod` is deliberately hedged:
- * it comes from the marketplace spec and is not a confirmed Claude Code feature.
+ * One-paragraph definitions shown on the kind explorer. The `mod` text follows the Mods README in
+ * anthropics/claude-code. Claims about which mods exist, who publishes them or whether they are
+ * early access come from the catalog entries (see `describeBuiltInMods`), never from this file.
  */
 export const KIND_DESCRIPTIONS: Readonly<Record<ExtensionKind, string>> = {
   plugin: "A bundle that can package commands, agents, skills, hooks, and MCP servers, installed from a plugin marketplace.",
@@ -11,5 +12,5 @@ export const KIND_DESCRIPTIONS: Readonly<Record<ExtensionKind, string>> = {
   hook: "A shell command that runs at a fixed point in a session, such as before or after a tool call.",
   "mcp-server": "A program that gives Claude Code extra tools and data through the Model Context Protocol.",
   command: "A reusable prompt saved as a markdown file and run inside a session as a slash command.",
-  mod: "Proposed in the marketplace spec, not a confirmed Claude Code feature. These entries have no public code.",
+  mod: "A Claude Code plugin whose behavior lives in a hooks module that hooks engine events.",
 };

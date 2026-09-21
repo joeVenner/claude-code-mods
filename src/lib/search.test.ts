@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchExtensions } from "@/lib/search";
+import { searchExtensions, type SearchableExtension } from "@/lib/search";
 import type { Extension } from "@/lib/types";
 
 function makeEntry(overrides: Partial<Extension> & Pick<Extension, "slug" | "name">): Extension {
@@ -11,7 +11,11 @@ function makeEntry(overrides: Partial<Extension> & Pick<Extension, "slug" | "nam
     publisher: { name: "Publisher", url: null, kind: "community" },
     repositoryUrl: "https://github.com/example/repo",
     license: null,
+    availability: "source-only",
     installCommands: [],
+    notice: null,
+    details: [],
+    guide: [],
     hooks: [],
     tags: [],
     links: [],
@@ -22,27 +26,27 @@ function makeEntry(overrides: Partial<Extension> & Pick<Extension, "slug" | "nam
   };
 }
 
-const conceptVerification: Extension["verification"] = { status: "concept", specReference: "Report 03" };
-
 const nameHit = makeEntry({ slug: "zeta-guard", name: "Zeta Guard", categories: ["security"] });
 const summaryHit = makeEntry({
   slug: "alpha-tool",
   name: "Alpha Tool",
   summary: "Adds a guard around risky commands.",
   categories: ["security", "workflow"],
+  availability: "installable",
+  installCommands: ["/plugin install alpha-tool@example"],
 });
 const tagHit = makeEntry({ slug: "beta-tool", name: "Beta Tool", tags: ["guardrails"], categories: ["quality"] });
 const hookHit = makeEntry({ slug: "gamma-tool", name: "Gamma Tool", hooks: ["PreToolUse"], kind: "hook" });
-const conceptEntry = makeEntry({
-  slug: "delta-concept",
-  name: "Delta Concept",
+const builtInEntry = makeEntry({
+  slug: "delta-mod",
+  name: "Delta Mod",
   kind: "mod",
-  repositoryUrl: null,
+  hooks: ["session.start"],
   categories: ["security"],
-  verification: conceptVerification,
+  availability: "built-in",
 });
 
-const items: readonly Extension[] = [summaryHit, tagHit, hookHit, nameHit, conceptEntry];
+const items: readonly Extension[] = [summaryHit, tagHit, hookHit, nameHit, builtInEntry];
 
 describe("searchExtensions", () => {
   it("returns everything in input order for an empty filter set", () => {
@@ -95,18 +99,25 @@ describe("searchExtensions", () => {
   });
 
   it("filters by category", () => {
-    expect(searchExtensions(items, { category: "security" })).toEqual([summaryHit, nameHit, conceptEntry]);
+    expect(searchExtensions(items, { category: "security" })).toEqual([summaryHit, nameHit, builtInEntry]);
   });
 
-  it("filters by verification status", () => {
-    expect(searchExtensions(items, { status: "concept" })).toEqual([conceptEntry]);
-    expect(searchExtensions(items, { status: "verified" })).toEqual([summaryHit, tagHit, hookHit, nameHit]);
+  it("filters by availability", () => {
+    expect(searchExtensions(items, { availability: "built-in" })).toEqual([builtInEntry]);
+    expect(searchExtensions(items, { availability: "installable" })).toEqual([summaryHit]);
+    expect(searchExtensions(items, { availability: "source-only" })).toEqual([tagHit, hookHit, nameHit]);
+  });
+
+  it("matches dotted hook event names", () => {
+    expect(searchExtensions(items, { query: "session.start" })).toEqual([builtInEntry]);
   });
 
   it("ANDs all filters together, including the query", () => {
-    expect(searchExtensions(items, { category: "security", status: "verified", query: "guard" })).toEqual([
-      nameHit,
+    expect(searchExtensions(items, { category: "security", availability: "installable", query: "guard" })).toEqual([
       summaryHit,
+    ]);
+    expect(searchExtensions(items, { category: "security", availability: "source-only", query: "guard" })).toEqual([
+      nameHit,
     ]);
     expect(searchExtensions(items, { category: "quality", kind: "hook" })).toEqual([]);
   });
@@ -115,5 +126,25 @@ describe("searchExtensions", () => {
     const snapshot = [...items];
     searchExtensions(items, { query: "guard" });
     expect(items).toEqual(snapshot);
+  });
+});
+
+describe("searchExtensions with a slim projection", () => {
+  it("accepts objects without the long fields and returns the same objects", () => {
+    const slim: SearchableExtension & { readonly extra: number } = {
+      slug: "slim-tool",
+      name: "Slim Tool",
+      kind: "plugin",
+      categories: ["workflow"],
+      summary: "No description or guide here.",
+      tags: [],
+      hooks: [],
+      availability: "source-only",
+      extra: 1,
+    };
+    const results = searchExtensions([slim], { query: "slim" });
+    expect(results).toEqual([slim]);
+    expect(results[0].extra).toBe(1);
+    expect(searchExtensions([slim], { availability: "built-in" })).toEqual([]);
   });
 });

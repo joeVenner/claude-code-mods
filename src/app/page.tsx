@@ -5,7 +5,14 @@ import { FeaturedSection } from "@/components/home/FeaturedSection";
 import { InstallFlow } from "@/components/home/InstallFlow";
 import { KindExplorer } from "@/components/home/KindExplorer";
 import { TrustModel } from "@/components/home/TrustModel";
-import { pickFeatured, pickInstallExamples } from "@/components/home/home-data";
+import {
+  describeBuiltInMods,
+  pickFeatured,
+  pickInstallExamples,
+  pickRunFromSource,
+  selectBuiltInMods,
+} from "@/components/home/home-data";
+import { toListItems } from "@/components/catalog/ExtensionListItem";
 import {
   countByKind,
   getAllExtensions,
@@ -24,14 +31,18 @@ export const metadata: Metadata = {
 export default function HomePage(): ReactNode {
   const allExtensions = getAllExtensions();
   const featuredExtensions = getFeaturedExtensions();
+  const featuredPick = pickFeatured(featuredExtensions, allExtensions);
 
   return (
     <>
-      <Hero extensions={allExtensions} />
-      <KindExplorer counts={countByKind()} />
-      <FeaturedSection extensions={pickFeatured(featuredExtensions, allExtensions)} />
-      <InstallFlow examples={pickInstallExamples(featuredExtensions)} />
-      <TrustModel catalogDate={getCatalogGeneratedAt()} />
+      <Hero extensions={toListItems(allExtensions)} />
+      <KindExplorer counts={countByKind()} builtInModsNote={describeBuiltInMods(allExtensions)} />
+      <FeaturedSection extensions={featuredPick.extensions} isEditorialPick={featuredPick.isEditorial} />
+      <InstallFlow
+        examples={pickInstallExamples(allExtensions)}
+        runFromSource={pickRunFromSource(featuredExtensions)}
+      />
+      <TrustModel catalogDate={getCatalogGeneratedAt()} builtInMods={selectBuiltInMods(allExtensions)} />
     </>
   );
 }

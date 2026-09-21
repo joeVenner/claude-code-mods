@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "checkedAt": "2026-09-20",
+  "ideas": [
+    {
+      "slug": "claude-mod-guardrails",
+      "name": "Security Guardrails and Secret Scrubber",
+      "summary": "Would block destructive shell patterns and redact token-like strings from command arguments before a command or tool call runs.",
+      "description": [
+        "The spec says it would block destructive shell patterns such as recursive deletes and pipe-to-shell installs, and redact strings that look like cloud, Git host or chat tokens from command arguments.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "command:pre_exec",
+        "tool:pre_call"
+      ],
+      "specReference": "Report 03, section 2.1"
+    },
+    {
+      "slug": "claude-mod-git-sentinel",
+      "name": "Git Sentinel and Branch Hygiene",
+      "summary": "Would keep Claude from editing or pushing to protected branches and ask for feature branches and structured commit summaries.",
+      "description": [
+        "The spec says it would keep Claude from editing or pushing to protected branches such as main and require feature branches and structured commit summaries.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "session:init",
+        "command:pre_exec",
+        "turn:complete"
+      ],
+      "specReference": "Report 03, section 2.2"
+    },
+    {
+      "slug": "claude-mod-context-compressor",
+      "name": "Smart Context Compressor and Token Pruner",
+      "summary": "Would deduplicate repeated tool calls and shorten large historical outputs when context is compacted or pruned.",
+      "description": [
+        "The spec says it would deduplicate repeated tool calls and shorten large historical outputs when context is compacted or pruned. The report gives a token savings figure with no measurement behind it.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "context:inject",
+        "context:compact",
+        "context:prune"
+      ],
+      "specReference": "Report 03, section 2.3"
+    },
+    {
+      "slug": "claude-mod-ui-telemetry",
+      "name": "Terminal HUD and Realtime Cost Sparkline",
+      "summary": "Would show a status line above the prompt with a token sparkline and the cumulative session cost.",
+      "description": [
+        "The spec says it would show a status line above the prompt with a token sparkline and cumulative session cost.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "session:start",
+        "turn:post_prompt",
+        "turn:complete"
+      ],
+      "specReference": "Report 03, section 2.4"
+    },
+    {
+      "slug": "claude-mod-mcp-bridge",
+      "name": "Dynamic MCP Server-to-Hook Bridge",
+      "summary": "Would connect MCP servers to the hook system; the spec gives only its name, category and proposed events.",
+      "description": [
+        "The report lists it under Integration with the proposed events below and gives no further design detail.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "session:init",
+        "tool:filtering",
+        "tool:pre_call"
+      ],
+      "specReference": "Report 03, section 1 (registry table)"
+    },
+    {
+      "slug": "claude-mod-docker-sandbox",
+      "name": "Ephemeral Docker Container Isolation",
+      "summary": "Would isolate command execution in an ephemeral Docker container; the spec gives only its name, category and proposed events.",
+      "description": [
+        "The report lists it under Sandboxing with the proposed events below and gives no further design detail.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "command:pre_exec",
+        "session:exit"
+      ],
+      "specReference": "Report 03, section 1 (registry table)"
+    },
+    {
+      "slug": "claude-mod-agentic-eval",
+      "name": "LLM-as-a-Judge Pre-Commit Evaluator",
+      "summary": "Would have an LLM judge evaluate work before a commit; the spec gives only its name, category and proposed events.",
+      "description": [
+        "The report lists it under Quality Assurance with the proposed events below and gives no further design detail.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "turn:complete",
+        "command:pre_exec"
+      ],
+      "specReference": "Report 03, section 1 (registry table)"
+    },
+    {
+      "slug": "claude-mod-voice-alerts",
+      "name": "Terminal Audio and TTS Notifications",
+      "summary": "Would play terminal audio and text to speech notifications; the spec gives only its name, category and proposed events.",
+      "description": [
+        "The report lists it under Accessibility with the proposed events below and gives no further design detail.",
+        "No public repository was found: the URL the spec report gives for it returned HTTP 404 on 2026-09-20. This is a proposal, not something you can install.",
+        "The event names are copied from the spec and may not match the names the real engine uses. The report says it passed Tier A validation, but no scanning pipeline exists."
+      ],
+      "proposedEvents": [
+        "turn:complete",
+        "tool:pre_call"
+      ],
+      "specReference": "Report 03, section 1 (registry table)"
+    }
+  ]
+}

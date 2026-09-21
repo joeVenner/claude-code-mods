@@ -14,6 +14,7 @@ describe("isAllowedCatalogUrl", () => {
     ["other scheme", "ftp://github.com/example"],
     ["javascript scheme", "javascript:alert(1)"],
     ["unlisted host", "https://example.com/page"],
+    ["raw content host, used only by the verify script", "https://raw.githubusercontent.com/a/b/main/x.json"],
     ["look-alike subdomain", "https://github.com.evil.example/x"],
     ["look-alike prefix", "https://evilgithub.com/x"],
     ["credentials in userinfo", "https://user:pass@github.com/x"],
