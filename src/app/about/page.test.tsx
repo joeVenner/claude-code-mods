@@ -12,6 +12,17 @@ import AboutPage, { metadata } from "./page";
 beforeAll(stubIntersectionObserver);
 
 describe("about page", () => {
+  it("discloses the analytics in Vercel's own documented terms and links its privacy notes", () => {
+    render(<AboutPage />);
+    const section = document.getElementById("analytics");
+    expect(section).not.toBeNull();
+    expect(within(section as HTMLElement).getByText(/Vercel Web Analytics/)).toBeInTheDocument();
+    expect(section).toHaveTextContent("without third-party cookies");
+    expect(section).toHaveTextContent("24 hours");
+    const link = within(section as HTMLElement).getByRole("link", { name: /privacy and compliance notes/ });
+    expect(link).toHaveAttribute("href", "https://vercel.com/docs/analytics/privacy-policy");
+  });
+
   it("has exactly one h1 and no em or en dashes", () => {
     const { container } = render(<AboutPage />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);

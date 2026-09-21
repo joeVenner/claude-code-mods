@@ -165,6 +165,21 @@ export default function AboutPage(): ReactNode {
           </p>
         </Prose>
       </DocSection>
+
+      <DocSection id="analytics" title="Analytics">
+        <Prose>
+          <p>
+            This site uses Vercel Web Analytics to count page views. Vercel states that it works without third-party
+            cookies, identifies a visitor by a hash created from the incoming request, and discards that session after
+            24 hours. The site sets no cookies of its own; your light or dark theme choice is kept in your browser&apos;s local storage.
+          </p>
+          <p>
+            Read Vercel&apos;s{" "}
+            <TextLink href="https://vercel.com/docs/analytics/privacy-policy">privacy and compliance notes</TextLink>{" "}
+            for what is collected.
+          </p>
+        </Prose>
+      </DocSection>
     </DocPage>
   );
 }
