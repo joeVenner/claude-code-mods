@@ -15,12 +15,24 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - A catalog schema with availability (installable, built in, source only), a notice for caveats such as early access, labelled details, and a required guide for mods.
 - `npm run catalog:verify` and `npm run catalog:structure` (with `--only`) to check that URLs respond and that plugin and mod entries have their manifest files, refusing hosts outside an allowlist and checking every redirect hop.
 - A design system with light and dark themes, a landing page with live search, a browse page with URL-driven search, kind, category, availability and sort filters, detail pages for every entry, and Security, Publish and About pages that state what is and is not checked.
-- Custom 404 page, `sitemap.xml` and `robots.txt`.
+- Custom 404 page (kept out of search results), `sitemap.xml` and `robots.txt`.
+- Vercel Web Analytics through `@vercel/analytics`. It is disclosed on the About page and only records page views once it is enabled in the Vercel dashboard.
+- A brand kit: a rounded square in the accent green holding a `>_` prompt, with the wordmark "Claude Code Mods" in Geist. The mark is one set of shapes in `src/lib/seo/brandMark.ts` that draws the favicon, the icons and the share banner. It uses no Anthropic or Claude logo or mark. Files: a real multi-size `src/app/favicon.ico` (16, 32 and 48 px, built by `scripts/make-favicon.mjs` with no dependencies), a 32 px `icon.tsx`, a 180 px `apple-icon.tsx`, and a web app `manifest.ts` with 192 px, 512 px and maskable 512 px icons.
+- Link previews: a 1200 by 630 Open Graph and Twitter banner (`opengraph-image.tsx`, `twitter-image.tsx`) with the tagline and an "Unofficial community directory" note, plus a generated image for every extension page and the Ideas page showing the kind, name, summary, publisher and a "Built in" or "Community listing" tag. Catalog text is clamped and rendered only as text. Geist and Geist Mono font files sit in `src/assets/fonts/` under the SIL Open Font License, with the license text beside them.
+- One typed metadata helper in `src/lib/seo/` for every page: unique titles and descriptions, an absolute canonical URL with a trailing slash, Open Graph, Twitter cards, robots directives, author and creator, and an Atom feed link. Search console verification tags come from `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` and `NEXT_PUBLIC_BING_SITE_VERIFICATION` and are omitted when unset.
+- JSON-LD structured data: WebSite with a search action and a publisher on the home page, a CollectionPage with an ItemList on Browse, a BreadcrumbList and SoftwareSourceCode on each extension page, and a WebPage with breadcrumbs on the other pages. It states only facts in the catalog, and `license` appears only for a recognised SPDX id. The serializer escapes `<`, `>`, `&`, U+2028 and U+2029 so community text cannot close the script element.
+- `llms.txt` and `llms-full.txt` for AI search, following llmstxt.org: mods first, then the other kinds, site docs, and a clearly separate "Proposed ideas (not real, no public implementation)" section. Both are generated from the catalog.
+- An Atom feed at `/feed.xml`, newest source check first.
+- `robots.txt` names the search and AI crawlers it allows (Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, Claude-SearchBot, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended and CCBot).
+- `sitemap.xml` gives every entry its own last modified date and a change frequency and priority, with mods ranked above other kinds. The Ideas page is included.
+- A Deploy section in the README for Vercel.
 - GitHub Actions: `validate.yml` (typecheck, lint, tests and build on every pull request, catalog checks on changed community files, and an advisory path check) and a weekly `reverify.yml` that re-checks every entry so link rot shows up as a failed run.
 - `.github/CODEOWNERS`, a pull request template, an issue template for wrong or dead listings, and `CONTRIBUTING.md`.
 
 ### Changed
 
+- The site deploys on Vercel, not Cloudflare Pages. `NEXT_PUBLIC_SITE_URL` defaults to `https://claudecodemods.com` in production builds, so canonical URLs and the sitemap never say localhost.
+- Page titles and descriptions are rewritten for search: titles fit 60 characters with the site name, descriptions are 110 to 160 characters, and extension pages read "<name>, a <kind> for Claude Code".
 - Nothing on the site claims a listing was reviewed or scanned. "Source verified" means the source URL responded on the catalog date, and the proposed security tiers are described as a design with no scanner.
 - The four Anthropic mods are described as their README describes them: early access, shipped inside Claude Code, source published as built, and under "All rights reserved" terms, not open source.
 
@@ -29,4 +41,4 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Validation workflows run on `pull_request` (never `pull_request_target`) or on a schedule, with read-only permissions, no secrets, actions pinned to full commit SHAs, `npm ci --ignore-scripts`, and changed file names passed NUL separated. The community diff uses `--no-renames`.
 - Link components reject any href that is not an internal path, an anchor or a plain https URL, and external links keep `noopener noreferrer`.
 - Catalog URLs must be https, on an allowlisted host, with no credentials or custom ports.
-- Cloudflare Pages `_headers` with a Content-Security-Policy, HSTS, `nosniff`, a referrer policy, a permissions policy and immutable caching for static assets.
+- Security headers in `vercel.json`: a Content-Security-Policy, HSTS, `nosniff`, a referrer policy and a permissions policy. The site deploys on Vercel, so the earlier Cloudflare Pages `_headers` file is gone.
