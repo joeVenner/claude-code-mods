@@ -72,6 +72,23 @@ npm run sync:events -- --sha <commit> --write  # pin a specific upstream commit
 
 CI (`.github/workflows/validate.yml`) runs typecheck, lint, tests and a build on every pull request, runs the two catalog checks on the community files a pull request adds or changes, and asks a submission to touch only `src/data/community/`. That last check is advisory, because a pull request runs its own workflow; the real protection is `.github/CODEOWNERS` plus a branch ruleset that requires code owner review. `.github/workflows/reverify.yml` re-runs both catalog checks on every entry each week, so link rot or a rewritten repository shows up as a failed run.
 
+## Learn pages and the starter mod
+
+`/learn/` and `/learn/getting-started/` teach Claude Mods. Their copy is typed data in `src/components/docs/learnContent.ts`, and each claim in it comes from a linked source or from a command run on the Claude Code version named on the page (`TESTED_WITH`). Nothing is copied from Anthropic's type declarations, which are published under "All rights reserved" terms.
+
+`templates/mod-starter/` is a complete mod that refuses a Bash call which force pushes with git. The Getting started page reads its files at build time through `src/lib/starter-mod.ts`, and a test fails if the folder holds a file the page does not show. To check it:
+
+```bash
+npm run test:starter                          # CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude plugin test templates/mod-starter
+claude plugin validate templates/mod-starter
+```
+
+`claude plugin test` does not exist unless `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` is set, which the script does for that one command. CI does not run it, because the Claude Code CLI is not installed there, so the page dates its claim ("passed on Claude Code X on DATE") and this script is how a maintainer re-checks it.
+
+Testing a mod runs its code, so read a folder before you run it. The variable is set on the command, not exported, so it is not left on for later sessions.
+
+The folder is excluded from `tsconfig.json`: it imports `claude-code` types that Claude Code writes with `/plugin-types`, and the site's own tests do not run it. Re-run the tests above when Claude Code updates, and update `TESTED_WITH` when you do.
+
 ## SEO, GEO and previews
 
 Everything below is generated at build time from the catalog, so nothing lists an entry by hand. Code lives in `src/lib/seo/` (pure and unit tested) and `src/components/seo/`.
