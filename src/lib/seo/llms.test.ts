@@ -112,6 +112,12 @@ describe("buildLlmsTxt", () => {
     for (const idea of catalogInput.ideas) expect(directory).not.toContain(idea.name);
   });
 
+  it("links the catalog JSON under Optional and says it is data, not a marketplace", () => {
+    const optional = text.slice(text.indexOf("## Optional"));
+    expect(optional).toContain(`](${SITE_URL}/catalog.json)`);
+    expect(optional).toContain("not a plugin marketplace");
+  });
+
   it("puts every idea in its own clearly labelled section", () => {
     const ideasSection = text.slice(text.indexOf(`## ${LLMS_IDEAS_HEADING}`), text.indexOf("## Optional"));
     expect(ideasSection).toContain("none can be installed");

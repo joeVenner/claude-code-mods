@@ -108,6 +108,19 @@ describe("vercel.json headers", () => {
     expect(contentTypeFor("/llms-full.txt")).toBe("text/plain; charset=utf-8");
   });
 
+  it("serves the catalog JSON as utf-8 JSON that any origin may read, because it is public and read-only", () => {
+    expect(contentTypeFor("/catalog.json")).toBe("application/json; charset=utf-8");
+    const rule = rulesMatching("/catalog.json").find((candidate) => candidate.source === "/catalog.json");
+    expect(valueOf(rule as HeaderRule, "Access-Control-Allow-Origin")).toBe("*");
+  });
+
+  it("does not open cross-origin access for any other path", () => {
+    for (const urlPath of ["/", "/browse/", "/feed.xml", "/llms.txt", "/hooks/"]) {
+      const opensAccess = rulesMatching(urlPath).some((rule) => valueOf(rule, "Access-Control-Allow-Origin") !== undefined);
+      expect(opensAccess, urlPath).toBe(false);
+    }
+  });
+
   it("still applies the security headers on top of the type rules", () => {
     expect(rulesMatching("/extensions/diff/opengraph-image")).toContain(globalRule);
   });

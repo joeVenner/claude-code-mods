@@ -35,7 +35,7 @@ describe("sitemap", () => {
     expect(new Set(urls).size).toBe(urls.length);
     for (const url of urls) {
       expect(url.startsWith(`${SITE_URL}/`)).toBe(true);
-      expect(url).not.toMatch(/llms|feed\.xml|\.txt$|\?/);
+      expect(url).not.toMatch(/llms|feed\.xml|catalog\.json|\.txt$|\?/);
     }
   });
 
