@@ -7,6 +7,7 @@ import {
 } from "@/components/catalog/__fixtures__/extensions";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/ui/testSupport";
 import type { Extension } from "@/lib/types";
+import { hookEventHrefs } from "@/lib/event-names";
 import { ExtensionDetail } from "./ExtensionDetail";
 import { collectExtensionLinks } from "./ExtensionLinks";
 import { BUILT_IN_EXPLANATION, NO_INSTALL_COMMAND } from "./InstallSection";
@@ -207,6 +208,44 @@ describe("ExtensionDetail: mod with a guide", () => {
     expect(screen.queryByRole("heading", { name: "Lifecycle hooks" })).not.toBeInTheDocument();
     expect(within(section as HTMLElement).getByText("classic.*")).toBeInTheDocument();
     expect(within(section as HTMLElement).getByText("session.start")).toBeInTheDocument();
+  });
+
+  it("links a hook that has an href to its event row and leaves the others as text", () => {
+    render(
+      <ExtensionDetail
+        extension={mod}
+        related={[]}
+        hookHrefs={new Map([["session.start", "/hooks/#event-session.start"]])}
+      />,
+    );
+    const section = screen.getByRole("heading", { level: 2, name: "Hooks it registers" }).closest("section") as HTMLElement;
+    const link = within(section).getByRole("link", { name: "session.start" });
+    expect(link.getAttribute("href")).toMatch(/^\/hooks\/?#event-session\.start$/);
+    expect(within(section).queryByRole("link", { name: "classic.*" })).not.toBeInTheDocument();
+    expect(within(section).getByText("classic.*")).toBeInTheDocument();
+  });
+
+  it("marks a linked hook with an underline and a title, so it is not told apart by hover alone", () => {
+    render(<ExtensionDetail extension={mod} related={[]} hookHrefs={new Map([["session.start", "/hooks/#event-session.start"]])} />);
+    const link = screen.getByRole("link", { name: "session.start" });
+    expect(link).toHaveAttribute("title", "Open in the event reference");
+    expect(within(link).getByText("session.start").className).toContain("underline");
+    expect(screen.getByText("classic.*").className).not.toContain("underline");
+  });
+
+  it("renders an entry whose hooks are the names every object inherits, instead of failing the build", () => {
+    const hostile = withOverrides(mod, { hooks: ["constructor", "__proto__", "toString", "hasOwnProperty"] });
+    const hrefs = hookEventHrefs(hostile.hooks, [{ name: "tool.call" }], "/hooks/", true);
+    render(<ExtensionDetail extension={hostile} related={[]} hookHrefs={hrefs} />);
+    const section = screen.getByRole("heading", { level: 2, name: "Hooks it registers" }).closest("section") as HTMLElement;
+    for (const name of ["constructor", "__proto__", "toString", "hasOwnProperty"]) expect(within(section).getByText(name)).toBeInTheDocument();
+    expect(within(section).queryAllByRole("link")).toHaveLength(0);
+  });
+
+  it("shows every hook as text when the page passes no links", () => {
+    render(<ExtensionDetail extension={mod} related={[]} />);
+    const section = screen.getByRole("heading", { level: 2, name: "Hooks it registers" }).closest("section") as HTMLElement;
+    expect(within(section).queryAllByRole("link")).toHaveLength(0);
   });
 
   it("shows the stored license exactly and no stars", () => {

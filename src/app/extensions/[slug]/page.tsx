@@ -4,8 +4,11 @@ import type { ReactNode } from "react";
 import { ExtensionDetail } from "@/components/detail/ExtensionDetail";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllExtensions, getExtensionBySlug, getRelatedExtensions } from "@/lib/catalog";
+import { hookEventHrefs } from "@/lib/event-names";
+import { getEvents } from "@/lib/events";
 import { buildExtensionGraph } from "@/lib/seo/jsonLd";
 import { buildExtensionMetadata } from "@/lib/seo/metadata";
+import { PAGE_SEO } from "@/lib/seo/pages";
 
 // Static export: only slugs from the catalog exist, anything else is a 404.
 export const dynamicParams = false;
@@ -32,7 +35,11 @@ export default async function ExtensionPage({ params }: ExtensionPageProps): Pro
   return (
     <>
       <JsonLd data={buildExtensionGraph(extension)} />
-      <ExtensionDetail extension={extension} related={getRelatedExtensions(slug)} />
+      <ExtensionDetail
+        extension={extension}
+        related={getRelatedExtensions(slug)}
+        hookHrefs={hookEventHrefs(extension.hooks, getEvents(), PAGE_SEO.hooks.path, extension.kind !== "mod")}
+      />
     </>
   );
 }
