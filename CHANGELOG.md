@@ -46,6 +46,10 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Nothing on the site claims a listing was reviewed or scanned. "Source verified" means the source URL responded on the catalog date, and the proposed security tiers are described as a design with no scanner.
 - The four Anthropic mods are described as their README describes them: early access, shipped inside Claude Code, source published as built, and under "All rights reserved" terms, not open source.
 
+### Fixed
+
+- Sections that fade in as they scroll into view stayed invisible when they were taller than five windows. The wrapper waited for 20 percent of a section to be on screen, which a section that tall can never reach, so the whole event reference on `/hooks/` (over 12,000 pixels on a desktop and 16,000 on a phone) was blank however far you scrolled. A section now fades in as soon as any part of it is on screen. A test holds the setting, and a scroll check in a real browser confirmed that no section on any main page stays hidden at desktop and phone widths.
+
 ### Security
 
 - Validation workflows run on `pull_request` (never `pull_request_target`) or on a schedule, with read-only permissions, no secrets, actions pinned to full commit SHAs, `npm ci --ignore-scripts`, and changed file names passed NUL separated. The community diff uses `--no-renames`.
