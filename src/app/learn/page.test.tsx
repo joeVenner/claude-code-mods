@@ -93,6 +93,17 @@ describe("learn page", () => {
     expect(container.textContent).not.toMatch(/\b(reviewed|scanned|audited|verified by)\b/i);
   });
 
+  it("gives the video tutorials and the getting-started guide their own prominent buttons, above the fold", () => {
+    render(<LearnPage />);
+    const primary = screen.getByRole("link", { name: "Watch the video tutorials" });
+    const secondary = screen.getByRole("link", { name: "Build your first mod" });
+    expect(pathOf(primary)).toBe("/learn/tutorials");
+    expect(pathOf(secondary)).toBe("/learn/getting-started");
+    // Both buttons come before the first h2, so they read as an action a visitor can take immediately.
+    const firstHeading = screen.getAllByRole("heading", { level: 2 })[0];
+    expect(primary.compareDocumentPosition(firstHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("links on to getting started, the migration guide, the video tutorials and the security page", () => {
     render(<LearnPage />);
     expect(pathOf(screen.getByRole("link", { name: "Getting started guide" }))).toBe("/learn/getting-started");

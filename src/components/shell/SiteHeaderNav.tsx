@@ -1,6 +1,6 @@
 "use client";
 
-import { List, X } from "@phosphor-icons/react/ssr";
+import { CaretDown, List, X } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -23,11 +23,100 @@ function navLinkClassName(isActive: boolean): string {
   );
 }
 
+interface DesktopDropdownProps {
+  readonly link: NavLink;
+  readonly isActive: boolean;
+  readonly pathname: string;
+}
+
 /**
- * Right side of the header: desktop links, theme toggle, and the mobile disclosure menu.
- * The menu is a plain disclosure (not a modal), so focus is never trapped; Escape and
- * route changes close it. Open state is stored with the pathname it was opened on, which
- * closes it on navigation without an effect.
+ * A nav item with a dropdown of subpages: the label is still a real link to `link.href` (a reader who
+ * never opens the menu can still click straight to the section), and a separate caret button toggles a
+ * panel listing `link.children`. Closes on Escape (focus returns to the caret), on an outside click, and
+ * on navigation. Not a full ARIA `menu`: like the mobile disclosure this component already used, it is a
+ * plain disclosure panel of ordinary links, so Tab moves through it naturally and nothing traps focus.
+ */
+function DesktopDropdown({ link, isActive, pathname }: DesktopDropdownProps): ReactNode {
+  const [openedOnPath, setOpenedOnPath] = useState<string | null>(null);
+  const isOpen = openedOnPath !== null && openedOnPath === pathname;
+  const containerRef = useRef<HTMLLIElement>(null);
+  const caretButtonRef = useRef<HTMLButtonElement>(null);
+  const panelId = `${link.href.replace(/\W+/g, "-")}-submenu`;
+
+  if (openedOnPath !== null && openedOnPath !== pathname) setOpenedOnPath(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key !== "Escape") return;
+      setOpenedOnPath(null);
+      caretButtonRef.current?.focus();
+    }
+    function handlePointerDown(event: PointerEvent): void {
+      if (containerRef.current?.contains(event.target as Node)) return;
+      setOpenedOnPath(null);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <li ref={containerRef} className="relative">
+      <div className="flex items-center">
+        <Link href={link.href} aria-current={isActive ? "page" : undefined} className={cn(navLinkClassName(isActive), "pr-1.5")}>
+          {link.label}
+        </Link>
+        <button
+          ref={caretButtonRef}
+          type="button"
+          onClick={() => setOpenedOnPath(isOpen ? null : pathname)}
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          aria-label={`${link.label} submenu`}
+          className={cn(
+            "inline-flex min-h-11 items-center rounded-control px-1.5 transition-colors duration-150 lg:min-h-10",
+            isActive ? "bg-surface-2 text-fg" : "text-fg-muted hover:bg-surface hover:text-fg",
+          )}
+        >
+          <CaretDown size={14} weight="bold" aria-hidden="true" className={cn("transition-transform duration-150", isOpen && "rotate-180")} />
+        </button>
+      </div>
+      <ul
+        id={panelId}
+        hidden={!isOpen}
+        className={cn(
+          "absolute left-0 top-full mt-1 flex min-w-[13rem] flex-col gap-0.5 rounded-panel border border-border bg-bg p-1.5 shadow-lg",
+          Z_CLASS.menu,
+        )}
+      >
+        {(link.children ?? []).map((child) => (
+          <li key={child.href}>
+            <Link
+              href={child.href}
+              aria-current={isNavLinkActive(pathname, child) ? "page" : undefined}
+              onClick={() => setOpenedOnPath(null)}
+              className={cn(navLinkClassName(isNavLinkActive(pathname, child)), "block w-full")}
+            >
+              {child.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
+}
+
+/**
+ * Right side of the header: desktop links (one of which, Learn, opens a dropdown of subpages),
+ * theme toggle, and the mobile disclosure menu. The mobile menu is a plain disclosure (not a
+ * modal), so focus is never trapped; Escape and route changes close it. Open state is stored with
+ * the pathname it was opened on, which closes it on navigation without an effect.
  */
 export function SiteHeaderNav({ links }: SiteHeaderNavProps): ReactNode {
   const pathname = usePathname();
@@ -62,6 +151,9 @@ export function SiteHeaderNav({ links }: SiteHeaderNavProps): ReactNode {
         <ul className="flex items-center gap-1">
           {links.map((link) => {
             const isActive = isNavLinkActive(pathname, link);
+            if (link.children !== undefined) {
+              return <DesktopDropdown key={link.href} link={link} isActive={isActive} pathname={pathname} />;
+            }
             return (
               <li key={link.href}>
                 <Link
@@ -117,6 +209,22 @@ export function SiteHeaderNav({ links }: SiteHeaderNavProps): ReactNode {
                 >
                   {link.label}
                 </Link>
+                {link.children === undefined ? null : (
+                  <ul className="flex flex-col border-l border-border pl-3">
+                    {link.children.map((child) => (
+                      <li key={child.href}>
+                        <Link
+                          href={child.href}
+                          aria-current={isNavLinkActive(pathname, child) ? "page" : undefined}
+                          onClick={() => setOpenedOnPath(null)}
+                          className={cn(navLinkClassName(isNavLinkActive(pathname, child)), "w-full")}
+                        >
+                          {child.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             );
           })}

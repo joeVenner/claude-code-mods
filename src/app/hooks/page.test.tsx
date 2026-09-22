@@ -37,7 +37,14 @@ describe("hooks page", () => {
     expect(screen.getByRole("heading", { level: 3, name: /^Engine/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: /^Calls on \$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: /^Classic/ })).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(`Showing ${getEvents().length} of ${getEvents().length} events`);
+  });
+
+  it("browses with each family collapsed behind a native summary, closed by default", () => {
+    const { container } = render(<HooksPage />);
+    const familyDetails = container.querySelectorAll("#events details");
+    expect(familyDetails).toHaveLength(3);
+    for (const details of familyDetails) expect((details as HTMLDetailsElement).open, details.textContent ?? "").toBe(false);
+    expect(screen.getByText(`${getEvents().length} events in 3 families. Open one, or filter to see matches right away.`)).toBeInTheDocument();
   });
 
   it("gives every event a row that links its declaring line and lists exactly the entries the reference says use it", () => {

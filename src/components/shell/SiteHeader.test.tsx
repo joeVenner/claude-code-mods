@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NAV_LINKS, isNavLinkActive } from "@/lib/site";
@@ -36,6 +36,105 @@ describe("SiteHeader", () => {
     browseLinks.forEach((link) => expect(link).toHaveAttribute("aria-current", "page"));
     const aboutLinks = screen.getAllByRole("link", { name: "About", hidden: true });
     aboutLinks.forEach((link) => expect(link).not.toHaveAttribute("aria-current"));
+  });
+
+  describe("Learn dropdown", () => {
+    const learn = NAV_LINKS.find((link) => link.label === "Learn");
+    if (learn?.children === undefined) throw new Error("fixture assumption: Learn has children");
+    const children = learn.children;
+
+    it("starts closed, and the Learn label itself still links straight to /learn/", () => {
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      expect(within(desktopNav).getByRole("link", { name: "Learn" })).toHaveAttribute("href", "/learn");
+      const caret = within(desktopNav).getByRole("button", { name: "Learn submenu" });
+      expect(caret).toHaveAttribute("aria-expanded", "false");
+      expect(document.getElementById(caret.getAttribute("aria-controls") as string)).toHaveAttribute("hidden");
+    });
+
+    it("opens on click and lists every child with its real href", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      await user.click(within(desktopNav).getByRole("button", { name: "Learn submenu" }));
+
+      expect(within(desktopNav).getByRole("button", { name: "Learn submenu" })).toHaveAttribute("aria-expanded", "true");
+      for (const child of children) {
+        expect(within(desktopNav).getByRole("link", { name: child.label })).toHaveAttribute("href", child.href.replace(/\/$/, ""));
+      }
+    });
+
+    it("closes on Escape and returns focus to the caret", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      const caret = within(desktopNav).getByRole("button", { name: "Learn submenu" });
+      await user.click(caret);
+      expect(caret).toHaveAttribute("aria-expanded", "true");
+
+      await user.keyboard("{Escape}");
+
+      expect(caret).toHaveAttribute("aria-expanded", "false");
+      expect(caret).toHaveFocus();
+    });
+
+    it("closes on a click outside the dropdown", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      await user.click(within(desktopNav).getByRole("button", { name: "Learn submenu" }));
+      expect(within(desktopNav).getByRole("button", { name: "Learn submenu" })).toHaveAttribute("aria-expanded", "true");
+
+      await user.click(document.body);
+
+      expect(within(desktopNav).getByRole("button", { name: "Learn submenu" })).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("closes when a child link is chosen", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      await user.click(within(desktopNav).getByRole("button", { name: "Learn submenu" }));
+      const link = within(desktopNav).getByRole("link", { name: children[0].label });
+      link.addEventListener("click", (event) => event.preventDefault());
+
+      await user.click(link);
+
+      expect(within(desktopNav).getByRole("button", { name: "Learn submenu" })).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("also lists every child, always visible, in the mobile menu", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      await user.click(screen.getByRole("button", { name: "Open menu" }));
+      const mobileNav = screen.getByRole("navigation", { name: "Mobile" });
+      for (const child of children) {
+        expect(within(mobileNav).getByRole("link", { name: child.label })).toHaveAttribute("href", child.href.replace(/\/$/, ""));
+      }
+    });
+
+    it("marks the active child with aria-current in both the dropdown and the mobile menu", async () => {
+      pathnameMock.current = children[0].href;
+      const user = userEvent.setup();
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      await user.click(within(desktopNav).getByRole("button", { name: "Learn submenu" }));
+      expect(within(desktopNav).getByRole("link", { name: children[0].label })).toHaveAttribute("aria-current", "page");
+      expect(within(desktopNav).getByRole("link", { name: children[1].label })).not.toHaveAttribute("aria-current");
+
+      await user.click(screen.getByRole("button", { name: "Open menu" }));
+      const mobileNav = screen.getByRole("navigation", { name: "Mobile" });
+      expect(within(mobileNav).getByRole("link", { name: children[0].label })).toHaveAttribute("aria-current", "page");
+    });
+
+    it("does not give any other top-level link a dropdown", () => {
+      render(<SiteHeader />);
+      const desktopNav = screen.getByRole("navigation", { name: "Primary" });
+      const others = NAV_LINKS.filter((link) => link.label !== "Learn");
+      for (const link of others) {
+        expect(within(desktopNav).queryByRole("button", { name: `${link.label} submenu` }), link.label).not.toBeInTheDocument();
+      }
+    });
   });
 
   describe("mobile menu", () => {

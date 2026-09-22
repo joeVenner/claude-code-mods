@@ -50,11 +50,25 @@ export interface NavLink {
   readonly href: string;
   /** Extra path prefixes that should also mark this link as the current section. */
   readonly matchPrefixes?: readonly string[];
+  /**
+   * Subpages shown in a dropdown under this link. The link itself still goes to `href` directly;
+   * the dropdown is an addition, not a replacement, so clicking the label always works even for a
+   * reader who never opens the menu. Only a top-level `NavLink` may have children: one level deep.
+   */
+  readonly children?: readonly NavLink[];
 }
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: "Browse", href: "/browse/", matchPrefixes: ["/extensions/"] },
-  { label: "Learn", href: "/learn/" },
+  {
+    label: "Learn",
+    href: "/learn/",
+    children: [
+      { label: "Getting started", href: "/learn/getting-started/" },
+      { label: "Migration", href: "/learn/migration/" },
+      { label: "Video tutorials", href: "/learn/tutorials/" },
+    ],
+  },
   { label: "Hooks", href: "/hooks/" },
   { label: "Ideas", href: "/ideas/" },
   { label: "Security", href: "/security/" },
@@ -62,10 +76,11 @@ export const NAV_LINKS: readonly NavLink[] = [
   { label: "About", href: "/about/" },
 ];
 
-/** True when `pathname` belongs to the section a nav link represents. */
+/** True when `pathname` belongs to the section a nav link represents, including any of its dropdown children. */
 export function isNavLinkActive(pathname: string, link: NavLink): boolean {
   const normalizedPathname = pathname.endsWith("/") ? pathname : `${pathname}/`;
-  return [link.href, ...(link.matchPrefixes ?? [])].some((prefix) => normalizedPathname.startsWith(prefix));
+  const prefixes = [link.href, ...(link.matchPrefixes ?? []), ...(link.children ?? []).map((child) => child.href)];
+  return prefixes.some((prefix) => normalizedPathname.startsWith(prefix));
 }
 
 /**

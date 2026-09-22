@@ -5,6 +5,7 @@ import { FeaturedSection } from "@/components/home/FeaturedSection";
 import { InstallFlow } from "@/components/home/InstallFlow";
 import { KindExplorer } from "@/components/home/KindExplorer";
 import { TrustModel } from "@/components/home/TrustModel";
+import { TutorialsShowcase } from "@/components/home/TutorialsShowcase";
 import {
   describeBuiltInMods,
   pickFeatured,
@@ -38,6 +39,7 @@ export default function HomePage(): ReactNode {
       <Hero extensions={toListItems(allExtensions)} />
       <KindExplorer counts={countByKind()} builtInModsNote={describeBuiltInMods(allExtensions)} />
       <FeaturedSection extensions={featuredPick.extensions} isEditorialPick={featuredPick.isEditorial} />
+      <TutorialsShowcase />
       <InstallFlow
         examples={pickInstallExamples(allExtensions)}
         runFromSource={pickRunFromSource(featuredExtensions)}
