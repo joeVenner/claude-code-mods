@@ -5,6 +5,7 @@ import { absoluteUrl as rawAbsoluteUrl, buildExtensionDescription, extensionPath
 import { toSingleLine } from "@/lib/seo/text";
 import { toSafeOutputUrl } from "@/lib/url";
 import { VIDEO_GROUP_DURATIONS, type Video } from "@/components/docs/tutorialsContent";
+import type { FaqEntry } from "@/components/docs/learnContent";
 
 /**
  * Schema.org structured data, built as plain objects and serialised by `serializeJsonLd`.
@@ -185,6 +186,48 @@ export function buildDocPageGraph(page: PageSeo): JsonLdGraph {
       ...(page.breadcrumbParent === undefined ? [] : [{ name: page.breadcrumbParent.label, path: page.breadcrumbParent.path }]),
       { name: page.breadcrumbLabel, path: page.path },
     ]),
+  );
+}
+
+/**
+ * Learn page: its WebPage and breadcrumb, plus a FAQPage listing every question the page's own FAQ
+ * section answers, verbatim. Google's structured data guidelines expect FAQ text in the markup to
+ * match text visible on the page, so this reads the exact same `LEARN_FAQ` array the section renders.
+ */
+export function buildLearnGraph(faqItems: readonly FaqEntry[]): JsonLdGraph {
+  // Widened to PageSeo, the same way buildDocPageGraph's parameter is: PAGE_SEO's `as const` gives
+  // PAGE_SEO.learn a literal type with no breadcrumbParent key at all, not an optional undefined one.
+  const page: PageSeo = PAGE_SEO.learn;
+  const faqId = `${absoluteUrl(page.path)}#faq`;
+  return graph(
+    {
+      "@type": "WebPage",
+      "@id": `${absoluteUrl(page.path)}#page`,
+      name: page.title,
+      description: page.description,
+      url: absoluteUrl(page.path),
+      isPartOf: { "@id": WEBSITE_ID },
+      inLanguage: "en",
+      ...(faqItems.length === 0 ? {} : { mainEntity: { "@id": faqId } }),
+    },
+    buildBreadcrumbList([
+      HOME_STEP,
+      ...(page.breadcrumbParent === undefined ? [] : [{ name: page.breadcrumbParent.label, path: page.breadcrumbParent.path }]),
+      { name: page.breadcrumbLabel, path: page.path },
+    ]),
+    ...(faqItems.length === 0
+      ? []
+      : [
+          {
+            "@type": "FAQPage",
+            "@id": faqId,
+            mainEntity: faqItems.map((item) => ({
+              "@type": "Question",
+              name: toSingleLine(item.question),
+              acceptedAnswer: { "@type": "Answer", text: toSingleLine(item.answer) },
+            })),
+          } satisfies JsonLdNode,
+        ]),
   );
 }
 

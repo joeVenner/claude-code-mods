@@ -5,12 +5,14 @@ import { getAllExtensions } from "@/lib/catalog";
 import { COMMUNITY_REPOSITORY_URL, SITE_URL } from "@/lib/site";
 import type { Extension } from "@/lib/types";
 import { VIDEOS } from "@/components/docs/tutorialsContent";
+import { LEARN_FAQ } from "@/components/docs/learnContent";
 import {
   BROWSE_LIST_MAX_ITEMS,
   buildBrowseGraph,
   buildDocPageGraph,
   buildExtensionGraph,
   buildHomeGraph,
+  buildLearnGraph,
   buildTutorialsGraph,
   serializeJsonLd,
   spdxLicenseUrl,
@@ -332,6 +334,55 @@ describe("buildTutorialsGraph", () => {
     const empty = buildTutorialsGraph([]);
     expect(nodesOfType(empty, "VideoObject")).toEqual([]);
     expect(nodeOfType(empty, "WebPage").video).toBeUndefined();
+  });
+
+  it("round-trips through the serializer and contains no long dashes", () => {
+    const json = serializeJsonLd(graph);
+    expect(DASH_PATTERN.test(json)).toBe(false);
+    expect(roundTrip(graph)).toEqual(graph);
+  });
+});
+
+describe("buildLearnGraph", () => {
+  const graph = buildLearnGraph(LEARN_FAQ);
+
+  it("has a WebPage, its two step breadcrumb, and one FAQPage listing every question", () => {
+    expect(types(graph)).toEqual(["WebPage", "BreadcrumbList", "FAQPage"]);
+    const crumbs = nodeOfType(graph, "BreadcrumbList").itemListElement as readonly { name: string }[];
+    expect(crumbs.map((crumb) => crumb.name)).toEqual(["Home", "Learn"]);
+    const faq = nodeOfType(graph, "FAQPage").mainEntity as readonly { name: string }[];
+    expect(faq).toHaveLength(LEARN_FAQ.length);
+  });
+
+  it("links the WebPage forward to the FAQPage by @id, like the browse and tutorials graphs link their own child nodes", () => {
+    const webPage = nodeOfType(graph, "WebPage");
+    const faqPage = nodeOfType(graph, "FAQPage");
+    expect(webPage.mainEntity).toEqual({ "@id": faqPage["@id"] });
+  });
+
+  it("has no mainEntity on the WebPage when there are no questions", () => {
+    const empty = buildLearnGraph([]);
+    expect(nodeOfType(empty, "WebPage")).not.toHaveProperty("mainEntity");
+  });
+
+  it("gives each question its exact question and answer text, unchanged, so it matches the visible section", () => {
+    const faq = nodeOfType(graph, "FAQPage").mainEntity as readonly {
+      "@type": string;
+      name: string;
+      acceptedAnswer: { "@type": string; text: string };
+    }[];
+    for (const entry of LEARN_FAQ) {
+      const node = faq.find((candidate) => candidate.name === entry.question);
+      expect(node, entry.id).toBeDefined();
+      expect(node?.["@type"]).toBe("Question");
+      expect(node?.acceptedAnswer["@type"]).toBe("Answer");
+      expect(node?.acceptedAnswer.text).toBe(entry.answer);
+    }
+  });
+
+  it("has no FAQPage node for no questions, without failing", () => {
+    const empty = buildLearnGraph([]);
+    expect(types(empty)).toEqual(["WebPage", "BreadcrumbList"]);
   });
 
   it("round-trips through the serializer and contains no long dashes", () => {

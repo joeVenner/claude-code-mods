@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Two prominent buttons at the top of `/learn/`, above the first section: "Watch the video tutorials" and "Build your first mod", so both are visible without reading the page's closing paragraph.
 - The header's Learn link now opens a dropdown of its three subpages (Getting started, Migration, Video tutorials) on click, closing on Escape, an outside click or choosing a page; Learn itself still links straight to `/learn/`. The mobile menu lists the same three pages indented under Learn, always visible. `NavLink` gained an optional `children` field for this, one level deep, used only by Learn.
 - A video showcase on the home page, between the featured mods and the install flow: the 4 Basic tutorial videos (a real filtered subset of the 9, not a hand-picked list), each a poster image and title that link to its exact clip on `/learn/tutorials/`. No video plays on the home page itself.
+- A "Frequently asked questions" section on `/learn/`, six questions each restating a fact the page already states and sources above it, with matching `FAQPage` JSON-LD (`Question`/`acceptedAnswer`) linked from the page's own `WebPage` node. Each question is a real heading with its own deep-linkable anchor, and tests cross-check the visible text, the JSON-LD text and the section it restates all say the exact same thing, so the three cannot drift apart.
 
 ### Changed
 
