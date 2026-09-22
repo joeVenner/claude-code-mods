@@ -2,6 +2,8 @@
 
 An unofficial community directory of Claude Code mods and extensions: mods, plugins, skills, agents, hooks, MCP servers and slash commands.
 
+**Live site: [claudecodemods.com](https://claudecodemods.com)**
+
 > Not affiliated with or endorsed by Anthropic.
 
 ## Mods first
