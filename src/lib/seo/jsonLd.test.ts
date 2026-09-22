@@ -4,18 +4,24 @@ import { DASH_PATTERN } from "@/components/docs/testSupport";
 import { getAllExtensions } from "@/lib/catalog";
 import { COMMUNITY_REPOSITORY_URL, SITE_URL } from "@/lib/site";
 import type { Extension } from "@/lib/types";
+import { VIDEOS } from "@/components/docs/tutorialsContent";
 import {
   BROWSE_LIST_MAX_ITEMS,
   buildBrowseGraph,
   buildDocPageGraph,
   buildExtensionGraph,
   buildHomeGraph,
+  buildTutorialsGraph,
   serializeJsonLd,
   spdxLicenseUrl,
   type JsonLdGraph,
   type JsonLdNode,
 } from "./jsonLd";
 import { PAGE_SEO } from "./pages";
+
+function nodesOfType(graph: JsonLdGraph, type: string): readonly JsonLdNode[] {
+  return graph["@graph"].filter((candidate) => candidate["@type"] === type);
+}
 
 const HOSTILE = "</script><script>alert(1)</script>";
 const LINE_SEPARATOR = String.fromCharCode(0x2028);
@@ -276,5 +282,61 @@ describe("extension graph", () => {
       const parsed = JSON.parse(json) as JsonLdGraph;
       expect(nodeOfType(parsed, "SoftwareSourceCode").codeRepository).toBe(extension.repositoryUrl);
     }
+  });
+});
+
+describe("buildTutorialsGraph", () => {
+  const graph = buildTutorialsGraph(VIDEOS);
+  const videoNodes = nodesOfType(graph, "VideoObject");
+
+  it("has a WebPage, its breadcrumb with Learn as the parent step, and one VideoObject per video", () => {
+    expect(types(graph)).toEqual(["WebPage", "BreadcrumbList", ...VIDEOS.map(() => "VideoObject")]);
+    expect(videoNodes).toHaveLength(VIDEOS.length);
+    const crumbs = nodeOfType(graph, "BreadcrumbList").itemListElement as readonly { name: string }[];
+    expect(crumbs.map((crumb) => crumb.name)).toEqual(["Home", "Learn", "Tutorials"]);
+  });
+
+  it("gives every VideoObject the exact video and poster URLs, a name, a description and an upload date", () => {
+    for (const video of VIDEOS) {
+      const node = videoNodes.find((candidate) => candidate.contentUrl === video.videoUrl);
+      expect(node, video.id).toBeDefined();
+      expect(node?.name).toBe(video.title);
+      expect(node?.description).toBe(video.caption);
+      expect(node?.thumbnailUrl).toBe(video.posterUrl);
+      expect(node?.embedUrl).toBe(video.videoUrl);
+      expect(node?.uploadDate).toBe("2026-09-03");
+    }
+  });
+
+  it("states a duration only for the videos an exact one is known for", () => {
+    for (const video of VIDEOS) {
+      const node = videoNodes.find((candidate) => candidate.contentUrl === video.videoUrl);
+      if (video.group === "case-study") expect(node?.duration, video.id).toBeUndefined();
+      else expect(node?.duration, video.id).toBe("PT1M");
+    }
+  });
+
+  it("references every video from the WebPage node", () => {
+    const page = nodeOfType(graph, "WebPage");
+    const referenced = page.video as readonly { readonly "@id": string }[];
+    expect(referenced).toHaveLength(VIDEOS.length);
+    for (const node of videoNodes) expect(referenced.map((ref) => ref["@id"])).toContain(node["@id"]);
+  });
+
+  it("gives every video node a unique id", () => {
+    const ids = videoNodes.map((node) => node["@id"]);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("has no video node and an empty video list for no videos, without failing", () => {
+    const empty = buildTutorialsGraph([]);
+    expect(nodesOfType(empty, "VideoObject")).toEqual([]);
+    expect(nodeOfType(empty, "WebPage").video).toBeUndefined();
+  });
+
+  it("round-trips through the serializer and contains no long dashes", () => {
+    const json = serializeJsonLd(graph);
+    expect(DASH_PATTERN.test(json)).toBe(false);
+    expect(roundTrip(graph)).toEqual(graph);
   });
 });
