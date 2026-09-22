@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { VIDEO_HOSTS } from "@/components/docs/tutorialsContent";
 
 interface HeaderRule {
   readonly source: string;
@@ -75,6 +76,30 @@ describe("vercel.json headers", () => {
     expect(policy).toContain("frame-ancestors 'none'");
     expect(policy).toContain("object-src 'none'");
     expect(policy).not.toContain("unsafe-eval");
+  });
+
+  it("allows media and images from exactly the two hosts a tutorial video touches, and nothing else", () => {
+    const policy = valueOf(globalRule as HeaderRule, "Content-Security-Policy") ?? "";
+    const directive = (name: string): string => {
+      const match = new RegExp(`${name} ([^;]+)`).exec(policy);
+      if (match === null) throw new Error(`no ${name} directive`);
+      return match[1];
+    };
+    for (const name of ["media-src", "img-src"]) {
+      const sources = directive(name);
+      expect(sources, name).toContain("'self'");
+      expect(sources, name).toContain(`https://${VIDEO_HOSTS.frontDoor}`);
+      expect(sources, name).toContain(`https://${VIDEO_HOSTS.redirectTarget}`);
+      // No wildcard: the exact bucket host is used, so a change to it is a change someone reviews.
+      expect(sources, name).not.toContain("*");
+    }
+    expect(directive("img-src")).toContain("data:");
+  });
+
+  it("gives media-src and img-src their own explicit directives, instead of leaving video to the default-src fallback", () => {
+    const policy = valueOf(globalRule as HeaderRule, "Content-Security-Policy") ?? "";
+    expect(policy).toMatch(/media-src [^;]+;/);
+    expect(policy).toMatch(/img-src [^;]+;/);
   });
 
   it("sets the other security headers", () => {
