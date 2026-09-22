@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
-import { CONCEPTS, KIND_COMPARISON, LEARN_SOURCES } from "@/components/docs/learnContent";
+import { CONCEPTS, KIND_COMPARISON, LEARN_FAQ, LEARN_SOURCES } from "@/components/docs/learnContent";
 import { getEvents, getEventsSource } from "@/lib/events";
 import { PAGE_SEO } from "@/lib/seo/pages";
 import { SITE_URL } from "@/lib/site";
@@ -34,7 +34,8 @@ describe("learn page", () => {
 
   it("explains what a mod is and the five ideas behind it", () => {
     render(<LearnPage />);
-    expect(screen.getByRole("heading", { name: "What is a Claude Mod?" })).toBeInTheDocument();
+    // level: 2 disambiguates from the FAQ section's own "What is a Claude Mod?" question, an h3.
+    expect(screen.getByRole("heading", { name: "What is a Claude Mod?", level: 2 })).toBeInTheDocument();
     for (const term of ["A hook is a function", "The $ object", "next continues the chain", "Administrators sit outermost", "Plugins can draw"]) {
       expect(screen.getByText(term)).toBeInTheDocument();
     }
@@ -118,10 +119,52 @@ describe("learn page", () => {
     expect(metadata.alternates?.canonical).toBe(`${SITE_URL}${PAGE_SEO.learn.path}`);
   });
 
-  it("embeds one parseable JSON-LD graph", () => {
+  it("embeds one parseable JSON-LD graph, with a FAQPage matching the visible questions and answers exactly", () => {
     const { container } = render(<LearnPage />);
     const scripts = container.querySelectorAll('script[type="application/ld+json"]');
     expect(scripts).toHaveLength(1);
-    expect(() => JSON.parse(scripts[0].textContent ?? "")).not.toThrow();
+    const parsed = JSON.parse(scripts[0].textContent ?? "") as {
+      "@graph": readonly { "@type": string; mainEntity?: readonly { name: string; acceptedAnswer: { text: string } }[] }[];
+    };
+    const faqNode = parsed["@graph"].find((node) => node["@type"] === "FAQPage");
+    expect(faqNode?.mainEntity).toHaveLength(LEARN_FAQ.length);
+    for (const entry of LEARN_FAQ) {
+      const question = faqNode?.mainEntity?.find((candidate) => candidate.name === entry.question);
+      expect(question, entry.id).toBeDefined();
+      expect(question?.acceptedAnswer.text).toBe(entry.answer);
+    }
+  });
+
+  it("shows every FAQ question and its exact answer, the same text the JSON-LD states", () => {
+    const { container } = render(<LearnPage />);
+    const faqSection = container.querySelector("#faq") as HTMLElement;
+    for (const entry of LEARN_FAQ) {
+      expect(within(faqSection).getByText(entry.question), entry.id).toBeInTheDocument();
+      expect(within(faqSection).getByText(entry.answer), entry.id).toBeInTheDocument();
+    }
+  });
+
+  it("gives each FAQ question a real h3, reachable by a screen reader's heading navigation, and its own anchor", () => {
+    const { container } = render(<LearnPage />);
+    const faqSection = container.querySelector("#faq") as HTMLElement;
+    expect(within(faqSection).getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent)).toEqual(
+      LEARN_FAQ.map((entry) => entry.question),
+    );
+    for (const entry of LEARN_FAQ) expect(container.querySelector(`[id="${entry.id}"]`), entry.id).not.toBeNull();
+  });
+
+  it("keeps the FAQ's own claims lined up with the section each one restates: the exact same phrase must appear in both, not just a similar one", () => {
+    const { container } = render(<LearnPage />);
+    const sectionText = (id: string) => (container.querySelector(`#${id}`) as HTMLElement).textContent ?? "";
+    const faqAnswer = (id: string) => LEARN_FAQ.find((entry) => entry.id === id)?.answer ?? "";
+
+    for (const [sectionId, faqId, sharedPhrase] of [
+      ["what-is-a-mod", "faq-what-is-a-mod", "hooks the engine's events with TypeScript functions shaped"],
+      ["events", "faq-what-can-a-mod-hook", "The Hooks page shows which mods and plugins use which events."],
+      ["next", "faq-build-first-mod", "Build a small mod in the Getting started guide"],
+    ] as const) {
+      expect(sectionText(sectionId), sectionId).toContain(sharedPhrase);
+      expect(faqAnswer(faqId), faqId).toContain(sharedPhrase);
+    }
   });
 });

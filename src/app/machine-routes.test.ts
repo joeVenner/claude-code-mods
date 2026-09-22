@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { DASH_PATTERN } from "@/components/docs/testSupport";
 import { getAllExtensions } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
+import { INDEXNOW_KEY, INDEXNOW_KEY_FILENAME } from "@/lib/seo/indexNow";
 import { GET as getCatalogJson, dynamic as catalogJsonDynamic } from "./catalog.json/route";
 import { GET as getFeed, dynamic as feedDynamic } from "./feed.xml/route";
+import { GET as getIndexNowKey, dynamic as indexNowKeyDynamic } from "./73b087fe1cc34d7ca56436abb7d8bae9.txt/route";
 import { GET as getLlmsFull, dynamic as llmsFullDynamic } from "./llms-full.txt/route";
 import { GET as getLlms, dynamic as llmsDynamic } from "./llms.txt/route";
 
@@ -49,6 +51,18 @@ describe("catalog.json route", () => {
     expect(body.disclaimer).toMatch(/not a security review/);
     expect(body.extensions.map((entry) => entry.slug)).toEqual(getAllExtensions().map((entry) => entry.slug));
     for (const entry of body.extensions) expect(entry.pageUrl).toBe(`${SITE_URL}/extensions/${entry.slug}/`);
+  });
+});
+
+describe("IndexNow key route", () => {
+  it("is static, served as plain text, and its folder name is the exact key filename IndexNow expects", async () => {
+    // The import path above is the literal folder name: if it did not equal INDEXNOW_KEY_FILENAME,
+    // this file would fail to import at all, so this assertion is really a belt-and-suspenders check.
+    expect("73b087fe1cc34d7ca56436abb7d8bae9.txt").toBe(INDEXNOW_KEY_FILENAME);
+    expect(indexNowKeyDynamic).toBe("force-static");
+    const response = getIndexNowKey();
+    expect(response.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+    expect(await response.text()).toBe(INDEXNOW_KEY);
   });
 });
 

@@ -12,12 +12,13 @@ import {
   CONCEPTS,
   KIND_COMPARISON,
   KIND_COMPARISON_COLUMNS,
+  LEARN_FAQ,
   LEARN_SOURCES,
 } from "@/components/docs/learnContent";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Button } from "@/components/ui/Button";
 import { getEvents, getEventsSource } from "@/lib/events";
-import { buildDocPageGraph } from "@/lib/seo/jsonLd";
+import { buildLearnGraph } from "@/lib/seo/jsonLd";
 import { buildStaticPageMetadata } from "@/lib/seo/metadata";
 import { PAGE_SEO } from "@/lib/seo/pages";
 import { EVENT_FAMILIES, type EventFamily } from "@/lib/types";
@@ -37,7 +38,7 @@ export default function LearnPage(): ReactNode {
       title="Learn Claude Mods"
       description="What a Claude Mod is, how function hooks work, and how a mod differs from the other ways to extend Claude Code."
     >
-      <JsonLd data={buildDocPageGraph(PAGE_SEO.learn)} />
+      <JsonLd data={buildLearnGraph(LEARN_FAQ)} />
       <Callout>
         <p>
           Claude Mods are early access. Anthropic says the API a mod is written against may change between releases
@@ -126,6 +127,18 @@ export default function LearnPage(): ReactNode {
             The <TextLink href="/hooks/">Hooks page</TextLink> shows which mods and plugins use which events.
           </p>
         </Prose>
+      </DocSection>
+      <DocSection id="faq" title="Frequently asked questions">
+        <DefinitionList
+          items={LEARN_FAQ.map((entry) => ({
+            id: entry.id,
+            // A real h3, not just styled text, so a screen reader's "next heading" shortcut reaches
+            // every question, the same way it reaches every DocSection title on this page.
+            term: <h3 className="text-base font-medium text-fg">{entry.question}</h3>,
+            anchorId: entry.id,
+            description: <p>{entry.answer}</p>,
+          }))}
+        />
       </DocSection>
       <DocSection id="next" title="Where to go next">
         <Prose>

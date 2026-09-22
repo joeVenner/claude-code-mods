@@ -8,6 +8,7 @@ import {
   HOOKS_ENVIRONMENT_LIMITS,
   KIND_COMPARISON,
   KIND_COMPARISON_COLUMNS,
+  LEARN_FAQ,
   LEARN_SOURCES,
   MOD_FOLDER_TREE,
   RUN_WARNING,
@@ -111,6 +112,44 @@ describe("MOD_FOLDER_TREE", () => {
     for (const file of STARTER_MOD_FILES) expect(MOD_FOLDER_TREE).toContain(file);
     const fileLines = MOD_FOLDER_TREE.split("\n").filter((line) => line.startsWith("  "));
     expect(fileLines).toHaveLength(STARTER_MOD_FILES.length);
+  });
+});
+
+describe("LEARN_FAQ", () => {
+  it("has unique ids and no empty question or answer", () => {
+    expect(new Set(LEARN_FAQ.map((entry) => entry.id)).size).toBe(LEARN_FAQ.length);
+    for (const entry of LEARN_FAQ) {
+      expect(entry.question.trim(), entry.id).not.toBe("");
+      expect(entry.answer.trim(), entry.id).not.toBe("");
+      expect(entry.question, entry.id).toMatch(/\?$/);
+    }
+  });
+
+  it("never uses an em or en dash, which the copy rules forbid", () => {
+    for (const entry of LEARN_FAQ) {
+      expect(entry.question, entry.id).not.toMatch(DASH_PATTERN);
+      expect(entry.answer, entry.id).not.toMatch(DASH_PATTERN);
+    }
+  });
+
+  it("restates the Callout's own words for early access and the enable flag", () => {
+    const allAnswers = LEARN_FAQ.map((entry) => entry.answer).join(" ");
+    expect(allAnswers).toMatch(/early access/i);
+    expect(allAnswers).toMatch(/function hooks are enabled/);
+  });
+
+  it("keeps the mod vs plugin answer's phrasing in sync with the comparison table's own plugin row, not just approximately similar", () => {
+    const plugin = KIND_COMPARISON.find((row) => row.id === "plugin");
+    const entry = LEARN_FAQ.find((candidate) => candidate.id === "faq-mod-vs-plugin");
+    expect(entry?.answer).toContain("skills, agents, hooks or MCP servers");
+    expect(plugin?.howYouWriteIt).toContain("skills, agents, hooks or MCP servers");
+  });
+
+  it("keeps the mod vs classic hook answer's phrasing in sync with the comparison table's own classic hook row", () => {
+    const classicHook = KIND_COMPARISON.find((row) => row.id === "classic-hook");
+    const entry = LEARN_FAQ.find((candidate) => candidate.id === "faq-mod-vs-classic-hook");
+    expect(entry?.answer).toContain("shell command, HTTP endpoint, MCP tool call, prompt or subagent");
+    expect(classicHook?.howYouWriteIt).toContain("shell command, HTTP endpoint, MCP tool call, prompt or subagent");
   });
 });
 
