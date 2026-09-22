@@ -11,7 +11,7 @@ import {
 } from "./site";
 
 describe("NAV_LINKS", () => {
-  it("lists short destinations so the header fits on one line", () => {
+  it("lists short top-level destinations so the header fits on one line", () => {
     expect(NAV_LINKS.map((link) => link.label)).toEqual(["Browse", "Learn", "Hooks", "Ideas", "Security", "Publish", "About"]);
     for (const link of NAV_LINKS) {
       expect(link.label.length).toBeLessThanOrEqual(8);
@@ -22,11 +22,24 @@ describe("NAV_LINKS", () => {
     expect(NAV_LINKS).toContainEqual({ label: "Ideas", href: "/ideas/" });
   });
 
-  it("uses unique internal paths that end with a slash", () => {
-    const hrefs = NAV_LINKS.map((link) => link.href);
+  it("uses unique internal paths that end with a slash, at every level, one level deep at most", () => {
+    const hrefs = NAV_LINKS.flatMap((link) => [link.href, ...(link.children ?? []).map((child) => child.href)]);
     expect(new Set(hrefs).size).toBe(hrefs.length);
     for (const href of hrefs) {
-      expect(href).toMatch(/^\/[a-z-]+\/$/);
+      expect(href).toMatch(/^\/[a-z-]+(?:\/[a-z-]+)?\/$/);
+    }
+  });
+
+  it("only Learn has a dropdown, and only Learn's own subpages are in it", () => {
+    for (const link of NAV_LINKS) {
+      if (link.label === "Learn") continue;
+      expect(link.children, link.label).toBeUndefined();
+    }
+    const learn = NAV_LINKS.find((link) => link.label === "Learn");
+    expect(learn?.children?.map((child) => child.href)).toEqual(["/learn/getting-started/", "/learn/migration/", "/learn/tutorials/"]);
+    for (const child of learn?.children ?? []) {
+      expect(child.href.startsWith("/learn/"), child.label).toBe(true);
+      expect(child.children, child.label).toBeUndefined();
     }
   });
 });
@@ -34,6 +47,7 @@ describe("NAV_LINKS", () => {
 describe("isNavLinkActive", () => {
   const browse = NAV_LINKS[0];
   const ideas = NAV_LINKS.find((link) => link.href === "/ideas/");
+  const learn = NAV_LINKS.find((link) => link.label === "Learn") as (typeof NAV_LINKS)[number];
 
   it("marks the ideas link active on its own page and not on others", () => {
     expect(ideas).toBeDefined();
@@ -44,6 +58,14 @@ describe("isNavLinkActive", () => {
 
   it("keeps Browse active on extension detail pages", () => {
     expect(isNavLinkActive("/extensions/diff/", browse)).toBe(true);
+  });
+
+  it("marks Learn active on its own page and on every one of its dropdown children's pages", () => {
+    expect(isNavLinkActive("/learn/", learn)).toBe(true);
+    for (const child of learn.children ?? []) {
+      expect(isNavLinkActive(child.href, learn), child.label).toBe(true);
+    }
+    expect(isNavLinkActive("/hooks/", learn)).toBe(false);
   });
 });
 

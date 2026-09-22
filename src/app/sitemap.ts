@@ -33,7 +33,8 @@ const EXTENSION_PRIORITY = 0.6;
 /** Nav destinations that have no entry in `PAGE_SEO` yet still get indexed, so a new nav link is never missed. */
 function unlistedNavPaths(): readonly string[] {
   const listed = new Set<string>(STATIC_PAGE_KEYS.map((key) => PAGE_SEO[key].path));
-  return NAV_LINKS.map((link) => link.href).filter((href) => !listed.has(href));
+  const navPaths = NAV_LINKS.flatMap((link) => [link.href, ...(link.children ?? []).map((child) => child.href)]);
+  return navPaths.filter((href) => !listed.has(href));
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
