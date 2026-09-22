@@ -61,6 +61,14 @@ export const PAGE_SEO = {
     breadcrumbLabel: "Migration",
     breadcrumbParent: { label: "Learn", path: "/learn/" },
   },
+  learnTutorials: {
+    path: "/learn/tutorials/",
+    title: "Claude Mods video tutorials",
+    description:
+      "The 9 official Claude Mods videos from the announcement issue, grouped Basic, Advanced and Case studies, played from GitHub's own attachment URLs.",
+    breadcrumbLabel: "Tutorials",
+    breadcrumbParent: { label: "Learn", path: "/learn/" },
+  },
   hooks: {
     path: "/hooks/",
     title: "Hook events across Claude Code mods",
@@ -111,6 +119,7 @@ export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = [
   "learn",
   "learnGettingStarted",
   "learnMigration",
+  "learnTutorials",
   "hooks",
   "ideas",
   "security",
