@@ -1,0 +1,8 @@
+{
+  "name": "classic-bridge",
+  "version": "0.1.0",
+  "description": "A migration example: three classic hooks (PreToolUse, Stop, UserPromptSubmit) rewritten as function hooks on the classic.<Name> events.",
+  "author": {
+    "name": "Your name"
+  }
+}

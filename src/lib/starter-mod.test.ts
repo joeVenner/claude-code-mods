@@ -115,14 +115,14 @@ describe("loadStarterModFiles refuses anything that is not a plain file in its p
     const filePath = path.join(rootDirectory, STARTER_MOD_DIRECTORY, "hooks/register.ts");
     rmSync(filePath);
     symlinkSync(path.join(outsideDirectory, "secret.txt"), filePath);
-    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/hooks\/register\.ts: not a regular file inside the starter mod folder/);
+    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/hooks\/register\.ts: not a regular file inside the template folder/);
   });
 
   it("refuses a file that is a link to another listed file", () => {
     const filePath = path.join(rootDirectory, STARTER_MOD_DIRECTORY, "hooks/register.ts");
     rmSync(filePath);
     symlinkSync(path.join(rootDirectory, STARTER_MOD_DIRECTORY, "hooks/hooks.json"), filePath);
-    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the starter mod folder/);
+    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the template folder/);
   });
 
   it("refuses a folder that is a link, so the files inside it are not the listed ones", () => {
@@ -131,7 +131,7 @@ describe("loadStarterModFiles refuses anything that is not a plain file in its p
     mkdirSync(path.join(outsideDirectory, "hooks"));
     for (const name of ["hooks.json", "register.ts", "is-force-push.ts"]) writeFileSync(path.join(outsideDirectory, "hooks", name), "OUTSIDE");
     symlinkSync(path.join(outsideDirectory, "hooks"), hooksDirectory);
-    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the starter mod folder/);
+    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the template folder/);
   });
 
   it("refuses a starter folder that is itself a link to somewhere else", () => {
@@ -144,13 +144,13 @@ describe("loadStarterModFiles refuses anything that is not a plain file in its p
       writeFileSync(filePath, "OUTSIDE");
     }
     symlinkSync(path.join(outsideDirectory, "elsewhere"), starterDirectory);
-    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the starter mod folder/);
+    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the template folder/);
   });
 
   it("refuses a listed path that is a directory", () => {
     const filePath = path.join(rootDirectory, STARTER_MOD_DIRECTORY, "hooks/register.ts");
     rmSync(filePath);
     mkdirSync(filePath);
-    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the starter mod folder/);
+    expect(() => loadStarterModFiles(rootDirectory)).toThrow(/not a regular file inside the template folder/);
   });
 });

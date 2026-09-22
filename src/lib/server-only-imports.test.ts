@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
  */
 const PROJECT_ROOT = process.cwd();
 const SOURCE_ROOT = path.join(PROJECT_ROOT, "src");
-const SERVER_ONLY_FILES = ["src/lib/catalog.ts", "src/lib/ideas.ts", "src/lib/events.ts", "src/lib/starter-mod.ts", "src/lib/data-files.ts"] as const;
+const SERVER_ONLY_FILES = ["src/lib/catalog.ts", "src/lib/ideas.ts", "src/lib/events.ts", "src/lib/starter-mod.ts", "src/lib/migration-example.ts", "src/lib/template-files.ts", "src/lib/data-files.ts"] as const;
 const SOURCE_EXTENSIONS = [".ts", ".tsx"] as const;
 const USE_CLIENT_DIRECTIVE = /^\s*(?:(?:\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)\s*)*["']use client["']/;
 // Type-only imports are erased by the compiler, so they cannot pull a module into the bundle.
