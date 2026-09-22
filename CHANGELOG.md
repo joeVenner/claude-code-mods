@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 - Two prominent buttons at the top of `/learn/`, above the first section: "Watch the video tutorials" and "Build your first mod", so both are visible without reading the page's closing paragraph.
 - The header's Learn link now opens a dropdown of its three subpages (Getting started, Migration, Video tutorials) on click, closing on Escape, an outside click or choosing a page; Learn itself still links straight to `/learn/`. The mobile menu lists the same three pages indented under Learn, always visible. `NavLink` gained an optional `children` field for this, one level deep, used only by Learn.
 - A video showcase on the home page, between the featured mods and the install flow: the 4 Basic tutorial videos (a real filtered subset of the 9, not a hand-picked list), each a poster image and title that link to its exact clip on `/learn/tutorials/`. No video plays on the home page itself.
+- IndexNow support: a key file at `/<key>.txt` proves this site owns its own host, and `npm run indexnow:submit` (a manual, network-using maintenance script, not run in CI) tells Bing, Yandex, Seznam.cz and Naver a URL changed instead of waiting for their next crawl. By default it submits every URL in the live sitemap; `--url` submits just the ones given, and `--dry-run` prints the request without sending it.
 
 ### Changed
 
