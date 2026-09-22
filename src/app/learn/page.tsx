@@ -1,3 +1,4 @@
+import { ArrowRight } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Callout } from "@/components/docs/Callout";
@@ -14,6 +15,7 @@ import {
   LEARN_SOURCES,
 } from "@/components/docs/learnContent";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { Button } from "@/components/ui/Button";
 import { getEvents, getEventsSource } from "@/lib/events";
 import { buildDocPageGraph } from "@/lib/seo/jsonLd";
 import { buildStaticPageMetadata } from "@/lib/seo/metadata";
@@ -43,6 +45,14 @@ export default function LearnPage(): ReactNode {
           sources are linked beside each idea and in the table, so you can check them.
         </p>
       </Callout>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button href="/learn/tutorials/" size="lg" iconRight={<ArrowRight size={18} weight="regular" aria-hidden="true" />}>
+          Watch the video tutorials
+        </Button>
+        <Button href="/learn/getting-started/" variant="ghost" size="lg">
+          Build your first mod
+        </Button>
+      </div>
       <DocSection id="what-is-a-mod" title="What is a Claude Mod?">
         <Prose>
           <p>
