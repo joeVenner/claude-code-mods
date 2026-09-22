@@ -49,6 +49,7 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Changed
 
+- The Hooks page's event list is grouped behind one collapsed, native `<details>`/`<summary>` per family (Engine, Calls on `$`, Classic), closed by default instead of always rendering all 125 events open at once. Each family keeps its real heading in the outline whether open or closed. A link to a specific event, from the Migration page, an extension's guide or the tutorials page, still opens the right family and scrolls to the row: the browser does this natively from the row's existing anchor id, with no script of this site's own. Typing a filter or picking a family still switches to the flat, always-open list of just the matches, unchanged from before.
 - The guides of the four Anthropic mods now say where the flag for enabling function hooks comes from: `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` is named in the Sep 9 update of the announcement issue (anthropics/claude-code #91870), not in any documentation, and may change. The issue is linked from each mod page, and the four entries were re-checked on 2026-09-21.
 
 - The site deploys on Vercel, not Cloudflare Pages. `NEXT_PUBLIC_SITE_URL` defaults to `https://claudecodemods.com` in production builds, so canonical URLs and the sitemap never say localhost.

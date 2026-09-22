@@ -1,5 +1,6 @@
 "use client";
 
+import { CaretDown } from "@phosphor-icons/react/ssr";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { CommunityBadge } from "@/components/catalog/CommunityBadge";
@@ -8,7 +9,13 @@ import { TextLink } from "@/components/docs/TextLink";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SearchField } from "@/components/ui/SearchField";
-import { filterEventRows, groupEventRows, type EventReferenceRow, type EventUser } from "@/lib/event-reference";
+import {
+  filterEventRows,
+  groupEventRows,
+  type EventFamilyGroup,
+  type EventReferenceRow,
+  type EventUser,
+} from "@/lib/event-reference";
 import { extensionPath } from "@/lib/seo/metadata";
 import { EVENT_FAMILIES, EVENT_FAMILY_LABELS, KIND_LABELS, type EventFamily } from "@/lib/types";
 
@@ -43,6 +50,8 @@ function UserItem({ user, eventName }: { readonly user: EventUser; readonly even
 function EventRow({ row }: { readonly row: EventReferenceRow }): ReactNode {
   return (
     // globals.css already offsets every [id] below the sticky header; target: marks the row a link points at.
+    // A row inside a closed <details> still has this id: the browser opens the details and scrolls to it
+    // natively, for a full page load or a same-document hash change alike, with no script of our own.
     <div id={row.anchorId} className="grid gap-1.5 py-4 first:pt-0 target:bg-surface-2 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-8">
       <dt className="text-base font-medium text-fg">
         <InlineCode>{row.name}</InlineCode>
@@ -65,13 +74,59 @@ function EventRow({ row }: { readonly row: EventReferenceRow }): ReactNode {
   );
 }
 
+function NounGroups({ group }: { readonly group: EventFamilyGroup }): ReactNode {
+  return (
+    <>
+      {group.nouns.map((noun) => (
+        <div key={noun.noun} className="flex flex-col gap-3">
+          <h4 className="font-mono text-sm font-semibold text-fg">{noun.noun}</h4>
+          <dl className="divide-y divide-border">
+            {noun.rows.map((row) => (
+              <EventRow key={row.name} row={row} />
+            ))}
+          </dl>
+        </div>
+      ))}
+    </>
+  );
+}
+
 /**
- * Every event, grouped by family and noun, with a filter. All rows are rendered on the server, so the
- * page reads in full without JavaScript and a link to one row always finds it; the filter only hides rows.
+ * One family, collapsed by default: a `<summary>` naming it and its count, opening natively on
+ * click with no script of ours, and opening automatically if the page is asked to scroll to an
+ * event inside it (a browser feature, not something this component arranges).
+ */
+function FamilyDisclosure({ group }: { readonly group: EventFamilyGroup }): ReactNode {
+  return (
+    <details className="group border-b border-border pb-6 first:pt-0 [&:not(:first-child)]:pt-6">
+      {/* <summary>'s content model is phrasing content optionally intermixed with heading content
+          (WHATWG), and svg counts as phrasing content, so the h3 next to the caret icon is valid.
+          The family keeps its real h3 in the outline (no level skip to the noun h4s below) whether
+          or not it is open. */}
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-control py-1 outline-none [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+        <h3 className="text-xl font-semibold tracking-tight text-fg">
+          {EVENT_FAMILY_LABELS[group.family]} <span className="text-base font-normal text-fg-muted">({group.count})</span>
+        </h3>
+        <CaretDown size={18} weight="bold" aria-hidden="true" className="shrink-0 text-fg-muted transition-transform duration-150 group-open:rotate-180" />
+      </summary>
+      <div className="flex flex-col gap-6 pt-6">
+        <NounGroups group={group} />
+      </div>
+    </details>
+  );
+}
+
+/**
+ * Every event, grouped by family and noun, with a filter. All rows are rendered on the server, so
+ * the page reads in full without JavaScript and a link to one row always finds it: browsing shows
+ * each family collapsed behind a native `<summary>`, which needs no script to open; typing a query
+ * or picking a family switches to a flat, always-open list of just the matches, because someone
+ * searching wants results immediately, not another click to open the group they are already in.
  */
 export function EventReferenceExplorer({ rows }: EventReferenceExplorerProps): ReactNode {
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState<FamilyChoice>("all");
+  const isBrowsing = query.trim() === "" && family === "all";
   const visibleRows = filterEventRows(rows, { query, family });
   const groups = groupEventRows(visibleRows);
 
@@ -112,9 +167,13 @@ export function EventReferenceExplorer({ rows }: EventReferenceExplorerProps): R
           </select>
         </div>
       </div>
-      <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-fg-muted">
-        {`Showing ${visibleRows.length} of ${rows.length} events`}
-      </p>
+      {isBrowsing && groups.length > 0 ? (
+        <p className="text-sm text-fg-muted">{rows.length} events in {groups.length} families. Open one, or filter to see matches right away.</p>
+      ) : !isBrowsing ? (
+        <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-fg-muted">
+          {`Showing ${visibleRows.length} of ${rows.length} events`}
+        </p>
+      ) : null}
       {groups.length === 0 ? (
         <EmptyState
           title="No event matches"
@@ -125,22 +184,19 @@ export function EventReferenceExplorer({ rows }: EventReferenceExplorerProps): R
             </Button>
           }
         />
+      ) : isBrowsing ? (
+        <div className="flex flex-col">
+          {groups.map((group) => (
+            <FamilyDisclosure key={group.family} group={group} />
+          ))}
+        </div>
       ) : (
         groups.map((group) => (
           <section key={group.family} aria-labelledby={`family-${group.family}`} className="flex flex-col gap-6">
             <h3 id={`family-${group.family}`} className="text-xl font-semibold tracking-tight text-fg">
               {EVENT_FAMILY_LABELS[group.family]} <span className="text-base font-normal text-fg-muted">({group.count})</span>
             </h3>
-            {group.nouns.map((noun) => (
-              <div key={noun.noun} className="flex flex-col gap-3">
-                <h4 className="font-mono text-sm font-semibold text-fg">{noun.noun}</h4>
-                <dl className="divide-y divide-border">
-                  {noun.rows.map((row) => (
-                    <EventRow key={row.name} row={row} />
-                  ))}
-                </dl>
-              </div>
-            ))}
+            <NounGroups group={group} />
           </section>
         ))
       )}
