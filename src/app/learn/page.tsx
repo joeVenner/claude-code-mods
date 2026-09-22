@@ -120,9 +120,11 @@ export default function LearnPage(): ReactNode {
       <DocSection id="next" title="Where to go next">
         <Prose>
           <p>
-            Build a small mod in the <TextLink href="/learn/getting-started/">Getting started guide</TextLink>. To
-            share one you have built, see how to <TextLink href="/publish/">publish it</TextLink>, and read{" "}
-            <TextLink href="/security/">what this site does and does not check</TextLink> first.
+            Build a small mod in the <TextLink href="/learn/getting-started/">Getting started guide</TextLink>, or
+            move a hook you already have with <TextLink href="/learn/migration/">classic hooks to function hooks</TextLink>.
+            To share a mod you have built, see how to <TextLink href="/publish/">publish it</TextLink>, and read{" "}
+            <TextLink href="/security/">what this site does and does not check</TextLink> and{" "}
+            <TextLink href="/security/#mod-runtime">how Claude Code keeps a mod in check</TextLink> first.
           </p>
         </Prose>
       </DocSection>

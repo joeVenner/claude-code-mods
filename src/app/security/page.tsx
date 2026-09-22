@@ -5,13 +5,19 @@ import { DefinitionList } from "@/components/docs/DefinitionList";
 import { DocPage } from "@/components/docs/DocPage";
 import { DocSection, Prose } from "@/components/docs/DocSection";
 import { InlineCode } from "@/components/docs/InlineCode";
+import { SourceLine } from "@/components/docs/SourceLine";
 import { TextLink } from "@/components/docs/TextLink";
 import { Timeline } from "@/components/docs/Timeline";
-import { pickExampleMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
+import { pickExampleMod, pickSecurityMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
 import {
   BEFORE_YOU_INSTALL,
   NO_SCANNER_NOTICE,
+  RUNTIME_POINTS,
+  RUNTIME_SEATS,
+  RUNTIME_SEAT_NOTE,
+  RUNTIME_SECTION_NOTE,
   SCAN_PIPELINE,
+  SECURITY_MOD_FACTS,
   SECURITY_TIERS,
 } from "@/components/docs/securityContent";
 import { Chip } from "@/components/ui/Chip";
@@ -27,6 +33,8 @@ export const metadata: Metadata = buildStaticPageMetadata(PAGE_SEO.security);
 export default function SecurityPage(): ReactNode {
   const builtInMods = selectAnthropicBuiltInMods(getAllExtensions());
   const exampleMod = pickExampleMod(builtInMods);
+  // The seat facts below are about one mod, so they appear only beside a built-in mod that has its properties.
+  const securityMod = pickSecurityMod(builtInMods);
 
   return (
     <DocPage
@@ -94,6 +102,48 @@ export default function SecurityPage(): ReactNode {
         </DocSection>
       ) : null}
 
+      <DocSection id="mod-runtime" title="How Claude Code keeps a mod in check">
+        <Callout>
+          <p>{RUNTIME_SECTION_NOTE}</p>
+        </Callout>
+        <Prose>
+          <p>
+            A plugin that uses function hooks is loaded into one of five seats, outermost first. {RUNTIME_SEAT_NOTE}
+          </p>
+        </Prose>
+        <ol role="list" className="flex max-w-[65ch] flex-col divide-y divide-border">
+          {RUNTIME_SEATS.map((seat, index) => (
+            <li key={seat.id} className="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-3 first:pt-0">
+              <span className="w-6 text-sm text-fg-muted">{index + 1}</span>
+              <InlineCode>{seat.name}</InlineCode>
+              <span className="min-w-0 flex-1 text-base text-fg-muted">{seat.who}</span>
+            </li>
+          ))}
+        </ol>
+        <DefinitionList
+          items={RUNTIME_POINTS.map((point) => ({
+            id: point.id,
+            term: point.term,
+            description: (
+              <>
+                <p>{point.description}</p>
+                <SourceLine sources={point.sources} />
+              </>
+            ),
+          }))}
+        />
+        {securityMod ? (
+          <Prose>
+            <p>
+              <TextLink href={`/extensions/${securityMod.slug}/`}>{securityMod.name}</TextLink> is the mod in the
+              directory that these seats are about. {SECURITY_MOD_FACTS.whatItIs}
+            </p>
+            <p>{SECURITY_MOD_FACTS.moves}</p>
+            <SourceLine sources={[SECURITY_MOD_FACTS.source]} />
+          </Prose>
+        ) : null}
+      </DocSection>
+
       <DocSection id="tier-model" title="Proposed security tiers">
         <Callout tone="warning">
           <p>{NO_SCANNER_NOTICE}</p>
@@ -145,7 +195,7 @@ export default function SecurityPage(): ReactNode {
             extension, on this site or anywhere else.
           </p>
         </Prose>
-        <ul className="grid gap-x-12 gap-y-8 md:grid-cols-2">
+        <ul role="list" className="grid gap-x-12 gap-y-8 md:grid-cols-2">
           {BEFORE_YOU_INSTALL.map((item) => (
             <li key={item.title} className="flex max-w-[65ch] flex-col gap-2 border-t border-border pt-4">
               <h3 className="text-lg font-semibold tracking-tight text-fg">{item.title}</h3>

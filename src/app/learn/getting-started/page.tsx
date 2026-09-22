@@ -142,7 +142,8 @@ export default function GettingStartedPage(): ReactNode {
         <Prose>
           <p>
             Read how the four built-in mods are written in the <TextLink href="/browse/?kind=mod">directory</TextLink>,
-            look up an event on the <TextLink href="/hooks/">Hooks page</TextLink>, and see{" "}
+            look up an event on the <TextLink href="/hooks/">Hooks page</TextLink>, move a hook you already have with{" "}
+            <TextLink href="/learn/migration/">classic hooks to function hooks</TextLink>, and see{" "}
             <TextLink href="/learn/">what a mod is and how it compares with plugins, hooks and skills</TextLink>.
           </p>
         </Prose>
