@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { ReactNode } from "react";
+import { TextLink } from "@/components/docs/TextLink";
 import { Button } from "@/components/ui/Button";
 import { AVAILABILITIES, AVAILABILITY_LABELS, CATEGORIES, CATEGORY_LABELS, EXTENSION_KINDS, KIND_LABELS } from "@/lib/types";
 import type { ExtensionListItem } from "@/components/catalog/ExtensionListItem";
@@ -81,6 +82,9 @@ export function FilterPanel({
             />
           ))}
         </div>
+        <p className="mt-2 text-sm text-fg-muted">
+          <TextLink href="/hooks/">See every event a hook or mod can use</TextLink>
+        </p>
       </fieldset>
 
       <fieldset>

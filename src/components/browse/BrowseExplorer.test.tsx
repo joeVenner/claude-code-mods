@@ -309,6 +309,21 @@ describe("BrowseExplorer empty state", () => {
     expect(screen.queryByText("No extensions match")).not.toBeInTheDocument();
     expect(resultNames()).toHaveLength(browseFixtures.length);
   });
+
+  it("always offers a way to Learn, even with no active filters to clear", () => {
+    renderExplorer("q=zzz-no-match");
+    const link = screen.getByRole("link", { name: "What is a Claude Mod?" });
+    // next/link only applies trailingSlash: true at build time, so jsdom rendering drops it here.
+    expect(link.getAttribute("href")).toBe("/learn");
+  });
+});
+
+describe("BrowseExplorer Kind filter", () => {
+  it("links to the Hooks reference beside the Kind facet", () => {
+    renderExplorer();
+    const link = screen.getByRole("link", { name: "See every event a hook or mod can use" });
+    expect(link.getAttribute("href")).toBe("/hooks");
+  });
 });
 
 describe("BrowseExplorer live region", () => {

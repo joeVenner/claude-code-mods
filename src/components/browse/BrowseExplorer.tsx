@@ -233,11 +233,16 @@ export function BrowseExplorer({ extensions }: BrowseExplorerProps): ReactNode {
             title="No extensions match"
             body="Nothing fits the current search and filters. Remove a filter or try a different term."
             action={
-              hasFilters ? (
-                <Button variant="secondary" onClick={handleClear}>
-                  Clear filters
+              <div className="flex flex-wrap items-center gap-3">
+                {hasFilters ? (
+                  <Button variant="secondary" onClick={handleClear}>
+                    Clear filters
+                  </Button>
+                ) : null}
+                <Button variant="ghost" href="/learn/">
+                  What is a Claude Mod?
                 </Button>
-              ) : undefined
+              </div>
             }
           />
         )}
