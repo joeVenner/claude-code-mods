@@ -97,6 +97,8 @@ That script also compiles `scripts/fixtures/*.negative.ts`, whose `@ts-expect-er
 
 The folders are excluded from `tsconfig.json`: they import `claude-code` types that Claude Code writes with `/plugin-types`, and the site's own tests do not run them. Re-run the tests above when Claude Code updates, and update `TESTED_WITH` when you do.
 
+`/learn/tutorials/` plays the 9 official videos from the announcement issue, from data in `src/components/docs/tutorialsContent.ts`. The titles, captions and asset ids there are copied exactly from the issue's own body; nothing is paraphrased. The clips are not re-hosted: `<video>` points at GitHub's own stable attachment URL (`github.com/user-attachments/assets/<id>`), the same one the issue embeds, which GitHub keeps redirecting to a fresh short-lived link on every request. That needs `media-src` and `img-src` allowances in `vercel.json`'s CSP for `github.com` and the one GitHub attachment CDN host the videos resolve to, added by exact hostname, not a wildcard. If GitHub ever serves attachments from a different host, the videos and the poster images will stop loading and the CSP entry needs updating; `src/lib/vercel-config.test.ts` checks the policy still names the hosts `tutorialsContent.ts`'s `VIDEO_HOSTS` constant uses, so the two cannot silently drift apart.
+
 ## SEO, GEO and previews
 
 Everything below is generated at build time from the catalog, so nothing lists an entry by hand. Code lives in `src/lib/seo/` (pure and unit tested) and `src/components/seo/`.
