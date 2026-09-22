@@ -4,6 +4,7 @@ import { PAGE_SEO, type PageSeo } from "@/lib/seo/pages";
 import { absoluteUrl as rawAbsoluteUrl, buildExtensionDescription, extensionPath } from "@/lib/seo/metadata";
 import { toSingleLine } from "@/lib/seo/text";
 import { toSafeOutputUrl } from "@/lib/url";
+import { VIDEO_GROUP_DURATIONS, type Video } from "@/components/docs/tutorialsContent";
 
 /**
  * Schema.org structured data, built as plain objects and serialised by `serializeJsonLd`.
@@ -219,5 +220,52 @@ export function buildExtensionGraph(extension: Extension): JsonLdGraph {
       ...(extension.tags.length > 0 ? { keywords: extension.tags.map(toSingleLine).join(", ") } : {}),
       ...(licenseUrl === null ? {} : { license: licenseUrl }),
     },
+  );
+}
+
+/** The date the announcement issue (and the videos embedded in its body) was published. */
+const VIDEOS_UPLOAD_DATE = "2026-09-03";
+
+/**
+ * One video as a schema.org VideoObject. `contentUrl` is the exact URL the page's `<video>` element
+ * uses, which is also what a crawler would need to fetch the clip. `duration` is set only for the
+ * groups the issue states an exact length for (Basic and Advanced, 60 seconds); Case Studies are
+ * stated only as "around 2 minutes", so no exact duration is claimed for them.
+ */
+function buildVideoObjectNode(video: Video): JsonLdNode {
+  const durationLabel = VIDEO_GROUP_DURATIONS[video.group];
+  return {
+    "@type": "VideoObject",
+    "@id": `${absoluteUrl(PAGE_SEO.learnTutorials.path)}#${video.id}`,
+    name: toSingleLine(video.title),
+    description: toSingleLine(video.caption),
+    thumbnailUrl: toSafeOutputUrl(video.posterUrl),
+    contentUrl: toSafeOutputUrl(video.videoUrl),
+    embedUrl: toSafeOutputUrl(video.videoUrl),
+    uploadDate: VIDEOS_UPLOAD_DATE,
+    ...(durationLabel === "60 seconds" ? { duration: "PT1M" } : {}),
+  };
+}
+
+/** Tutorials page: a WebPage, its breadcrumb, and one VideoObject per official video. */
+export function buildTutorialsGraph(videos: readonly Video[]): JsonLdGraph {
+  const page = PAGE_SEO.learnTutorials;
+  return graph(
+    {
+      "@type": "WebPage",
+      "@id": `${absoluteUrl(page.path)}#page`,
+      name: page.title,
+      description: page.description,
+      url: absoluteUrl(page.path),
+      isPartOf: { "@id": WEBSITE_ID },
+      inLanguage: "en",
+      ...(videos.length > 0 ? { video: videos.map((video) => ({ "@id": `${absoluteUrl(page.path)}#${video.id}` })) } : {}),
+    },
+    buildBreadcrumbList([
+      HOME_STEP,
+      ...(page.breadcrumbParent === undefined ? [] : [{ name: page.breadcrumbParent.label, path: page.breadcrumbParent.path }]),
+      { name: page.breadcrumbLabel, path: page.path },
+    ]),
+    ...videos.map(buildVideoObjectNode),
   );
 }
