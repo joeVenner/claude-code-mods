@@ -139,6 +139,56 @@ export const CONCEPTS: readonly ConceptItem[] = [
   },
 ];
 
+export interface FaqEntry {
+  readonly id: string;
+  readonly question: string;
+  readonly answer: string;
+}
+
+/**
+ * Every answer here restates a fact this page states, and sources, in the section above it. Nothing
+ * new is claimed. Every id is prefixed `faq-` so a row's anchor can never collide with a DocSection id
+ * on the same page (`what-is-a-mod` names both a section and, without the prefix, would have named a
+ * question too).
+ */
+export const LEARN_FAQ: readonly FaqEntry[] = [
+  {
+    id: "faq-what-is-a-mod",
+    question: "What is a Claude Mod?",
+    answer:
+      "A Claude Mod is a Claude Code plugin whose behaviour lives in a hooks module: one register entry that hooks the engine's events with TypeScript functions shaped ($, e, next). Anthropic ships four mods inside Claude Code itself and publishes their source.",
+  },
+  {
+    id: "faq-are-mods-ready",
+    question: "Are Claude Mods ready to use?",
+    answer:
+      "They are early access. Anthropic says the API a mod is written against may change between releases without notice, and a mod's hooks module loads only where function hooks are enabled.",
+  },
+  {
+    id: "faq-mod-vs-plugin",
+    question: "How is a mod different from a plugin?",
+    answer:
+      "A plugin is a self-contained directory that packages skills, agents, hooks or MCP servers so they can be shared. A mod is a plugin whose behaviour specifically lives in a hooks module of function hooks: every mod is a plugin, but not every plugin is a mod.",
+  },
+  {
+    id: "faq-mod-vs-classic-hook",
+    question: "How is a mod different from a classic hook?",
+    answer:
+      "A classic hook is a handler, usually a shell command, HTTP endpoint, MCP tool call, prompt or subagent, that Claude Code runs at a lifecycle event such as PreToolUse and that can block some of them by exit code. A mod's function hook is a TypeScript function the engine calls directly with the event, so it has types and can return a value instead of just an exit code.",
+  },
+  {
+    id: "faq-what-can-a-mod-hook",
+    question: "What events can a mod hook?",
+    answer:
+      "Function hooks name every engine event, every call the engine makes on $, and every classic hook, bridged in as classic.<Name>. The Hooks page shows which mods and plugins use which events.",
+  },
+  {
+    id: "faq-build-first-mod",
+    question: "How do I build my first mod?",
+    answer: "Build a small mod in the Getting started guide, move a hook you already have, or watch the official video tutorials.",
+  },
+];
+
 export const MOD_FOLDER_TREE = [
   "mod-starter/",
   "  .claude-plugin/plugin.json   the plugin manifest",
