@@ -17,6 +17,17 @@ export function pickExampleMod(mods: readonly Extension[]): Extension | undefine
   return mods.find((mod) => mod.categories.includes("security")) ?? mods[0];
 }
 
+/**
+ * The built-in mod that the Security page's seat facts are about. `SECURITY_MOD_FACTS` is written
+ * from sec-default's own README, so the mod is chosen by its repository, not by name or category: a
+ * renamed sec-default is still picked up, and a different mod that merely looks like it (same
+ * category, hooks every classic event, even the name "sec-default") is not, because it would render
+ * facts that are not about its own source. Undefined when no mod's source is that repository.
+ */
+export function pickSecurityMod(mods: readonly Extension[]): Extension | undefined {
+  return mods.find((mod) => mod.repositoryUrl.endsWith("/mods/sec-default"));
+}
+
 /** `owner/repo` from a github.com repository URL, or null when the URL is not shaped that way. */
 export function repositoryNameOf(repositoryUrl: string): string | null {
   if (!URL.canParse(repositoryUrl)) return null;

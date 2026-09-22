@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { extensionSchema } from "@/lib/types";
 import type { Extension } from "@/lib/types";
-import { pickExampleMod, repositoryNameOf, selectAnthropicBuiltInMods, sharedNotice } from "./builtInMods";
+import { pickExampleMod, pickSecurityMod, repositoryNameOf, selectAnthropicBuiltInMods, sharedNotice } from "./builtInMods";
 import { EXAMPLE_ENTRY, EXAMPLE_GUIDE } from "./publishContent";
 
 function build(overrides: Record<string, unknown>): Extension {
@@ -62,6 +62,49 @@ describe("pickExampleMod", () => {
 
   it("is undefined when there are no mods", () => {
     expect(pickExampleMod([])).toBeUndefined();
+  });
+});
+
+describe("pickSecurityMod", () => {
+  const SEC_DEFAULT_URL = "https://github.com/anthropics/claude-code/tree/main/mods/sec-default";
+  const POLICY_MOD = build({
+    ...MOD_BASE,
+    slug: "fixture-policy",
+    publisher: ANTHROPIC,
+    availability: "built-in",
+    categories: ["security"],
+    hooks: ["classic.*", "prompt.section"],
+    repositoryUrl: SEC_DEFAULT_URL,
+    notice: "Early access fixture notice.",
+  });
+
+  it("picks the mod whose source is mods/sec-default", () => {
+    expect(pickSecurityMod([BUILT_IN_OTHER, BUILT_IN_SECURITY, POLICY_MOD])?.slug).toBe("fixture-policy");
+  });
+
+  it("does not pick a mod outside that repository, even one in the security category that hooks every classic event", () => {
+    expect(pickSecurityMod([BUILT_IN_SECURITY])).toBeUndefined();
+  });
+
+  it("returns undefined for no mods, so the page leaves the mod-specific facts out", () => {
+    expect(pickSecurityMod([])).toBeUndefined();
+  });
+
+  it("chooses by repository, not by name, so a renamed sec-default keeps the facts and a same-shaped mod merely named sec-default does not", () => {
+    const renamed = { ...POLICY_MOD, slug: "renamed-policy", name: "Renamed" };
+    const lookalike = build({
+      ...MOD_BASE,
+      slug: "sec-default",
+      name: "sec-default",
+      publisher: ANTHROPIC,
+      availability: "built-in",
+      categories: ["security"],
+      hooks: ["classic.*"],
+      repositoryUrl: BUILT_IN_OTHER.repositoryUrl,
+      notice: "n",
+    });
+    expect(pickSecurityMod([renamed])?.slug).toBe("renamed-policy");
+    expect(pickSecurityMod([lookalike])).toBeUndefined();
   });
 });
 

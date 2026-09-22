@@ -87,7 +87,15 @@ claude plugin validate templates/mod-starter
 
 Testing a mod runs its code, so read a folder before you run it. The variable is set on the command, not exported, so it is not left on for later sessions.
 
-The folder is excluded from `tsconfig.json`: it imports `claude-code` types that Claude Code writes with `/plugin-types`, and the site's own tests do not run it. Re-run the tests above when Claude Code updates, and update `TESTED_WITH` when you do.
+`templates/migration-example/` moves three classic hooks to the `classic.<Name>` events for the Migration page. The test kit cannot fire a classic event, so it has no tests. Check both templates against Anthropic's declarations with:
+
+```bash
+npm run typecheck:templates     # fetches the declarations at the pinned commit into a temp folder; needs the network
+```
+
+That script also compiles `scripts/fixtures/*.negative.ts`, whose `@ts-expect-error` lines must keep failing: they hold the result-shape claims on the Migration page. It compiles TypeScript and never runs it, refuses a symbolic link under `templates/` and `scripts/fixtures/`, and stops `tsc` after three minutes. The declarations it fetches are the ones at the commit in `src/data/events.json`, so treat a change to that commit in a pull request as something to review.
+
+The folders are excluded from `tsconfig.json`: they import `claude-code` types that Claude Code writes with `/plugin-types`, and the site's own tests do not run them. Re-run the tests above when Claude Code updates, and update `TESTED_WITH` when you do.
 
 ## SEO, GEO and previews
 

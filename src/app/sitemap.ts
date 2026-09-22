@@ -17,6 +17,7 @@ const STATIC_PAGE_PLAN: Readonly<Record<keyof typeof PAGE_SEO, StaticPagePlan>> 
   browse: { changeFrequency: "weekly", priority: 0.9 },
   learn: { changeFrequency: "weekly", priority: 0.8 },
   learnGettingStarted: { changeFrequency: "weekly", priority: 0.7 },
+  learnMigration: { changeFrequency: "weekly", priority: 0.7 },
   hooks: { changeFrequency: "weekly", priority: 0.6 },
   ideas: { changeFrequency: "monthly", priority: 0.5 },
   security: { changeFrequency: "monthly", priority: 0.6 },

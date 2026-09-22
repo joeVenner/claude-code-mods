@@ -4,7 +4,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { DASH_PATTERN, stubIntersectionObserver } from "@/components/docs/testSupport";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { pickExampleMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
+import { pickExampleMod, pickSecurityMod, selectAnthropicBuiltInMods } from "@/components/docs/builtInMods";
+import { RUNTIME_POINTS, RUNTIME_SEATS, RUNTIME_SEAT_NOTE, RUNTIME_SECTION_NOTE, SECURITY_MOD_FACTS } from "@/components/docs/securityContent";
 import { getAllExtensions } from "@/lib/catalog";
 import SecurityPage, { metadata } from "./page";
 
@@ -61,6 +62,61 @@ describe("security page", () => {
   it("hardcodes no entry slug or name in its source", () => {
     const source = readFileSync(path.join(process.cwd(), "src/app/security/page.tsx"), "utf8");
     expect(source).not.toMatch(/sec-default|SECURITY_MOD_SLUG|getExtensionBySlug/);
+  });
+
+  it("explains how Claude Code keeps a mod in check, before the proposed tiers, and says it was not tested here", () => {
+    const { container } = render(<SecurityPage />);
+    const section = container.querySelector("#mod-runtime") as HTMLElement;
+    expect(section).not.toBeNull();
+    expect(within(section).getByRole("heading", { level: 2, name: "How Claude Code keeps a mod in check" })).toBeInTheDocument();
+    expect(within(section).getByRole("note")).toHaveTextContent(RUNTIME_SECTION_NOTE);
+    expect(RUNTIME_SECTION_NOTE).toMatch(/This site did not test it/);
+    const order = Array.from(container.querySelectorAll("section")).map((element) => element.id);
+    expect(order.indexOf("mod-runtime")).toBeLessThan(order.indexOf("tier-model"));
+  });
+
+  it("lists the five seats outermost first and keeps them apart from the proposed tiers", () => {
+    const { container } = render(<SecurityPage />);
+    const section = within(container.querySelector("#mod-runtime") as HTMLElement);
+    const seats = section.getAllByRole("listitem").map((item) => item.querySelector("code")?.textContent);
+    expect(seats).toEqual(["prepend", "user", "append", "builtin", "core"]);
+    expect(RUNTIME_SEATS.map((seat) => seat.name)).toEqual(seats);
+    expect(section.getByText(new RegExp(RUNTIME_SEAT_NOTE.slice(0, 40)))).toBeInTheDocument();
+    expect(RUNTIME_SEAT_NOTE).toMatch(/proposed tiers A, B and C/);
+  });
+
+  it("gives a source under every runtime point", () => {
+    const { container } = render(<SecurityPage />);
+    const section = container.querySelector("#mod-runtime") as HTMLElement;
+    for (const point of RUNTIME_POINTS) {
+      const row = within(section).getByText(point.term).closest("div") as HTMLElement;
+      for (const source of point.sources) {
+        expect(within(row).getByRole("link", { name: new RegExp(source.label) })).toHaveAttribute("href", source.href);
+      }
+    }
+  });
+
+  it("says a mod run from a folder is code you chose to run, and does not claim a machine without managed settings has no seat above yours", () => {
+    const { container } = render(<SecurityPage />);
+    const text = (container.querySelector("#mod-runtime") as HTMLElement).textContent ?? "";
+    expect(text).toMatch(/code you chose to run: read it first/);
+    expect(text).toMatch(/does not say those are the only cases/);
+    expect(text).not.toMatch(/\bno seat above yours\b/);
+  });
+
+  it("names the security mod from the catalog, by its repository, and states only what its own README says, with a source link", () => {
+    const { container } = render(<SecurityPage />);
+    const securityMod = pickSecurityMod(selectAnthropicBuiltInMods(getAllExtensions()));
+    expect(securityMod).toBeDefined();
+    expect(securityMod?.repositoryUrl.endsWith("/mods/sec-default")).toBe(true);
+    const section = within(container.querySelector("#mod-runtime") as HTMLElement);
+    expect(section.getByRole("link", { name: securityMod?.name ?? "" }).getAttribute("href")).toMatch(new RegExp(`^/extensions/${securityMod?.slug}/?$`));
+    expect(section.getByText(new RegExp(SECURITY_MOD_FACTS.whatItIs.slice(0, 50)))).toBeInTheDocument();
+    expect(SECURITY_MOD_FACTS.moves).toMatch(/three moves and nothing else/);
+    expect(section.getByRole("link", { name: new RegExp(SECURITY_MOD_FACTS.source.label) })).toHaveAttribute(
+      "href",
+      SECURITY_MOD_FACTS.source.href,
+    );
   });
 
   it("lists all four tiers and marks each behavior as proposed", () => {

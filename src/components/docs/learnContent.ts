@@ -10,6 +10,7 @@ export const LEARN_SOURCES = {
   modsReadme: "https://github.com/anthropics/claude-code/blob/main/mods/README.md",
   modsFolder: "https://github.com/anthropics/claude-code/tree/main/mods",
   modsTypes: "https://github.com/anthropics/claude-code/tree/main/mods/types",
+  secDefaultReadme: "https://github.com/anthropics/claude-code/blob/main/mods/sec-default/README.md",
   hooksDocs: "https://code.claude.com/docs/en/hooks",
   pluginsDocs: "https://code.claude.com/docs/en/plugins",
   skillsDocs: "https://code.claude.com/docs/en/skills",
@@ -92,9 +93,12 @@ export interface ConceptItem {
   readonly sources: readonly LearnSource[];
 }
 
-const ANNOUNCEMENT: LearnSource = { label: "Announcement issue", href: LEARN_SOURCES.announcementIssue };
-const MODS_README: LearnSource = { label: "Mods README", href: LEARN_SOURCES.modsReadme };
-const MODS_TYPES: LearnSource = { label: "Mods type declarations", href: LEARN_SOURCES.modsTypes };
+/** Named sources, shared by the Learn, Migration and Security copy so each label and link is written once. */
+export const ANNOUNCEMENT: LearnSource = { label: "Announcement issue", href: LEARN_SOURCES.announcementIssue };
+export const MODS_README: LearnSource = { label: "Mods README", href: LEARN_SOURCES.modsReadme };
+export const MODS_TYPES: LearnSource = { label: "Mods type declarations", href: LEARN_SOURCES.modsTypes };
+export const HOOKS_DOCS: LearnSource = { label: "Hooks docs", href: LEARN_SOURCES.hooksDocs };
+export const SEC_DEFAULT_README: LearnSource = { label: "Security mod README", href: LEARN_SOURCES.secDefaultReadme };
 
 /** The five ideas a reader needs before the API makes sense, each with the source it is written from. */
 export const CONCEPTS: readonly ConceptItem[] = [

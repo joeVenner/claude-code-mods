@@ -93,9 +93,13 @@ describe("learn page", () => {
     expect(container.textContent).not.toMatch(/\b(reviewed|scanned|audited|verified by)\b/i);
   });
 
-  it("links on to getting started", () => {
+  it("links on to getting started, the migration guide and the security page", () => {
     render(<LearnPage />);
     expect(pathOf(screen.getByRole("link", { name: "Getting started guide" }))).toBe("/learn/getting-started");
+    expect(pathOf(screen.getByRole("link", { name: "classic hooks to function hooks" }))).toBe("/learn/migration");
+    expect(pathOf(screen.getByRole("link", { name: /what this site does and does not check/ }))).toBe("/security");
+    const runtimeLink = screen.getByRole("link", { name: "how Claude Code keeps a mod in check" });
+    expect(runtimeLink.getAttribute("href")).toMatch(/^\/security\/?#mod-runtime$/);
   });
 
   it("has its own canonical URL", () => {

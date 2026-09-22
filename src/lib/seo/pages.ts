@@ -53,6 +53,14 @@ export const PAGE_SEO = {
     breadcrumbLabel: "Getting started",
     breadcrumbParent: { label: "Learn", path: "/learn/" },
   },
+  learnMigration: {
+    path: "/learn/migration/",
+    title: "Classic hooks to function hooks",
+    description:
+      "How a classic hook becomes a function hook: the classic.<Name> events, exit codes and JSON as returned objects, and a worked example.",
+    breadcrumbLabel: "Migration",
+    breadcrumbParent: { label: "Learn", path: "/learn/" },
+  },
   hooks: {
     path: "/hooks/",
     title: "Hook events across Claude Code mods",
@@ -102,6 +110,7 @@ export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = [
   "browse",
   "learn",
   "learnGettingStarted",
+  "learnMigration",
   "hooks",
   "ideas",
   "security",

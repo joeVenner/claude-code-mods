@@ -124,6 +124,12 @@ describe("getting started page", () => {
     expect(screen.getByText(/no test\.each/)).toBeInTheDocument();
   });
 
+  it("links on to the migration guide", () => {
+    render(<GettingStartedPage />);
+    const link = screen.getByRole("link", { name: "classic hooks to function hooks" });
+    expect(link.getAttribute("href")).toMatch(/^\/learn\/migration\/?$/);
+  });
+
   it("has its own canonical URL", () => {
     expect(metadata.alternates?.canonical).toBe(`${SITE_URL}${PAGE_SEO.learnGettingStarted.path}`);
   });
