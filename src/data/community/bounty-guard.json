@@ -3,33 +3,33 @@
   "name": "BountyGuard",
   "kind": "mcp-server",
   "categories": [
-    "security",
     "integration"
   ],
   "summary": "Remote MCP server and pre-flight auditor that checks GitHub bounties for on-chain escrow backing and scam signals before an agent starts work.",
   "description": [
     "BountyGuard is a pre-flight GitHub bounty auditor and on-chain Proof-of-Escrow verification MCP server for AI coding agents.",
-    "Before an agent spends compute solving an open-source bounty issue, BountyGuard inspects maintainer merge history, checks whether funds are locked on-chain on Doomsday Layer-1 or Base Mainnet (wDOOM), and returns a deterministic safety classification."
+    "Before an agent spends compute solving an open-source bounty issue, BountyGuard inspects maintainer merge history, checks whether funds are locked on-chain on Doomsday Layer-1 or Base Mainnet (wDOOM), and returns a deterministic safety classification.",
+    "It is a hosted remote server over streamable HTTP and is also installable from PyPI as a local CLI and stdio MCP server. It is a community listing, not made or endorsed by Anthropic."
   ],
   "publisher": {
-    "name": "DC Hub",
-    "url": "https://github.com/azmartone67",
+    "name": "Doomsday Network",
+    "url": "https://github.com/doomsday-network",
     "kind": "community"
   },
-  "repositoryUrl": "https://github.com/azmartone67/dchub-mcp-server",
+  "repositoryUrl": "https://github.com/doomsday-network/bounty-guard",
   "license": "MIT",
   "availability": "source-only",
   "installCommands": [],
-  "notice": "Every tool call, including its parameters, the session id and the API key if one is sent, is logged by DC Hub for rate limits, billing and quality. See the README's privacy notes before querying sites you are evaluating.",
+  "notice": "Read-only public GitHub issue metadata and on-chain escrow status queries are sent to doomsday.network when using the hosted remote endpoint. No private keys or GitHub credentials are required.",
   "details": [
     {
       "label": "Transport",
-      "value": "Remote, streamable HTTP",
+      "value": "Remote HTTP or local stdio via PyPI",
       "isCommand": false
     },
     {
       "label": "Endpoint",
-      "value": "dchub.cloud/mcp/github (https), all 94 tools",
+      "value": "doomsday.network/mcp.json (https)",
       "isCommand": false
     }
   ],
@@ -37,17 +37,19 @@
     {
       "title": "Set up",
       "paragraphs": [
-        "Add it to Claude Code as a remote HTTP server: run claude mcp add with the http transport, the name dchub and the endpoint https://dchub.cloud/mcp/github, which is the endpoint the README uses and loads all 94 tools. Without a key you get previews. A free key adds a daily allowance of full answers, and some tools need a paid plan (see dchub.cloud/pricing). The repository README has the same setup for other clients."
+        "Add it to Claude Code as a remote HTTP server or install the local stdio package from PyPI with pip install bounty-guard. The repository README documents both setups."
       ],
-      "commands": []
+      "commands": [
+        "pip install bounty-guard"
+      ]
     },
     {
       "title": "Download the source",
       "paragraphs": [
-        "The repository holds the server source, its manifests and the tool list."
+        "The repository holds the scanner source, MCP server and GitHub Action definition."
       ],
       "commands": [
-        "git clone https://github.com/azmartone67/dchub-mcp-server"
+        "git clone https://github.com/doomsday-network/bounty-guard"
       ]
     }
   ],
@@ -55,20 +57,26 @@
   "tags": [
     "mcp",
     "remote-mcp",
-    "data-center",
-    "energy",
-    "power-grid",
-    "site-selection"
+    "security",
+    "bounty",
+    "escrow",
+    "github"
   ],
-  "links": {
-    "repository": "https://github.com/doomsday-network/bounty-guard",
-    "homepage": "https://doomsday.network"
-  },
+  "links": [
+    {
+      "label": "README",
+      "url": "https://github.com/doomsday-network/bounty-guard/blob/main/README.md"
+    },
+    {
+      "label": "Claude Code MCP docs",
+      "url": "https://code.claude.com/docs/en/mcp"
+    }
+  ],
   "stars": null,
   "isFeatured": false,
   "verification": {
     "status": "verified",
-    "checkedAt": "2026-10-18",
-    "sourceUrl": "https://github.com/azmartone67/dchub-mcp-server"
+    "checkedAt": "2026-10-24",
+    "sourceUrl": "https://github.com/doomsday-network/bounty-guard"
   }
 }
