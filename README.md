@@ -148,3 +148,6 @@ The site is a static export deployed on Vercel.
 4. Security headers (Content-Security-Policy, HSTS and others) come from `vercel.json`.
 
 `npm run build` writes a fully static site to `out/`, so any static host also works. Set `NEXT_PUBLIC_SITE_URL` to that host's origin.
+
+- [DoomPay](https://github.com/doomsday-network/doom-pay) - Non-custodial 3-line Web3 checkout widget, REST API, and remote MCP payment receipt verifier (`wDOOM` on Base Mainnet & `DOOM` Layer-1).
+- [BountyGuard](https://github.com/doomsday-network/bounty-guard) - Zero-dependency MCP security server & CLI auditor that verifies on-chain bounty escrow before AI agents start work.
