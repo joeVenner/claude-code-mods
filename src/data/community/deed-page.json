@@ -1,0 +1,81 @@
+{
+  "slug": "deed-page",
+  "name": "deed.page",
+  "kind": "plugin",
+  "categories": [
+    "integration",
+    "workflow"
+  ],
+  "summary": "Publishes a file or folder to a permanent public deed.page URL in one call, with no account, API key, email code or claim link.",
+  "description": [
+    "The repository is a plugin that bundles the deed.page agent skill with the hosted deed.page MCP server. The skill is one file, skills/deed-page/SKILL.md, and does the publish with one curl request. The MCP server runs at https://deed.page/mcp over Streamable HTTP. The README gives the Claude Code install as CLI commands, claude plugin marketplace add f-o-x11/deed-page-skill and then claude plugin install deed-page@deed-page; the install commands on this page are the same two steps typed as /plugin commands inside Claude Code.",
+    "Ask the agent to publish a folder to deed.page or to host a report and give you a link. It calls publish_site with the files and answers with the live URL; to change the site later it calls update_site with the same slug and token. The first publish returns an owner token once, and that token is the key to update or delete the sites it owns.",
+    "Free plan: 25 sites, 25 MB per site, 60 publishes per hour, and free sites show a small \"Published with deed.page\" badge. Paid plans raise the limits and never show the badge: Hobby ($3/mo) and Pro ($15/mo). When a plan limit is hit, the skill tells the agent to show you the price and a Stripe Checkout upgrade link; the agent may complete the payment itself only if you explicitly approved the purchase and it has a payment tool you approved. Free sites are public, so do not publish secrets. Static files only. It is a community project, not made or endorsed by Anthropic."
+  ],
+  "publisher": {
+    "name": "Avatar 8 LLC",
+    "url": "https://github.com/f-o-x11",
+    "kind": "community"
+  },
+  "repositoryUrl": "https://github.com/f-o-x11/deed-page-skill",
+  "license": "MIT",
+  "availability": "installable",
+  "installCommands": [
+    "/plugin marketplace add f-o-x11/deed-page-skill",
+    "/plugin install deed-page@deed-page"
+  ],
+  "notice": "The plugin uploads the files you publish to deed.page, a hosted service run by Avatar 8 LLC. The first publish returns an owner token, which the skill saves to ~/.config/deed-page/token and sends to deed.page on every publish. SKILL.md tells the agent to use it for requests such as \"give me a link\", and also when it runs unattended and cannot ask a human for a code or a click, so files can go to a public URL without anyone confirming. Sites published on the free plan are public. The plugin installs from its own repository's marketplace, not from Anthropic's.",
+  "details": [
+    {
+      "label": "Version",
+      "value": "1.4.1",
+      "isCommand": false
+    },
+    {
+      "label": "Plugin id",
+      "value": "deed-page",
+      "isCommand": false
+    },
+    {
+      "label": "MCP server",
+      "value": "https://deed.page/mcp (Streamable HTTP)",
+      "isCommand": false
+    },
+    {
+      "label": "Download the source",
+      "value": "git clone https://github.com/f-o-x11/deed-page-skill",
+      "isCommand": true
+    }
+  ],
+  "guide": [],
+  "hooks": [],
+  "tags": [
+    "hosting",
+    "static-site",
+    "publish",
+    "deploy",
+    "skills",
+    "remote-mcp"
+  ],
+  "links": [
+    {
+      "label": "README",
+      "url": "https://github.com/f-o-x11/deed-page-skill/blob/main/README.md"
+    },
+    {
+      "label": "SKILL.md",
+      "url": "https://github.com/f-o-x11/deed-page-skill/blob/main/skills/deed-page/SKILL.md"
+    },
+    {
+      "label": "LICENSE",
+      "url": "https://github.com/f-o-x11/deed-page-skill/blob/main/LICENSE"
+    }
+  ],
+  "stars": null,
+  "isFeatured": false,
+  "verification": {
+    "status": "verified",
+    "checkedAt": "2026-10-26",
+    "sourceUrl": "https://github.com/f-o-x11/deed-page-skill"
+  }
+}
