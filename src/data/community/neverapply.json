@@ -6,14 +6,14 @@
     "workflow",
     "integration"
   ],
-  "summary": "Hosted MCP server that searches jobs, explains matches, tracks applications and applies only with your approval.",
+  "summary": "Hosted MCP server that searches jobs, explains matches, tracks applications and applies after your approval unless the client has a separate send permission.",
   "description": [
     "NeverApply is a hosted MCP server for job search. With the plugin, an assistant can search jobs and read one job without signing in. After you sign in, it can explain matches, show application history, update your profile, prepare resume and interview drafts, and apply to jobs you approve.",
     "The server runs at neverapply.co/mcp over Streamable HTTP. Auth is OAuth 2.1 with PKCE and dynamic client registration for tools beyond search; no API key is pasted into a config file. This repository holds only manifests, skills and an icon; the server code runs on NeverApply.",
     "It is a community listing, not made or endorsed by Anthropic."
   ],
   "publisher": {
-    "name": "Kasovy",
+    "name": "Kasovy (NeverApply)",
     "url": "https://github.com/kasovy",
     "kind": "community"
   },
@@ -24,7 +24,7 @@
     "/plugin marketplace add kasovy/neverapply-mcp",
     "/plugin install neverapply@neverapply"
   ],
-  "notice": "Search jobs and read one job without signing in. Matches, profile and applications need OAuth sign-in in the browser. Applying requires your approval for each application in ask mode.",
+  "notice": "Search jobs and read one job without signing in. Matches, profile and applications need OAuth sign-in in the browser. Resume tailoring, interview prep and applying use NeverApply credits (Free/Pro/Max plans), so they are not free. Applying waits for your approval of each named job unless the client has a separate send permission.",
   "details": [
     {
       "label": "Transport",
@@ -87,8 +87,8 @@
       "url": "https://github.com/kasovy/neverapply-mcp/blob/main/.claude-plugin/plugin.json"
     },
     {
-      "label": "Claude Code MCP docs",
-      "url": "https://code.claude.com/docs/en/mcp"
+      "label": "Privacy",
+      "url": "https://github.com/kasovy/neverapply-mcp/blob/main/README.md#links"
     }
   ],
   "stars": null,
