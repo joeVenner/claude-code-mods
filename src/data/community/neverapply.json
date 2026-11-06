@@ -1,0 +1,101 @@
+{
+  "slug": "neverapply",
+  "name": "NeverApply",
+  "kind": "mcp-server",
+  "categories": [
+    "workflow",
+    "integration"
+  ],
+  "summary": "Hosted MCP server that searches jobs, explains matches, tracks applications and applies after your approval unless the client has a separate send permission.",
+  "description": [
+    "NeverApply is a hosted MCP server for job search. With the plugin, an assistant can search jobs and read one job without signing in. After you sign in, it can explain matches, show application history, update your profile, prepare resume and interview drafts, and apply to jobs you approve.",
+    "The server runs at neverapply.co/mcp over Streamable HTTP. Auth is OAuth 2.1 with PKCE and dynamic client registration for tools beyond search; no API key is pasted into a config file. This repository holds only manifests, skills and an icon; the server code runs on NeverApply.",
+    "It is a community listing, not made or endorsed by Anthropic."
+  ],
+  "publisher": {
+    "name": "Kasovy (NeverApply)",
+    "url": "https://github.com/kasovy",
+    "kind": "community"
+  },
+  "repositoryUrl": "https://github.com/kasovy/neverapply-mcp",
+  "license": "MIT",
+  "availability": "installable",
+  "installCommands": [
+    "/plugin marketplace add kasovy/neverapply-mcp",
+    "/plugin install neverapply@neverapply"
+  ],
+  "notice": "Search jobs and read one job without signing in. Matches, profile and applications need OAuth sign-in in the browser. Resume tailoring, interview prep and applying use NeverApply credits (Free/Pro/Max plans), so they are not free. Applying waits for your approval of each named job unless the client has a separate send permission.",
+  "details": [
+    {
+      "label": "Transport",
+      "value": "Remote, Streamable HTTP",
+      "isCommand": false
+    },
+    {
+      "label": "Endpoint",
+      "value": "neverapply.co/mcp (https)",
+      "isCommand": false
+    },
+    {
+      "label": "Auth",
+      "value": "OAuth 2.1 with PKCE and dynamic client registration; none for search_jobs and get_job",
+      "isCommand": false
+    },
+    {
+      "label": "Plugin id",
+      "value": "neverapply",
+      "isCommand": false
+    }
+  ],
+  "guide": [
+    {
+      "title": "Set up",
+      "paragraphs": [
+        "Install the plugin from this repository's marketplace, which adds the hosted server and the skills. Or add only the server with Claude Code's MCP HTTP transport to neverapply.co/mcp, then run /mcp and sign in when you want matches, profile or applications."
+      ],
+      "commands": [
+        "/plugin marketplace add kasovy/neverapply-mcp",
+        "/plugin install neverapply@neverapply"
+      ]
+    },
+    {
+      "title": "Download the source",
+      "paragraphs": [
+        "The repository holds the plugin manifests, skills and icon. The hosted server is not in this repository."
+      ],
+      "commands": [
+        "git clone https://github.com/kasovy/neverapply-mcp"
+      ]
+    }
+  ],
+  "hooks": [],
+  "tags": [
+    "mcp",
+    "remote-mcp",
+    "jobs",
+    "job-search",
+    "resume",
+    "careers"
+  ],
+  "links": [
+    {
+      "label": "README",
+      "url": "https://github.com/kasovy/neverapply-mcp/blob/main/README.md"
+    },
+    {
+      "label": "plugin.json",
+      "url": "https://github.com/kasovy/neverapply-mcp/blob/main/.claude-plugin/plugin.json"
+    },
+    {
+      "label": "Privacy",
+      "url": "https://github.com/kasovy/neverapply-mcp/blob/main/README.md#links"
+    }
+  ],
+  "stars": null,
+  "isFeatured": false,
+  "verification": {
+    "status": "verified",
+    "checkedAt": "2026-11-05",
+    "sourceUrl": "https://github.com/kasovy/neverapply-mcp"
+  }
+}
