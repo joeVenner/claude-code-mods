@@ -9,7 +9,7 @@
   "description": [
     "DC Hub is the live data layer for data-center site selection. Its Data Center Power Index (DCPI) is a daily score of where data centers can get grid power, across 300+ markets. Agents can query it and cite it.",
     "It also covers mapped power, grid, gas and fiber assets and carries live grid feeds from the seven US ISOs (PJM, ERCOT, CAISO, MISO, SPP, NYISO, ISO-NE), plus retail and wholesale electricity prices by state and ISO. Answers carry an as-of timestamp and a citation line.",
-    "It is a hosted remote server over streamable HTTP. Without a key you get previews. A free key adds a daily allowance of full answers, and some tools need a paid plan (see dchub.cloud/pricing). It is a community listing, not made or endorsed by Anthropic."
+    "It is a hosted remote server over streamable HTTP. Free to start: previews work with no key; a free key unlocks deeper answers. It is a community listing, not made or endorsed by Anthropic."
   ],
   "publisher": {
     "name": "DC Hub",
@@ -37,7 +37,7 @@
     {
       "title": "Set up",
       "paragraphs": [
-        "Add it to Claude Code as a remote HTTP server: run claude mcp add with the http transport, the name dchub and the endpoint https://dchub.cloud/mcp/github, which is the endpoint the README uses and loads all 94 tools. Without a key you get previews. A free key adds a daily allowance of full answers, and some tools need a paid plan (see dchub.cloud/pricing). The repository README has the same setup for other clients."
+        "Add it to Claude Code as a remote HTTP server: run claude mcp add with the http transport, the name dchub and the endpoint https://dchub.cloud/mcp/github, which is the endpoint the README uses and loads all 94 tools. Free to start: previews work with no key; a free key unlocks deeper answers. The repository README has the same setup for other clients."
       ],
       "commands": []
     },
