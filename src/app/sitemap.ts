@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { ARTICLES } from "@/components/docs/articlesContent";
+import { articlePath } from "@/lib/articles";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeasCheckedAt } from "@/lib/ideas";
 import { NAV_LINKS, SITE_URL } from "@/lib/site";
@@ -24,6 +26,7 @@ const STATIC_PAGE_PLAN: Readonly<Record<keyof typeof PAGE_SEO, StaticPagePlan>> 
   learnGettingStarted: { changeFrequency: "weekly", priority: 0.7 },
   learnMigration: { changeFrequency: "weekly", priority: 0.7 },
   learnTutorials: { changeFrequency: "monthly", priority: 0.6 },
+  learnArticles: { changeFrequency: "weekly", priority: 0.7 },
   hooks: { changeFrequency: "weekly", priority: 0.6 },
   ideas: { changeFrequency: "monthly", priority: 0.5 },
   security: { changeFrequency: "monthly", priority: 0.6 },
@@ -34,6 +37,7 @@ const STATIC_PAGE_PLAN: Readonly<Record<keyof typeof PAGE_SEO, StaticPagePlan>> 
 /** Mods are what the site is about, so their pages rank above the other kinds. */
 const MOD_PRIORITY = 0.8;
 const EXTENSION_PRIORITY = 0.6;
+const ARTICLE_PRIORITY = 0.6;
 
 /** Nav destinations that have no entry in `PAGE_SEO` yet still get indexed, so a new nav link is never missed. */
 function unlistedNavPaths(): readonly string[] {
@@ -62,5 +66,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: extension.kind === "mod" ? MOD_PRIORITY : EXTENSION_PRIORITY,
   }));
-  return [...staticEntries, ...navEntries, ...extensionEntries];
+  const articleEntries: MetadataRoute.Sitemap = ARTICLES.map((article) => ({
+    url: `${SITE_URL}${articlePath(article.slug)}`,
+    lastModified: article.updatedAt,
+    changeFrequency: "monthly",
+    priority: ARTICLE_PRIORITY,
+  }));
+  return [...staticEntries, ...navEntries, ...articleEntries, ...extensionEntries];
 }

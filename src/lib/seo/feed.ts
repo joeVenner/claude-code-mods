@@ -1,3 +1,4 @@
+import { articlePath, type Article } from "@/lib/articles";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { KIND_LABELS, type Extension } from "@/lib/types";
 import { ATOM_FEED_PATH, SITE_AUTHOR, absoluteUrl as rawAbsoluteUrl, buildExtensionDescription, extensionPath } from "@/lib/seo/metadata";
@@ -5,8 +6,9 @@ import { toSingleLine } from "@/lib/seo/text";
 import { toSafeOutputUrl } from "@/lib/url";
 
 /**
- * Atom feed of the directory, newest source check first. Entries carry only what the catalog
- * states: a title, a summary, a link and the date the source URL last responded.
+ * Atom feed of the directory, newest first. Extension entries carry only what the catalog states:
+ * a title, a summary, a link and the date the source URL last responded. Article entries carry the
+ * article's title, description, link and last update date.
  */
 
 /** A feed reader wants what is new, not the whole directory, and the file must stay small as the catalog grows. */
@@ -14,6 +16,8 @@ export const FEED_MAX_ENTRIES = 50;
 
 export interface FeedInput {
   readonly extensions: readonly Extension[];
+  /** Articles to list beside the extensions; none when left out. */
+  readonly articles?: readonly Article[];
   /** Catalog date (YYYY-MM-DD). Only the feed's `updated` time when there are no entries to take it from. */
   readonly generatedAt: string;
   readonly siteUrl?: string;
@@ -62,12 +66,54 @@ function entryXml(extension: Extension, siteUrl: string): string {
   ].join("\n");
 }
 
+function articleEntryXml(article: Article, siteUrl: string): string {
+  const url = escapeXml(absoluteUrl(articlePath(article.slug), siteUrl));
+  return [
+    "  <entry>",
+    `    <id>${url}</id>`,
+    `    <title>${escapeXml(article.title)}</title>`,
+    `    <link rel="alternate" type="text/html" href="${url}"/>`,
+    `    <published>${toAtomTime(article.publishedAt)}</published>`,
+    `    <updated>${toAtomTime(article.updatedAt)}</updated>`,
+    `    <category term="article" label="Article"/>`,
+    `    <summary type="text">${escapeXml(article.description)}</summary>`,
+    "  </entry>",
+  ].join("\n");
+}
+
+interface FeedItem {
+  /** YYYY-MM-DD the entry is sorted by and shows as `updated`. */
+  readonly date: string;
+  readonly title: string;
+  readonly xml: string;
+}
+
+/** Extensions and articles as one list, newest first, then by title, capped at `FEED_MAX_ENTRIES`. */
+function newestItems(input: FeedInput, siteUrl: string): readonly FeedItem[] {
+  const extensionItems = sortByNewestCheck(input.extensions).map((extension) => ({
+    date: extension.verification.checkedAt,
+    title: extension.name,
+    xml: entryXml(extension, siteUrl),
+  }));
+  const articleItems = (input.articles ?? []).map((article) => ({
+    date: article.updatedAt,
+    title: article.title,
+    xml: articleEntryXml(article, siteUrl),
+  }));
+  return [...extensionItems, ...articleItems]
+    .sort((left, right) => {
+      const byDate = right.date.localeCompare(left.date);
+      return byDate !== 0 ? byDate : left.title.localeCompare(right.title);
+    })
+    .slice(0, FEED_MAX_ENTRIES);
+}
+
 /** The feed document as an XML string. */
 export function buildAtomFeed(input: FeedInput): string {
   const siteUrl = input.siteUrl ?? SITE_URL;
   const home = escapeXml(absoluteUrl("/", siteUrl));
   const feedUrl = escapeXml(absoluteUrl(ATOM_FEED_PATH, siteUrl));
-  const newest = sortByNewestCheck(input.extensions).slice(0, FEED_MAX_ENTRIES);
+  const newest = newestItems(input, siteUrl);
   return [
     '<?xml version="1.0" encoding="utf-8"?>',
     '<feed xmlns="http://www.w3.org/2005/Atom">',
@@ -77,12 +123,12 @@ export function buildAtomFeed(input: FeedInput): string {
     `  <link rel="self" type="application/atom+xml" href="${feedUrl}"/>`,
     `  <link rel="alternate" type="text/html" href="${home}"/>`,
     // The newest entry date, so a reader sees the feed change only when an entry did.
-    `  <updated>${toAtomTime(newest[0]?.verification.checkedAt ?? input.generatedAt)}</updated>`,
+    `  <updated>${toAtomTime(newest[0]?.date ?? input.generatedAt)}</updated>`,
     "  <author>",
     `    <name>${escapeXml(SITE_AUTHOR.name)}</name>`,
     `    <uri>${escapeXml(toSafeOutputUrl(SITE_AUTHOR.url))}</uri>`,
     "  </author>",
-    ...newest.map((extension) => entryXml(extension, siteUrl)),
+    ...newest.map((item) => item.xml),
     "</feed>",
     "",
   ].join("\n");

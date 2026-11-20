@@ -1,3 +1,4 @@
+import { ARTICLES_PATH, articlePath, sortArticlesByNewest, type Article } from "@/lib/articles";
 import { COMMUNITY_REPOSITORY_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import { MARKETPLACE_INFO_PATH, MARKETPLACE_PATH } from "@/lib/marketplace";
 import { AVAILABILITY_LABELS, CATEGORY_LABELS, KIND_LABELS, type Extension, type ExtensionKind, type Idea } from "@/lib/types";
@@ -28,6 +29,8 @@ import { toInertLine, toPlainText, toSingleLine, toStrictInertLine } from "@/lib
 export interface LlmsInput {
   readonly extensions: readonly Extension[];
   readonly ideas: readonly Idea[];
+  /** Articles to list under the articles index in the site docs; none when left out. */
+  readonly articles?: readonly Article[];
   /** Catalog date (YYYY-MM-DD). */
   readonly generatedAt: string;
   /** Date (YYYY-MM-DD) the ideas list was last checked against the spec reports. */
@@ -102,8 +105,16 @@ function indexLine(extension: Extension, siteUrl: string): string {
   return `- [${linkLabel(extension.name)}](${url}): ${toSingleLine(extension.summary)} (${facts.join(", ")})`;
 }
 
-function docLines(siteUrl: string): readonly string[] {
-  return [
+/** One line per article, newest first, right after the articles index in the site docs. */
+function articleLines(articles: readonly Article[], siteUrl: string): readonly string[] {
+  return sortArticlesByNewest(articles).map(
+    (article) =>
+      `- [${linkLabel(article.title)}](${absoluteUrl(articlePath(article.slug), siteUrl)}): ${toSingleLine(article.description)} (published ${article.publishedAt})`,
+  );
+}
+
+function docLines(articles: readonly Article[], siteUrl: string): readonly string[] {
+  const pageLines = [
     PAGE_SEO.modsHub,
     PAGE_SEO.pluginsHub,
     PAGE_SEO.skillsHub,
@@ -113,13 +124,16 @@ function docLines(siteUrl: string): readonly string[] {
     PAGE_SEO.learnGettingStarted,
     PAGE_SEO.learnMigration,
     PAGE_SEO.learnTutorials,
+    PAGE_SEO.learnArticles,
     PAGE_SEO.hooks,
     PAGE_SEO.security,
     PAGE_SEO.publish,
     PAGE_SEO.about,
-  ].map(
-    (page) => `- [${page.breadcrumbLabel}](${absoluteUrl(page.path, siteUrl)}): ${page.description}`,
-  );
+  ].map((page) => ({
+    path: page.path,
+    line: `- [${page.breadcrumbLabel}](${absoluteUrl(page.path, siteUrl)}): ${page.description}`,
+  }));
+  return pageLines.flatMap(({ path, line }) => (path === ARTICLES_PATH ? [line, ...articleLines(articles, siteUrl)] : [line]));
 }
 
 function ideaIndexLines(ideas: readonly Idea[], siteUrl: string): readonly string[] {
@@ -151,7 +165,7 @@ export function buildLlmsTxt(input: LlmsInput): string {
   for (const { kind, entries } of groupByKind(input.extensions)) {
     lines.push(`## ${KIND_SECTION_TITLES[kind]}`, "", ...entries.map((entry) => indexLine(entry, siteUrl)), "");
   }
-  lines.push("## Site docs", "", ...docLines(siteUrl), "");
+  lines.push("## Site docs", "", ...docLines(input.articles ?? [], siteUrl), "");
   if (input.ideas.length > 0) {
     lines.push(
       `## ${LLMS_IDEAS_HEADING}`,
@@ -271,7 +285,7 @@ export function buildLlmsFullTxt(input: LlmsInput): string {
       ...entries.flatMap((entry) => (isCommunity(entry) ? communityEntryLines(entry, siteUrl) : fullEntryLines(entry, siteUrl))),
     );
   }
-  lines.push("## Site docs", "", ...docLines(siteUrl), "");
+  lines.push("## Site docs", "", ...docLines(input.articles ?? [], siteUrl), "");
   if (input.ideas.length > 0) {
     lines.push(
       `## ${LLMS_IDEAS_HEADING}`,

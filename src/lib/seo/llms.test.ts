@@ -3,6 +3,8 @@ import { builtInModExtension, sourceOnlyExtension, verifiedExtension } from "@/c
 import { DASH_PATTERN } from "@/components/docs/testSupport";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeas, getIdeasCheckedAt } from "@/lib/ideas";
+import { ARTICLES } from "@/components/docs/articlesContent";
+import { articlePath, sortArticlesByNewest } from "@/lib/articles";
 import { SITE_URL } from "@/lib/site";
 import { EXTENSION_KINDS, type Extension } from "@/lib/types";
 import { COMMUNITY_DATA_LABEL, LLMS_IDEAS_HEADING, LLMS_KIND_ORDER, buildLlmsFullTxt, buildLlmsTxt, fenceBlock, type LlmsInput } from "./llms";
@@ -16,6 +18,7 @@ const catalogInput: LlmsInput = {
   ideas: getIdeas(),
   generatedAt: getCatalogGeneratedAt(),
   ideasCheckedAt: getIdeasCheckedAt(),
+  articles: ARTICLES,
 };
 /** A maintainer entry (not community), so its full text is written. */
 const maintainerPlugin: Extension = {
@@ -353,5 +356,22 @@ describe("fenceBlock", () => {
 
   it("handles no lines", () => {
     expect(fenceBlock([])).toBe("```\n```");
+  });
+});
+
+describe("llms.txt articles", () => {
+  it("lists the articles index and each article, newest first, inside the site docs", () => {
+    const text = buildLlmsTxt(catalogInput);
+    const docs = text.slice(text.indexOf("## Site docs"), text.indexOf("## Optional"));
+    expect(docs).toContain(`](${SITE_URL}/learn/articles/)`);
+    const positions = sortArticlesByNewest(ARTICLES).map((article) => docs.indexOf(`](${SITE_URL}${articlePath(article.slug)})`));
+    expect(positions.every((position) => position > docs.indexOf(`](${SITE_URL}/learn/articles/)`))).toBe(true);
+    expect([...positions].sort((left, right) => left - right)).toEqual(positions);
+  });
+
+  it("writes no article lines when no articles are passed", () => {
+    const text = buildLlmsTxt({ ...catalogInput, articles: undefined });
+    expect(text).toContain(`](${SITE_URL}/learn/articles/)`);
+    expect(text).not.toContain(`${SITE_URL}/learn/articles/${ARTICLES[0].slug}/`);
   });
 });

@@ -79,6 +79,7 @@ export const NAV_LINKS: readonly NavLink[] = [
       { label: "Getting started", href: "/learn/getting-started/" },
       { label: "Migration", href: "/learn/migration/" },
       { label: "Video tutorials", href: "/learn/tutorials/" },
+      { label: "Articles", href: "/learn/articles/" },
     ],
   },
   { label: "Hooks", href: "/hooks/" },

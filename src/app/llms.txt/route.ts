@@ -1,3 +1,4 @@
+import { ARTICLES } from "@/components/docs/articlesContent";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeas, getIdeasCheckedAt } from "@/lib/ideas";
 import { buildLlmsTxt } from "@/lib/seo/llms";
@@ -11,6 +12,7 @@ export function GET(): Response {
     ideas: getIdeas(),
     generatedAt: getCatalogGeneratedAt(),
     ideasCheckedAt: getIdeasCheckedAt(),
+    articles: ARTICLES,
   });
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }

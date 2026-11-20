@@ -6,12 +6,14 @@ import { COMMUNITY_REPOSITORY_URL, SITE_URL } from "@/lib/site";
 import type { Extension } from "@/lib/types";
 import { VIDEOS } from "@/components/docs/tutorialsContent";
 import { LEARN_FAQ } from "@/components/docs/learnContent";
+import { ARTICLES } from "@/components/docs/articlesContent";
 import {
   BROWSE_LIST_MAX_ITEMS,
   buildBrowseGraph,
   buildDocPageGraph,
   buildExtensionGraph,
   buildHomeGraph,
+  buildArticleGraph,
   buildLearnGraph,
   buildTutorialsGraph,
   serializeJsonLd,
@@ -397,5 +399,32 @@ describe("buildLearnGraph", () => {
     const json = serializeJsonLd(graph);
     expect(DASH_PATTERN.test(json)).toBe(false);
     expect(roundTrip(graph)).toEqual(graph);
+  });
+});
+
+describe("buildArticleGraph", () => {
+  const [article] = ARTICLES;
+  const nodes = buildArticleGraph(article)["@graph"];
+
+  it("describes the article as a TechArticle with its real dates and canonical URL", () => {
+    const node = nodes.find((entry) => entry["@type"] === "TechArticle");
+    const url = `${SITE_URL}/learn/articles/${article.slug}/`;
+    expect(node).toMatchObject({
+      "@id": `${url}#article`,
+      headline: article.headline,
+      description: article.description,
+      url,
+      mainEntityOfPage: url,
+      datePublished: article.publishedAt,
+      dateModified: article.updatedAt,
+      inLanguage: "en",
+    });
+  });
+
+  it("breadcrumbs Home, Learn, Articles, then the article", () => {
+    const breadcrumb = nodes.find((entry) => entry["@type"] === "BreadcrumbList");
+    const items = breadcrumb?.itemListElement as readonly { name: string; item: string }[];
+    expect(items.map((item) => item.name)).toEqual(["Home", "Learn", "Articles", article.title]);
+    expect(items.at(-1)?.item).toBe(`${SITE_URL}/learn/articles/${article.slug}/`);
   });
 });

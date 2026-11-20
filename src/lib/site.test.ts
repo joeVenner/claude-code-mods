@@ -39,7 +39,7 @@ describe("NAV_LINKS", () => {
     const browse = NAV_LINKS.find((link) => link.label === "Browse");
     expect(browse?.children?.map((child) => child.href)).toEqual(HUB_KINDS.map(kindHref));
     const learn = NAV_LINKS.find((link) => link.label === "Learn");
-    expect(learn?.children?.map((child) => child.href)).toEqual(["/learn/getting-started/", "/learn/migration/", "/learn/tutorials/"]);
+    expect(learn?.children?.map((child) => child.href)).toEqual(["/learn/getting-started/", "/learn/migration/", "/learn/tutorials/", "/learn/articles/"]);
     for (const child of learn?.children ?? []) {
       expect(child.href.startsWith("/learn/"), child.label).toBe(true);
       expect(child.children, child.label).toBeUndefined();

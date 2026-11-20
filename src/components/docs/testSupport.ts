@@ -25,3 +25,11 @@ const EM_DASH = String.fromCharCode(0x2014);
 
 /** Matches the en and em dash characters that the copy rules forbid in visible text. */
 export const DASH_PATTERN = new RegExp(`[${EN_DASH}${EM_DASH}]`);
+
+/**
+ * The href Next's `Link` renders for an internal path under test: it drops the trailing slash that
+ * the static export adds, as the other page tests expect (for example `/learn/tutorials`).
+ */
+export function linkHref(path: string): string {
+  return path === "/" ? path : path.replace(/\/$/, "");
+}

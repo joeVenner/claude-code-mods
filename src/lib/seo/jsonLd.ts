@@ -1,3 +1,4 @@
+import { articlePath, type Article } from "@/lib/articles";
 import { COMMUNITY_REPOSITORY_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 import type { Extension } from "@/lib/types";
 import { PAGE_SEO, type PageSeo } from "@/lib/seo/pages";
@@ -199,6 +200,32 @@ export function buildDocPageGraph(page: PageSeo): JsonLdGraph {
       inLanguage: "en",
     },
     buildBreadcrumbList(pageSteps(page)),
+  );
+}
+
+/**
+ * Article page: a TechArticle with its real publish and update dates, and a breadcrumb through
+ * Learn and the articles index. The publisher is this site, inlined so the node stands alone.
+ */
+export function buildArticleGraph(article: Article): JsonLdGraph {
+  const url = absoluteUrl(articlePath(article.slug));
+  const index: PageSeo = PAGE_SEO.learnArticles;
+  return graph(
+    {
+      "@type": "TechArticle",
+      "@id": `${url}#article`,
+      headline: toSingleLine(article.headline),
+      description: toSingleLine(article.description),
+      url,
+      mainEntityOfPage: url,
+      datePublished: article.publishedAt,
+      dateModified: article.updatedAt,
+      inLanguage: "en",
+      isPartOf: { "@id": WEBSITE_ID },
+      author: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
+      publisher: { "@type": "Organization", "@id": ORGANIZATION_ID, name: SITE_NAME, url: absoluteUrl("/"), logo: absoluteUrl(LOGO_PATH) },
+    },
+    buildBreadcrumbList([...pageSteps(index), { name: toSingleLine(article.title), path: articlePath(article.slug) }]),
   );
 }
 
