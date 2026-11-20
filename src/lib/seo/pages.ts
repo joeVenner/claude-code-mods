@@ -109,6 +109,14 @@ export const PAGE_SEO = {
     breadcrumbLabel: "Tutorials",
     breadcrumbParent: { label: "Learn", path: "/learn/" },
   },
+  learnArticles: {
+    path: "/learn/articles/",
+    title: "Claude Code articles",
+    description:
+      "Dated articles on recent Claude Code releases such as Code Mode, custom Desktop themes and hooks that block actions, each checked against Anthropic's docs.",
+    breadcrumbLabel: "Articles",
+    breadcrumbParent: { label: "Learn", path: "/learn/" },
+  },
   hooks: {
     path: "/hooks/",
     title: "Hook events across Claude Code mods",
@@ -165,6 +173,7 @@ export const STATIC_PAGE_KEYS: readonly StaticPageKey[] = [
   "learnGettingStarted",
   "learnMigration",
   "learnTutorials",
+  "learnArticles",
   "hooks",
   "ideas",
   "security",

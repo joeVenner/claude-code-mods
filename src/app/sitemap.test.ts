@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { getIdeasCheckedAt } from "@/lib/ideas";
+import { ARTICLES } from "@/components/docs/articlesContent";
+import { articlePath } from "@/lib/articles";
 import { NAV_LINKS, SITE_URL } from "@/lib/site";
 import { PAGE_SEO, STATIC_PAGE_KEYS } from "@/lib/seo/pages";
 import sitemap, { dynamic } from "./sitemap";
@@ -71,5 +73,16 @@ describe("sitemap", () => {
     expect(otherPriorities.size).toBe(1);
     expect([...modPriorities][0]).toBeGreaterThan([...otherPriorities][0]);
     expect([...modPriorities][0]).toBeLessThan(1);
+  });
+});
+
+describe("sitemap articles", () => {
+  const byUrl = new Map(sitemap().map((entry) => [entry.url, entry]));
+
+  it("includes the articles index and every article, dated by its last update", () => {
+    expect(byUrl.has(`${SITE_URL}/learn/articles/`)).toBe(true);
+    for (const article of ARTICLES) {
+      expect(byUrl.get(`${SITE_URL}${articlePath(article.slug)}`)?.lastModified).toBe(article.updatedAt);
+    }
   });
 });
