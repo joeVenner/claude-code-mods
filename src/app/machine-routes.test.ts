@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { DASH_PATTERN } from "@/components/docs/testSupport";
+import { ARTICLES } from "@/components/docs/articlesContent";
 import { getAllExtensions } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
 import { INDEXNOW_KEY, INDEXNOW_KEY_FILENAME } from "@/lib/seo/indexNow";
@@ -73,6 +74,6 @@ describe("feed.xml route", () => {
     expect(response.headers.get("content-type")).toBe("application/atom+xml; charset=utf-8");
     const body = await response.text();
     expect(body).toContain('<feed xmlns="http://www.w3.org/2005/Atom">');
-    expect(body.split("<entry>")).toHaveLength(Math.min(getAllExtensions().length, 50) + 1);
+    expect(body.split("<entry>")).toHaveLength(Math.min(getAllExtensions().length + ARTICLES.length, 50) + 1);
   });
 });

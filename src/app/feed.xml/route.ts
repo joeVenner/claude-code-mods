@@ -1,3 +1,4 @@
+import { ARTICLES } from "@/components/docs/articlesContent";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { buildAtomFeed } from "@/lib/seo/feed";
 
@@ -5,6 +6,6 @@ import { buildAtomFeed } from "@/lib/seo/feed";
 export const dynamic = "force-static";
 
 export function GET(): Response {
-  const body = buildAtomFeed({ extensions: getAllExtensions(), generatedAt: getCatalogGeneratedAt() });
+  const body = buildAtomFeed({ extensions: getAllExtensions(), articles: ARTICLES, generatedAt: getCatalogGeneratedAt() });
   return new Response(body, { headers: { "Content-Type": "application/atom+xml; charset=utf-8" } });
 }

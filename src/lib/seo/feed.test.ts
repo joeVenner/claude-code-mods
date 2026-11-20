@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { builtInModExtension, sourceOnlyExtension, verifiedExtension } from "@/components/catalog/__fixtures__/extensions";
 import { DASH_PATTERN } from "@/components/docs/testSupport";
+import { ARTICLES } from "@/components/docs/articlesContent";
 import { getAllExtensions, getCatalogGeneratedAt } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
 import type { Extension } from "@/lib/types";
@@ -173,5 +174,43 @@ describe("buildAtomFeed", () => {
     const xml = buildAtomFeed({ extensions: [verifiedExtension], generatedAt: "2026-01-01", siteUrl: "https://example.test" });
     expect(xml).toContain("https://example.test/extensions/fixture-lint-runner/");
     expect(xml).not.toContain(SITE_URL);
+  });
+});
+
+describe("articles in the feed", () => {
+  const [article] = ARTICLES;
+  const datedArticle = { ...article, publishedAt: "2026-06-01", updatedAt: "2026-06-15" };
+
+  it("adds an entry per article with its link, published and updated dates, in date order", () => {
+    const xml = buildAtomFeed({
+      extensions: [withDate(verifiedExtension, "2026-06-10"), withDate(sourceOnlyExtension, "2026-06-20")],
+      articles: [datedArticle],
+      generatedAt: "2026-01-01",
+      siteUrl: "https://example.test",
+    });
+    const document = parse(xml);
+    expect(isWellFormed(document)).toBe(true);
+    const entries = [...document.getElementsByTagNameNS(ATOM_NAMESPACE, "entry")];
+    const ids = entries.map((entry) => entry.getElementsByTagNameNS(ATOM_NAMESPACE, "id")[0]?.textContent);
+    expect(ids).toEqual([
+      "https://example.test/extensions/fixture-source-only/",
+      `https://example.test/learn/articles/${article.slug}/`,
+      "https://example.test/extensions/fixture-lint-runner/",
+    ]);
+    const articleEntry = entries[1];
+    expect(articleEntry.getElementsByTagNameNS(ATOM_NAMESPACE, "published")[0]?.textContent).toBe("2026-06-01T00:00:00Z");
+    expect(articleEntry.getElementsByTagNameNS(ATOM_NAMESPACE, "updated")[0]?.textContent).toBe("2026-06-15T00:00:00Z");
+    expect(articleEntry.getElementsByTagNameNS(ATOM_NAMESPACE, "summary")[0]?.textContent).toBe(article.description);
+  });
+
+  it("takes the feed's updated time from an article when it is the newest entry", () => {
+    const xml = buildAtomFeed({ extensions: [withDate(verifiedExtension, "2026-06-10")], articles: [datedArticle], generatedAt: "2026-01-01" });
+    const feedUpdated = parse(xml).documentElement.getElementsByTagNameNS(ATOM_NAMESPACE, "updated")[0]?.textContent;
+    expect(feedUpdated).toBe("2026-06-15T00:00:00Z");
+  });
+
+  it("lists every real article in the real feed", () => {
+    const xml = buildAtomFeed({ extensions: getAllExtensions(), articles: ARTICLES, generatedAt: getCatalogGeneratedAt() });
+    for (const entry of ARTICLES) expect(xml).toContain(`${SITE_URL}/learn/articles/${entry.slug}/`);
   });
 });
