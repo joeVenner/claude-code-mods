@@ -13,6 +13,7 @@ const DOCS = "https://code.claude.com/docs/en";
 const SOURCES = {
   changelog: { label: "Claude Code changelog", href: `${DOCS}/changelog` },
   codeMode: { label: "Run tool calls from code with Code Mode", href: `${DOCS}/code-mode` },
+  modsOverview: { label: "Mods overview", href: `${DOCS}/plugins/mods/overview` },
   modsInterface: { label: "Draw in the interface with a mod", href: `${DOCS}/plugins/mods/interface` },
   modsReference: { label: "Mods reference", href: `${DOCS}/plugins/mods/reference` },
   modsEvents: { label: "React to events with a mod", href: `${DOCS}/plugins/mods/events` },
@@ -22,6 +23,7 @@ const SOURCES = {
 const CODE_MODE_SLUG = "code-mode";
 const THEMES_SLUG = "custom-themes-with-mods";
 const BLOCKING_HOOKS_SLUG = "hooks-that-block-actions";
+const EASEL_SLUG = "easel-charts-mod";
 
 const CODE_MODE: Article = {
   slug: CODE_MODE_SLUG,
@@ -494,5 +496,83 @@ const BLOCKING_HOOKS: Article = {
   ],
 };
 
+const EASEL: Article = {
+  slug: EASEL_SLUG,
+  title: "easel: the built-in charts mod",
+  description:
+    "easel is a built-in Claude Code mod that draws charts for Claude and under MCP metrics results. What it needs, where it runs, and how to turn it off.",
+  headline: "easel: the built-in mod that draws charts in Claude Code",
+  publishedAt: "2026-11-21",
+  updatedAt: "2026-11-21",
+  checkedAgainstVersion: "2.1.330",
+  relatedSlugs: [CODE_MODE_SLUG, THEMES_SLUG],
+  sections: [
+    {
+      id: "what-it-is",
+      title: "What easel is",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "The Claude Code changelog for v2.1.330, dated November 20, 2026, lists easel as a new built-in mod that draws charts when asked and under MCP metrics results. In `/plugin` it appears as `cc-plugin-easel`.",
+        },
+        {
+          kind: "paragraph",
+          text: "Anthropic's mods overview describes two behaviors: it gives Claude a tool for drawing charts, and it draws a chart automatically under an MCP result that comes in a supported time-series format, such as a Prometheus range query result.",
+        },
+      ],
+      sources: [SOURCES.changelog, SOURCES.modsOverview],
+    },
+    {
+      id: "requirements",
+      title: "What it needs",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Sign-in: a claude.ai subscription. The changelog names Pro and Max, and Team and Enterprise where available.",
+            "Version: Claude Code v2.1.321 or later. Team and Enterprise require v2.1.326 or later.",
+            "Platform: macOS or Linux outside WSL.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "If `cc-plugin-easel` isn't listed in `/plugin`, check these three first. The docs list them as the requirements to check when the mod is missing.",
+        },
+      ],
+      sources: [SOURCES.modsOverview, SOURCES.changelog],
+    },
+    {
+      id: "turn-off",
+      title: "Turn it off",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "To disable the mod, use `/plugin`. To stop only the automatic charts, turn off **Auto charts** in `/config`. The changelog says the same for automatic charts: turn them off in `/config`.",
+        },
+        {
+          kind: "paragraph",
+          text: "Settings and flags that stop installed mods, such as `disableAllHooks`, `--bare` and `--safe-mode`, don't stop built-in mods.",
+        },
+      ],
+      sources: [SOURCES.modsOverview, SOURCES.changelog],
+    },
+    {
+      id: "policy",
+      title: "MCP allowlists and denylists",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "The chart tool is built in, and v2.1.330 fixed a warning, \"MCP server blocked by enterprise policy: easel\", that showed at every start when an MCP allowlist or denylist excluded it. Per the changelog, the tool stays blocked in that case, and only the warning went away.",
+        },
+        {
+          kind: "paragraph",
+          text: "The same release fixed the built-in chart tool failing when Claude called it in [Code Mode](/learn/articles/code-mode/), which is experimental.",
+        },
+      ],
+      sources: [SOURCES.changelog],
+    },
+  ],
+};
+
 /** Every article, in no particular order: pages sort them with `sortArticlesByNewest`. */
-export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS];
+export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL];
