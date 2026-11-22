@@ -1,0 +1,47 @@
+{
+  "slug": "open-agent-api-catalog",
+  "name": "Open Agent API for Claude Code",
+  "kind": "plugin",
+  "categories": [
+    "integration",
+    "development"
+  ],
+  "summary": "List and inspect agents published by your local Open Agent API gateway without starting runs.",
+  "description": [
+    "This community plugin reads the published agent catalog of an Open Agent API gateway on your machine. It lists visible agents and inspects their published metadata. It does not start, cancel or approve tasks."
+  ],
+  "publisher": {
+    "name": "Open Agent API contributors",
+    "url": "https://github.com/jiangxingfan1-coder",
+    "kind": "community"
+  },
+  "repositoryUrl": "https://github.com/jiangxingfan1-coder/open-agent-api-claude-plugin",
+  "license": "Apache-2.0",
+  "availability": "installable",
+  "installCommands": [
+    "/plugin marketplace add jiangxingfan1-coder/open-agent-api-claude-plugin",
+    "/plugin install open-agent-api@oaa-integrations"
+  ],
+  "notice": "Requires Node.js 22 or later with npm, a loopback Open Agent API gateway, and a separate read-only caller key file. Tested with Claude Code 2.1.318.",
+  "details": [],
+  "guide": [],
+  "hooks": [],
+  "tags": [
+    "agent-catalog",
+    "local",
+    "read-only"
+  ],
+  "links": [
+    {
+      "label": "Open Agent API gateway",
+      "url": "https://github.com/jiangxingfan1-coder/Open-Agent-API"
+    }
+  ],
+  "stars": null,
+  "isFeatured": false,
+  "verification": {
+    "status": "verified",
+    "checkedAt": "2026-11-21",
+    "sourceUrl": "https://github.com/jiangxingfan1-coder/open-agent-api-claude-plugin"
+  }
+}
