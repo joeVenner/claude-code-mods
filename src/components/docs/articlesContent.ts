@@ -18,12 +18,20 @@ const SOURCES = {
   modsReference: { label: "Mods reference", href: `${DOCS}/plugins/mods/reference` },
   modsEvents: { label: "React to events with a mod", href: `${DOCS}/plugins/mods/events` },
   hooksReference: { label: "Hooks reference", href: `${DOCS}/hooks` },
+  claudeShip: { label: "Claude Ship", href: `${DOCS}/claude-ship` },
+  shipCommand: { label: "Get a pull request ready with /ship and /steward", href: `${DOCS}/ship-command` },
+  shipTroubleshooting: { label: "Troubleshoot /ship and /steward", href: `${DOCS}/ship-command-troubleshooting` },
+  codeReview: { label: "Code Review", href: `${DOCS}/code-review` },
+  prSteward: { label: "PR Steward", href: `${DOCS}/pr-steward` },
+  prStewardSetup: { label: "Set up PR Steward", href: `${DOCS}/pr-steward-setup` },
+  approvals: { label: "Claude Approvals", href: `${DOCS}/approvals` },
 } as const satisfies Record<string, ArticleSource>;
 
 const CODE_MODE_SLUG = "code-mode";
 const THEMES_SLUG = "custom-themes-with-mods";
 const BLOCKING_HOOKS_SLUG = "hooks-that-block-actions";
 const EASEL_SLUG = "easel-charts-mod";
+const CLAUDE_SHIP_SLUG = "claude-ship";
 
 const CODE_MODE: Article = {
   slug: CODE_MODE_SLUG,
@@ -547,7 +555,7 @@ const EASEL: Article = {
       blocks: [
         {
           kind: "paragraph",
-          text: "To disable the mod, use `/plugin`. To stop only the automatic charts, turn off **Auto charts** in `/config`. The changelog says the same for automatic charts: turn them off in `/config`.",
+          text: "To disable the mod, use `/plugin`. To stop only the automatic charts, turn off the Auto charts setting in `/config`. The changelog says the same for automatic charts: turn them off in `/config`.",
         },
         {
           kind: "paragraph",
@@ -574,5 +582,151 @@ const EASEL: Article = {
   ],
 };
 
+const CLAUDE_SHIP: Article = {
+  slug: CLAUDE_SHIP_SLUG,
+  title: "Claude Ship: review, fix and approve PRs",
+  description:
+    "Claude Ship adds three GitHub pull request agents: Code Review, PR Steward and Claude Approvals. What each does, what it needs, and the separate /ship command.",
+  headline: "Claude Ship: agents that review, fix and approve GitHub pull requests",
+  publishedAt: "2026-11-24",
+  updatedAt: "2026-11-24",
+  checkedAgainstVersion: "2.1.331",
+  relatedSlugs: [BLOCKING_HOOKS_SLUG, CODE_MODE_SLUG],
+  sections: [
+    {
+      id: "what-it-is",
+      title: "What Claude Ship is",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "Claude Ship is a set of agents for a team's GitHub pull requests. Anthropic's docs name three, and each one has its own job:",
+        },
+        {
+          kind: "list",
+          items: [
+            "Code Review reads a change alongside the surrounding code and posts its findings as inline comments, ranked by severity. It is generally available.",
+            "PR Steward works on failing checks, merge conflicts and review comments, and pushes commits with its fixes. It is in public beta.",
+            "Claude Approvals is a pull request check that reports who still has to approve, following a policy file you write. It is in public beta.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "Together they can take a pull request through review, fixes and an approval decision. Your settings and GitHub branch rules still decide what merges. Separately, the `/ship` and `/steward` commands do similar work from your own Claude Code session, on one pull request at a time.",
+        },
+        {
+          kind: "callout",
+          tone: "note",
+          text: "The docs warn that Claude Ship uses AI and may miss bugs, security vulnerabilities or other issues. A review with no findings doesn't mean the code is error free or secure.",
+        },
+      ],
+      sources: [SOURCES.claudeShip, SOURCES.codeReview, SOURCES.shipCommand],
+    },
+    {
+      id: "ship-command",
+      title: "/ship and /steward in your terminal",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "`/ship` opens a GitHub pull request for your change if the branch doesn't have one, reviews it with `/code-review`, and then starts a watch: Claude keeps checking the pull request from your session, works on failing checks, conflicts, reviewers' comments and its own findings, and pushes fixes. You merge it yourself. `/steward` skips the pull request and review steps and starts the watch on a pull request you already opened.",
+        },
+        {
+          kind: "list",
+          items: [
+            "Claude Code v2.1.330 or later, run from the CLI in a terminal in your local clone. Cloud sessions don't have either command.",
+            "The GitHub CLI 2.63 or later, signed in with `gh auth login`, and git 2.38 or later.",
+            "A session that fetches feature flags: with `DISABLE_TELEMETRY` set or a third party provider, `/ship` isn't available.",
+            "Auto mode if you want Claude to work unattended. In `bypassPermissions` mode no watch starts, and on native Windows no watch starts either.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "Both commands run in your session, act under your `gh` and `git` sign-ins, and count against your own usage. Arguments include an effort level for the review (`/ship low`), a pull request number, `+botname` to also read that bot's comments, `stop` to end a watch and `terms` to show what Claude may do during one.",
+        },
+        {
+          kind: "callout",
+          tone: "warning",
+          text: "`/ship` doesn't ask for confirmation. It can commit all your uncommitted changes, new files included, push and open the pull request after a few seconds unless you press `Esc`. Run `git status` first, and look inside your files for secrets: it only checks file names such as `.env`. In a public repository it doesn't commit uncommitted work for you.",
+        },
+      ],
+      sources: [SOURCES.shipCommand, SOURCES.shipTroubleshooting],
+    },
+    {
+      id: "watch-limits",
+      title: "What a watch can and can't do",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "When Claude acts without a message from you, Claude Code blocks `gh` and `git` commands that merge or approve the pull request, turn on auto merge or force push. It also limits Claude to a short list of `gh` and `git` commands and refuses tools the watch doesn't need, such as connectors, `WebFetch` and `WebSearch`.",
+        },
+        {
+          kind: "paragraph",
+          text: "Those limits don't cover everything. If auto merge is already on, a fix Claude pushes can let GitHub merge. While Claude answers a message you type, the limits are off. And code from the base branch, from other people's pushes to your branch and from your own tests can run on your computer with your credentials, so the docs say to run a watch only where you trust everyone who can merge to the base branch or push to your branch.",
+        },
+        {
+          kind: "paragraph",
+          text: "A watch ends when the pull request is merged or closed, after seven days, when you press `Esc` or switch branch, or when the session ends. Type `/ship stop` to end one, and `/steward` to start it again. To keep repository instructions for watches, save `.claude/skills/steward/SKILL.md`; PR Steward reads the same file.",
+        },
+      ],
+      sources: [SOURCES.shipCommand],
+    },
+    {
+      id: "org-agents",
+      title: "The agents your organization turns on",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "Code Review runs on Anthropic infrastructure with read only access to the repository, and doesn't build or run your code. Several agents look at the diff in parallel, a verification step drops false positives, and the rest are ranked and posted with a check run named Claude Code Review. Anyone with write access can comment `@claude review` to start one. Without the service, `/code-review` gives a review in your session on any plan.",
+        },
+        {
+          kind: "paragraph",
+          text: "PR Steward acts as the Claude GitHub App in a cloud session and bills your organization. By default it skips drafts, forks, pull requests opened by bots and authors without write access. To stop it on one pull request, remove the `claude-pr-steward-watching` label or comment `@claude stop`. It is designed not to approve or merge, so use branch protection to require the approvals you want.",
+        },
+        {
+          kind: "paragraph",
+          text: "Claude Approvals reads a policy in `.claude/approvals.yml`. This one, from the docs, asks for two people on every change, keeps Claude from approving, and starts in observe mode, where the check only shows what the policy would decide:",
+        },
+        {
+          kind: "code",
+          filename: ".claude/approvals.yml",
+          code: [
+            "version: 1",
+            "mode: observe",
+            "rules:",
+            '  - purpose: "A change takes two people, and Claude doesn\'t approve."',
+            '    paths: ["**"]',
+            "    verdict: { claude: comments, seats: 2 }",
+            "    advisory: [claude/code_review]",
+          ].join("\n"),
+        },
+        {
+          kind: "paragraph",
+          text: "The check blocks a merge only where you make it a required check in GitHub. The author can fill a seat, a rule with `claude: approves` can approve a change nothing has reviewed, and a policy file can stop automatic Code Reviews unless a rule names `claude/code_review`, as the `advisory` line above does.",
+        },
+      ],
+      sources: [SOURCES.codeReview, SOURCES.prSteward, SOURCES.approvals],
+    },
+    {
+      id: "availability",
+      title: "Who can use it, and what it costs",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Plans: Claude organizations on Team and Enterprise plans, for repositories on GitHub. An Owner turns the agents on in Organization settings, under Claude Ship.",
+            "Not available with Zero Data Retention, the HIPAA configuration or customer managed encryption keys. Approvals has further limits.",
+            "Billing: each agent is billed by tokens through the organization's usage credits, separately from the plan's included usage. Turning usage credits off doesn't stop an agent that is on.",
+            "PR Steward has no spend limit of its own until an Owner sets one.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "The docs suggest turning on one agent at a time in one repository: Code Review first, then PR Steward set to Manual, so it starts only when someone with write access comments `@claude steward` or adds the `claude-pr-steward-watching` label, then Approvals in observe mode. To turn Claude Ship off, go the other way: Approvals before Code Review, because a policy can start billed reviews where Code Review is off. That leaves `/ship` and `/steward` on; an administrator turns them off with `skillOverrides` for `ship-local` and `steward` in managed settings.",
+        },
+      ],
+      sources: [SOURCES.claudeShip, SOURCES.prStewardSetup, SOURCES.shipCommand],
+    },
+  ],
+};
+
 /** Every article, in no particular order: pages sort them with `sortArticlesByNewest`. */
-export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL];
+export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL, CLAUDE_SHIP];
