@@ -547,7 +547,7 @@ const EASEL: Article = {
       blocks: [
         {
           kind: "paragraph",
-          text: "To disable the mod, use `/plugin`. To stop only the automatic charts, turn off **Auto charts** in `/config`. The changelog says the same for automatic charts: turn them off in `/config`.",
+          text: "To disable the mod, use `/plugin`. To stop only the automatic charts, turn off the Auto charts setting in `/config`. The changelog says the same for automatic charts: turn them off in `/config`.",
         },
         {
           kind: "paragraph",

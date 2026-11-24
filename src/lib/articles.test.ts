@@ -163,6 +163,21 @@ describe("published articles", () => {
     }
   });
 
+  it("use no star-style Markdown emphasis in prose, which RichText would show as literal stars", () => {
+    for (const article of ARTICLES) {
+      for (const section of article.sections) {
+        for (const block of section.blocks) {
+          if (block.kind === "code") continue;
+          const texts = block.kind === "list" ? block.items : [block.text];
+          for (const part of texts.flatMap((text) => parseInline(text))) {
+            const prose = part.kind === "text" ? part.text : part.kind === "link" ? part.label : "";
+            expect(prose, `${article.slug}#${section.id}`).not.toMatch(/\*\S|\S\*/);
+          }
+        }
+      }
+    }
+  });
+
   it("link inline only to other articles or https pages", () => {
     const slugs = new Set(ARTICLES.map((article) => article.slug));
     for (const article of ARTICLES) {
