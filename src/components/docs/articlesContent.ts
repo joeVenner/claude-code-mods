@@ -25,6 +25,8 @@ const SOURCES = {
   prSteward: { label: "PR Steward", href: `${DOCS}/pr-steward` },
   prStewardSetup: { label: "Set up PR Steward", href: `${DOCS}/pr-steward-setup` },
   approvals: { label: "Claude Approvals", href: `${DOCS}/approvals` },
+  hostMarketplace: { label: "Host and maintain a marketplace", href: `${DOCS}/plugins/host-marketplace` },
+  pluginsOrg: { label: "Manage plugins for your organization", href: `${DOCS}/plugins/org` },
 } as const satisfies Record<string, ArticleSource>;
 
 const CODE_MODE_SLUG = "code-mode";
@@ -32,6 +34,7 @@ const THEMES_SLUG = "custom-themes-with-mods";
 const BLOCKING_HOOKS_SLUG = "hooks-that-block-actions";
 const EASEL_SLUG = "easel-charts-mod";
 const CLAUDE_SHIP_SLUG = "claude-ship";
+const MARKETPLACE_AUTOUPDATE_SLUG = "marketplace-auto-update-change";
 
 const CODE_MODE: Article = {
   slug: CODE_MODE_SLUG,
@@ -40,8 +43,8 @@ const CODE_MODE: Article = {
     "Code Mode lets Claude write JavaScript that makes many tool calls in one step. How to turn it on, what it needs, its limits and how permissions and hooks apply.",
   headline: "Code Mode: Claude writes JavaScript that calls its tools",
   publishedAt: "2026-11-20",
-  updatedAt: "2026-11-20",
-  checkedAgainstVersion: "2.1.329",
+  updatedAt: "2026-11-24",
+  checkedAgainstVersion: "2.1.331",
   relatedSlugs: [BLOCKING_HOOKS_SLUG, THEMES_SLUG],
   sections: [
     {
@@ -119,6 +122,11 @@ const CODE_MODE: Article = {
             "An interactive `claude` session in a terminal. It doesn't work with `-p`, the Agent SDK, the VS Code panel, the Desktop app or cloud sessions.",
             "For agent teams, v2.1.326 or later. Teammates run in Code Mode in the in-process display mode and start without it in split panes.",
           ],
+        },
+        {
+          kind: "callout",
+          tone: "note",
+          text: "The changelog for v2.1.331, dated November 23, 2026, says Code Mode support was added in terminal sessions on Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry and Claude Platform on AWS. When this article was checked on November 24, 2026, the Code Mode page still listed those providers as unsupported, so read the page and `/status` for your setup before you rely on it.",
         },
         {
           kind: "paragraph",
@@ -728,5 +736,78 @@ const CLAUDE_SHIP: Article = {
   ],
 };
 
+const MARKETPLACE_AUTOUPDATE: Article = {
+  slug: MARKETPLACE_AUTOUPDATE_SLUG,
+  title: "Marketplace auto-update default changes",
+  description:
+    "From November 30, 2026, plugin marketplaces in managed settings will auto-update by default. What changes, how to opt out, and what v2.1.331 adds.",
+  headline: "Managed plugin marketplaces will auto-update by default from November 30, 2026",
+  publishedAt: "2026-11-24",
+  updatedAt: "2026-11-24",
+  checkedAgainstVersion: "2.1.331",
+  relatedSlugs: [CLAUDE_SHIP_SLUG, CODE_MODE_SLUG],
+  sections: [
+    {
+      id: "what-changes",
+      title: "What is changing",
+      blocks: [
+        {
+          kind: "callout",
+          tone: "warning",
+          text: "This is a planned change, not something in the current release. The v2.1.331 changelog (November 23, 2026) says: in a future release, on or after November 30, 2026, plugin marketplaces in managed `extraKnownMarketplaces` will auto-update by default.",
+        },
+        {
+          kind: "paragraph",
+          text: "Today, Anthropic's docs say background auto-update is off for a marketplace by default. A user turns it on under Marketplaces in `/plugin`, or an administrator sets `\"autoUpdate\": true` on the marketplace's `extraKnownMarketplaces` entry in managed settings. Without auto-update, changes arrive when someone runs `/plugin marketplace update <name>` or `claude plugin update <plugin>@<name>`.",
+        },
+      ],
+      sources: [SOURCES.changelog, SOURCES.hostMarketplace],
+    },
+    {
+      id: "opt-out",
+      title: "How to opt a marketplace out",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "The changelog gives one instruction: set `\"autoUpdate\": false` on the entry. An administrator who wants to keep updates manual can add it to each managed entry before the date. The docs cover where the update policy lives under [Set update policy](https://code.claude.com/docs/en/plugins/org#set-update-policy).",
+        },
+        {
+          kind: "code",
+          filename: "managed-settings.json",
+          label: "Opt one managed marketplace out (shape follows the docs; use your own source)",
+          code: '{\n  "extraKnownMarketplaces": {\n    "your-marketplace": {\n      "source": { "source": "github", "repo": "your-org/your-marketplace" },\n      "autoUpdate": false\n    }\n  }\n}',
+        },
+      ],
+      sources: [SOURCES.changelog, SOURCES.pluginsOrg],
+    },
+    {
+      id: "private",
+      title: "Private marketplaces",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "Background auto-update uses the git credentials already on the machine and never prompts. If a check finds new commits or can't reach the remote, Claude Code clones the marketplace again and replaces the checkout, and the existing checkout stays if that clone fails. Users can set `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1` to keep the checkout when a check can't reach or authenticate to the remote.",
+        },
+        {
+          kind: "paragraph",
+          text: "A user gets a new copy of a plugin only when its computed version changes, so a marketplace owner who bumps `version` on each release controls when an update takes effect.",
+        },
+      ],
+      sources: [SOURCES.hostMarketplace],
+    },
+    {
+      id: "also-in-2-1-331",
+      title: "Also in v2.1.331: optionalDependencies",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "The same release added `optionalDependencies` to plugin manifests: plugins that install with the plugin listing them and can be disabled or uninstalled on their own. It also made the plugin auto-update notice name plugins that were newly installed as dependencies, separately from updated plugins.",
+        },
+      ],
+      sources: [SOURCES.changelog],
+    },
+  ],
+};
+
 /** Every article, in no particular order: pages sort them with `sortArticlesByNewest`. */
-export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL, CLAUDE_SHIP];
+export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL, CLAUDE_SHIP, MARKETPLACE_AUTOUPDATE];
