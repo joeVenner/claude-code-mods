@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ### Added
 
+- An article on the `PreSkillShellCommand` hook event added in Claude Code v2.1.332 (November 25, 2026), which can log or block the inline shell commands a skill runs as it loads, checked against v2.1.332 and citing Anthropic's docs per section.
+- An article on skills from MCP servers (beta, listed as `server:skill`), covering ignored frontmatter, permissions and the reserved `anthropic-skills` server name, checked against v2.1.332 and citing Anthropic's docs per section.
 - The Code Mode article now notes that v2.1.331 added Code Mode in terminal sessions on Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry and Claude Platform on AWS, while the docs page still lists them as unsupported; updated and rechecked against v2.1.331.
 - An article on the plugin marketplace auto-update change announced in Claude Code v2.1.331 (managed `extraKnownMarketplaces` will auto-update by default on or after November 30, 2026, opt out with `"autoUpdate": false`), plus `optionalDependencies` in plugin manifests, checked against v2.1.331 and citing Anthropic's docs per section.
 - An article on Claude Ship, Anthropic's GitHub pull request agents (Code Review, PR Steward and Claude Approvals) and the `/ship` and `/steward` commands: what each does, the watch's limits and risks, an example `.claude/approvals.yml` policy, plans, billing and rollout order, checked against Claude Code v2.1.331 and citing Anthropic's docs per section.

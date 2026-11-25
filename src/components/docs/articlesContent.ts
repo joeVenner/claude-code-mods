@@ -26,6 +26,7 @@ const SOURCES = {
   prStewardSetup: { label: "Set up PR Steward", href: `${DOCS}/pr-steward-setup` },
   approvals: { label: "Claude Approvals", href: `${DOCS}/approvals` },
   hostMarketplace: { label: "Host and maintain a marketplace", href: `${DOCS}/plugins/host-marketplace` },
+  skills: { label: "Extend Claude with skills", href: `${DOCS}/skills` },
   pluginsOrg: { label: "Manage plugins for your organization", href: `${DOCS}/plugins/org` },
 } as const satisfies Record<string, ArticleSource>;
 
@@ -35,6 +36,8 @@ const BLOCKING_HOOKS_SLUG = "hooks-that-block-actions";
 const EASEL_SLUG = "easel-charts-mod";
 const CLAUDE_SHIP_SLUG = "claude-ship";
 const MARKETPLACE_AUTOUPDATE_SLUG = "marketplace-auto-update-change";
+const SKILL_SHELL_HOOK_SLUG = "preskillshellcommand-hook";
+const MCP_SKILLS_SLUG = "skills-from-mcp-servers";
 
 const CODE_MODE: Article = {
   slug: CODE_MODE_SLUG,
@@ -809,5 +812,123 @@ const MARKETPLACE_AUTOUPDATE: Article = {
   ],
 };
 
+const SKILL_SHELL_HOOK: Article = {
+  slug: SKILL_SHELL_HOOK_SLUG,
+  title: "The PreSkillShellCommand hook",
+  description:
+    "Claude Code v2.1.332 adds PreSkillShellCommand, a hook that can refuse the inline shell commands a skill runs as it loads. What it does and its limits.",
+  headline: "PreSkillShellCommand lets a hook refuse a skill's inline shell commands (v2.1.332)",
+  publishedAt: "2026-11-25",
+  updatedAt: "2026-11-25",
+  checkedAgainstVersion: "2.1.332",
+  relatedSlugs: [BLOCKING_HOOKS_SLUG, MCP_SKILLS_SLUG],
+  sections: [
+    {
+      id: "why",
+      title: "Why a new event",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "A skill can run shell commands as it loads with the `!` placeholder syntax, and the output replaces the placeholder before Claude sees the skill. The skills docs say `PreToolUse` hooks do not fire for these injected commands. Claude Code v2.1.332 (November 25, 2026) added `PreSkillShellCommand`, a hook event that runs before such a command, so you can log it or block it.",
+        },
+        {
+          kind: "callout",
+          tone: "warning",
+          text: "On v2.1.331 and older, a settings file that names this event opens a dialog at start. Upgrade before adding it to shared settings.",
+        },
+      ],
+      sources: [SOURCES.changelog, SOURCES.skills],
+    },
+    {
+      id: "how-it-works",
+      title: "What the docs say it does",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "The hooks reference lists it as a blocking event that runs before a shell command in a loading skill.",
+            "The matcher filters on the tool that runs the command: `Bash` or `PowerShell`.",
+            "The `if` field is evaluated for this event, as it is for `PreToolUse`.",
+            "Exit code 2 blocks the command, and the skill loads without its output.",
+            "On Windows without Git Bash, only exit code 0 or 2 counts as the hook's verdict, and `\"onFailure\": \"continue\"` lets the command proceed on failure.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "Read the hooks reference for the input fields and any JSON output; this article restates only what the pages state about matching and exit codes.",
+        },
+      ],
+      sources: [SOURCES.hooksReference, SOURCES.changelog],
+    },
+    {
+      id: "related-controls",
+      title: "Other controls on injected commands",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "Setting `\"disableSkillShellExecution\": true` replaces each command with `[shell command execution disabled by policy]` instead of running it; bundled and managed skills are not affected. A failed command aborts the whole skill invocation, so a blocking hook means the skill does not load its output.",
+        },
+      ],
+      sources: [SOURCES.skills],
+    },
+  ],
+};
+
+const MCP_SKILLS: Article = {
+  slug: MCP_SKILLS_SLUG,
+  title: "Skills from MCP servers (beta)",
+  description:
+    "Claude Code v2.1.332 lists skills served by MCP servers as server:skill in the slash menu. What is ignored, how permissions work and the reserved name.",
+  headline: "MCP servers can provide skills, listed as server:skill (beta, v2.1.332)",
+  publishedAt: "2026-11-25",
+  updatedAt: "2026-11-25",
+  checkedAgainstVersion: "2.1.332",
+  relatedSlugs: [SKILL_SHELL_HOOK_SLUG, BLOCKING_HOOKS_SLUG],
+  sections: [
+    {
+      id: "what",
+      title: "What changed",
+      blocks: [
+        {
+          kind: "callout",
+          tone: "note",
+          text: "The v2.1.332 changelog (November 25, 2026) calls this a beta: skills from MCP servers appear as `server:skill` in the `/` menu, while other skills keep their names.",
+        },
+        {
+          kind: "paragraph",
+          text: "The skills docs say using them requires Claude Code v2.1.331 or later, and that Claude reads a skill's supporting files from the server as MCP resources.",
+        },
+      ],
+      sources: [SOURCES.changelog, SOURCES.skills],
+    },
+    {
+      id: "limits",
+      title: "What is ignored or not supported",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Frontmatter fields `allowed-tools`, `disallowed-tools`, `hooks`, `model`, `effort`, `context`, `agent`, `background`, `shell`, `paths` and `metadata` are ignored.",
+            "`!` commands do not run, `@` references are not attached, and `${CLAUDE_PROJECT_DIR}` and `${CLAUDE_SESSION_ID}` are not substituted.",
+            "Claude gets no `allowed-tools` grant from such a skill.",
+          ],
+        },
+      ],
+      sources: [SOURCES.skills],
+    },
+    {
+      id: "permissions",
+      title: "Permissions and the reserved name",
+      blocks: [
+        {
+          kind: "paragraph",
+          text: "Set a permission rule for the skill's server instead of the skill: an `allow` rule for the skill's name does not skip its prompt. An MCP server named `anthropic-skills` connects and its tools work, but its prompts do not appear as commands, so rename the server in your MCP configuration to list them.",
+        },
+      ],
+      sources: [SOURCES.skills],
+    },
+  ],
+};
+
 /** Every article, in no particular order: pages sort them with `sortArticlesByNewest`. */
-export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL, CLAUDE_SHIP, MARKETPLACE_AUTOUPDATE];
+export const ARTICLES: readonly Article[] = [CODE_MODE, THEMES, BLOCKING_HOOKS, EASEL, CLAUDE_SHIP, MARKETPLACE_AUTOUPDATE, SKILL_SHELL_HOOK, MCP_SKILLS];
